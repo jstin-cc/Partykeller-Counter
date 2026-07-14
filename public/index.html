@@ -5,42 +5,117 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Anmeldung</title>
 <link rel="stylesheet" href="css/theme.css">
+<style>
+  .login-watermark {
+    position: absolute;
+    left: -140px;
+    top: -100px;
+    width: 520px;
+    height: 520px;
+    background-color: var(--bg-hi);
+    opacity: 0.08;
+    -webkit-mask-image: url('assets/zapfen-raw.svg');
+    mask-image: url('assets/zapfen-raw.svg');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    transform: rotate(180deg);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .user-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: none;
+    border-radius: 3px;
+    padding: 13px 16px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .user-row:hover { background: var(--surface-2); }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bitter', serif;
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .pin-row { display: flex; gap: 8px; padding: 10px 4px 4px 4px; }
+  .input-flat {
+    background: var(--surface-2);
+    border: none;
+    border-radius: 3px;
+    padding: 13px 16px;
+    color: var(--ink);
+    font-size: 16px;
+    width: 100%;
+  }
+  .btn-green {
+    background: var(--green);
+    color: var(--bg);
+    border: none;
+    border-radius: 3px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .error-banner {
+    background: oklch(0.3 0.1 38 / 0.4);
+    color: var(--ink);
+    border-radius: 3px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+</style>
 </head>
 <body>
-<!-- Funktionaler Login (M3-Minimalversion); Feinschliff nach User Login v3 folgt in M4 -->
 <div class="screen">
-  <div class="watermark"></div>
+  <div class="login-watermark"></div>
 
-  <div class="screen-inner">
-    <div style="display:flex;justify-content:center;padding-top:8px;">
-      <img src="assets/logo-gold.svg" alt="SV Partykeller" style="height:48px;width:auto;object-fit:contain;">
+  <div class="screen-inner" style="padding:32px 24px;gap:22px;">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
+      <img src="assets/logo-gold.svg" alt="SV Partykeller" style="height:76px;width:auto;object-fit:contain;">
+      <div>
+        <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:30px;color:var(--creme);margin:0 0 4px 0;">Wer bist du?</h1>
+        <p style="font-size:15px;color:var(--ink-muted);margin:0;">Wähle deinen Account oder starte neu.</p>
+      </div>
     </div>
 
-    <div style="text-align:center;">
-      <div style="font-family:'Bitter',serif;font-weight:800;font-size:26px;color:var(--creme);">Wer bist du?</div>
-      <div style="font-size:14px;color:var(--ink-muted);margin-top:4px;">Name wählen und mit PIN anmelden</div>
+    <div id="error-banner" class="error-banner" hidden></div>
+
+    <div>
+      <div style="font-family:'Bitter',serif;font-weight:600;font-size:14px;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--green);padding-bottom:8px;margin-bottom:12px;">Dein Konto</div>
+      <div id="user-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="list-empty" hidden style="color:var(--ink-muted);font-size:14px;">Noch niemand da – leg unten los.</div>
     </div>
 
-    <div id="player-list" class="card card--green" style="display:flex;flex-direction:column;gap:10px;">
-      <div class="eyebrow">Name wählen</div>
-      <div id="player-buttons" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-      <div id="list-empty" hidden style="color:var(--ink-muted);font-size:14px;">Noch niemand da – leg unten einen Namen an.</div>
+    <div style="display:flex;align-items:center;gap:12px;color:var(--ink-muted);font-size:13px;">
+      <div style="flex:1;height:1px;background:oklch(0.95 0.01 95 / 0.15);"></div>
+      oder neu anmelden
+      <div style="flex:1;height:1px;background:oklch(0.95 0.01 95 / 0.15);"></div>
     </div>
 
-    <form id="login-form" class="card card--amber" hidden style="display:flex;flex-direction:column;gap:12px;">
-      <div class="card-title" style="color:var(--amber);">PIN für <span id="login-name"></span></div>
-      <input id="login-pin" class="field num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="••••" autocomplete="off" required>
-      <button class="btn-big" style="background:var(--amber);">Anmelden</button>
-      <div id="login-error" class="error-msg"></div>
+    <form id="create-form" style="display:flex;flex-direction:column;gap:10px;">
+      <input id="create-name" class="input-flat" type="text" maxlength="24" placeholder="Dein Name" autocomplete="off" required>
+      <input id="create-pin" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (4 Ziffern)" autocomplete="off" required>
+      <button class="btn-green" style="padding:15px;font-size:16px;margin-top:4px;">Konto erstellen &amp; los</button>
     </form>
 
-    <form id="create-form" class="card card--brick" style="display:flex;flex-direction:column;gap:12px;">
-      <div class="card-title" style="color:var(--brick);">Neu hier?</div>
-      <input id="create-name" class="field" type="text" maxlength="24" placeholder="Dein Name" autocomplete="off" required>
-      <input id="create-pin" class="field num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="4-stellige PIN wählen" autocomplete="off" required>
-      <button class="btn-big" style="background:var(--brick);color:var(--ink);">Account anlegen</button>
-      <div id="create-error" class="error-msg"></div>
-    </form>
+    <a href="/admin" style="text-align:center;font-size:13px;text-decoration:none;margin-top:auto;padding-top:12px;">Admin-Zugang</a>
   </div>
 
   <img src="assets/footer-woods.svg" alt="" class="footer-woods">
@@ -50,42 +125,85 @@
 import { post, fetchState, setSession } from './js/api.js';
 
 const $ = (id) => document.getElementById(id);
-let selected = null;
+let selectedId = null;
 
-async function loadPlayers() {
-  const { players } = await fetchState();
-  const box = $('player-buttons');
-  box.textContent = '';
-  $('list-empty').hidden = players.length > 0;
-  for (const p of players) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = p.name;
-    btn.className = 'pill';
-    btn.style.cssText = 'border:none;cursor:pointer;font-size:16px;padding:10px 16px;color:var(--creme);';
-    btn.addEventListener('click', () => {
-      selected = p;
-      $('login-name').textContent = p.name;
-      $('login-form').hidden = false;
-      $('login-error').textContent = '';
-      $('login-pin').value = '';
-      $('login-pin').focus();
-    });
-    box.appendChild(btn);
-  }
+function showError(msg) {
+  const el = $('error-banner');
+  el.textContent = msg;
+  el.hidden = !msg;
 }
 
-$('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (!selected) return;
-  try {
-    const { token, player } = await post('/api/login', { playerId: selected.id, pin: $('login-pin').value });
-    setSession(token, player.id);
-    location.href = '/dashboard';
-  } catch (err) {
-    $('login-error').textContent = err.message;
+function renderUsers(players) {
+  const list = $('user-list');
+  list.textContent = '';
+  $('list-empty').hidden = players.length > 0;
+
+  for (const p of players) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;';
+
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'user-row';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = p.name.charAt(0).toUpperCase();
+
+    const name = document.createElement('div');
+    name.style.cssText = 'flex:1;font-size:16px;font-weight:600;color:var(--ink);';
+    name.textContent = p.name;
+
+    const chevron = document.createElement('div');
+    chevron.style.cssText = 'color:var(--green);font-size:20px;';
+    chevron.textContent = '›';
+
+    row.append(avatar, name, chevron);
+    wrap.appendChild(row);
+
+    row.addEventListener('click', () => {
+      selectedId = p.id;
+      showError('');
+      renderUsers(players); // schließt andere PIN-Zeilen
+    });
+
+    if (selectedId === p.id) {
+      const pinRow = document.createElement('form');
+      pinRow.className = 'pin-row';
+
+      const pin = document.createElement('input');
+      pin.type = 'password';
+      pin.inputMode = 'numeric';
+      pin.maxLength = 4;
+      pin.placeholder = 'PIN';
+      pin.autocomplete = 'off';
+      pin.required = true;
+      pin.className = 'input-flat num';
+      pin.style.flex = '1';
+
+      const ok = document.createElement('button');
+      ok.className = 'btn-green';
+      ok.style.cssText = 'padding:12px 20px;font-size:15px;';
+      ok.textContent = 'OK';
+
+      pinRow.append(pin, ok);
+      pinRow.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          const { token, player } = await post('/api/login', { playerId: p.id, pin: pin.value });
+          setSession(token, player.id);
+          location.href = '/dashboard';
+        } catch (err) {
+          showError(err.message === 'Name oder PIN falsch' ? 'Falsche PIN.' : err.message);
+        }
+      });
+      wrap.appendChild(pinRow);
+      queueMicrotask(() => pin.focus());
+    }
+
+    list.appendChild(wrap);
   }
-});
+}
 
 $('create-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -94,11 +212,13 @@ $('create-form').addEventListener('submit', async (e) => {
     setSession(token, player.id);
     location.href = '/dashboard';
   } catch (err) {
-    $('create-error').textContent = err.message;
+    showError(err.message);
   }
 });
 
-loadPlayers().catch(() => { $('list-empty').hidden = false; });
+fetchState()
+  .then(({ players }) => renderUsers(players))
+  .catch(() => showError('Server nicht erreichbar.'));
 </script>
 </body>
 </html>

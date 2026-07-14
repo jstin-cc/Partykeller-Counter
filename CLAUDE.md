@@ -48,5 +48,6 @@ einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Vollständiger Plan in
 
 ## Status
 
-Plan ist freigegeben, M0–M3 sind umgesetzt. Aktueller Stand und offene
-Punkte stehen immer in PROGRESS.md — vor jeder Arbeit dort nachsehen.
+Alle Meilensteine (M0–M7) sind umgesetzt, die App ist funktional komplett.
+Aktueller Stand und offene Restpunkte stehen immer in PROGRESS.md — vor
+jeder Arbeit dort nachsehen.
