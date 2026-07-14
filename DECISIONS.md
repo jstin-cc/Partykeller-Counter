@@ -81,3 +81,16 @@ lokal in `public/` vendored.
 dem Design würden dort nicht laden. Ohne Build-Step bleibt das Deployment
 auf dem Pi ein `git pull` + Neustart, und das Projekt bleibt in Jahren noch
 wartbar.
+
+## 2026-07-14 · D-008: Interims-SVGs für Logo und Wald-Footer
+
+**Entscheidung:** `logo-gold.svg` und `footer-woods.svg` sind selbstgebaute
+Interims-Assets im Design-Stil. Die Original-PNGs aus dem Design-Projekt
+(`assets/logo-gold.png`, `assets/footer-woods.png`) überschreiten das
+256-KiB-Limit des Design-API-Exports und müssen einmal manuell exportiert
+und nach `public/assets/` gelegt werden (offener Punkt in PROGRESS.md M2).
+
+**Begründung:** Der Screen soll nicht an zwei Bilddateien scheitern. Die
+SVGs nutzen dieselben Farb-Tokens und Platzverhältnisse, sodass der spätere
+Tausch nur die zwei `<img src>`-Verweise betrifft. `zapfen-raw.svg` (das
+Wasserzeichen) konnte 1:1 übernommen werden.

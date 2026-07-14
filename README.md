@@ -4,8 +4,18 @@ Gäste zählen ihre Biere und Shots über das Handy, ein Fernseher zeigt die
 dauerhafte All-Time-Rangliste. Läuft komplett im lokalen WLAN auf einem
 Raspberry Pi — keine Internet-Abhängigkeit.
 
-**Status:** Planungsphase abgeschlossen, wartet auf Freigabe. Noch kein
-lauffähiger Code. Siehe [PROGRESS.md](PROGRESS.md) für den aktuellen Stand.
+**Status:** M0–M3 fertig — Server, Design-Basis und das Nutzer-Dashboard
+laufen. Noch offen: Login-Feinschliff (M4), TV-Scoreboard (M5), Admin (M6),
+Pi-Betrieb (M7). Details in [PROGRESS.md](PROGRESS.md).
+
+## Schnellstart (Entwicklung)
+
+```bash
+npm install
+cp .env.example .env       # ADMIN_PASSWORD und TOKEN_SECRET setzen
+npm run seed               # optional: Testnutzer (PIN 1111)
+npm start                  # http://localhost:3000
+```
 
 ## Screens
 

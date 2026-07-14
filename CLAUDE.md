@@ -46,7 +46,7 @@ einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Vollständiger Plan in
 - Keine neuen npm-Dependencies ohne DECISIONS.md-Eintrag.
 - `data/` und `.env` sind gitignored; niemals committen.
 
-## Status-Gate
+## Status
 
-Bis der Nutzer den Plan freigibt: **kein Feature-Code** (M1+ in PROGRESS.md
-gesperrt). Nur Planung/Doku/Gerüst.
+Plan ist freigegeben, M0–M3 sind umgesetzt. Aktueller Stand und offene
+Punkte stehen immer in PROGRESS.md — vor jeder Arbeit dort nachsehen.

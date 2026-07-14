@@ -1,0 +1,182 @@
+/* Design-Tokens aus dem Claude-Design-Projekt (v3-Serie), siehe PLAN.md §8 */
+
+@font-face {
+  font-family: 'Bitter';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('../assets/fonts/bitter-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../assets/fonts/worksans-latin.woff2') format('woff2');
+}
+
+:root {
+  --ink: oklch(0.95 0.01 95);
+  --creme: oklch(0.92 0.035 88);
+  --ink-muted: oklch(0.68 0.02 100);
+  --green: oklch(0.64 0.15 152);
+  --gold: oklch(0.80 0.15 83);
+  --amber: oklch(0.74 0.11 68);
+  --brick: oklch(0.56 0.14 38);
+  --bg: oklch(0.15 0.035 155);
+  --bg-hi: oklch(0.19 0.035 155);
+  --surface: oklch(0.25 0.035 55);
+  --surface-alt: oklch(0.21 0.03 55);
+  --surface-2: oklch(0.30 0.04 55);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: 'Work Sans', sans-serif;
+  color: var(--ink);
+}
+
+a { color: var(--green); }
+a:hover { color: var(--gold); }
+
+/* Handy-Screens (Hochformat): zentrierte Spalte wie im Design */
+.screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.screen-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px 28px 24px;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Zapfen-Wasserzeichen rechts unten */
+.watermark {
+  position: absolute;
+  right: -150px;
+  bottom: 60px;
+  width: 480px;
+  height: 480px;
+  background-color: var(--bg-hi);
+  opacity: 0.07;
+  -webkit-mask-image: url('../assets/zapfen-raw.svg');
+  mask-image: url('../assets/zapfen-raw.svg');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transform: rotate(-12deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Wald-Footer */
+.footer-woods {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: brightness(0.55) saturate(0.9);
+  position: relative;
+  z-index: 1;
+}
+
+/* Karten mit Farbkante oben */
+.card {
+  background: var(--surface);
+  border-top: 3px solid var(--edge, var(--green));
+  padding: 20px;
+}
+.card--green { --edge: var(--green); }
+.card--amber { --edge: var(--amber); }
+.card--brick { --edge: var(--brick); }
+
+.card-title {
+  font-family: 'Bitter', serif;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.eyebrow {
+  font-family: 'Bitter', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.num { font-variant-numeric: tabular-nums; font-family: 'Bitter', serif; font-weight: 800; }
+
+/* Großer Aktions-Button */
+.btn-big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  color: var(--bg);
+  border: none;
+  border-radius: 3px;
+  padding: 22px;
+  font-family: 'Bitter', serif;
+  font-weight: 800;
+  font-size: 22px;
+  cursor: pointer;
+}
+.btn-big:active { filter: brightness(1.1); }
+.btn-big:disabled { opacity: 0.5; cursor: default; }
+
+/* Rang-Pill */
+.pill {
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--gold);
+  font-family: 'Bitter', serif;
+  font-weight: 700;
+}
+
+/* Heute/Gesamt-Zweispalter */
+.split { display: flex; }
+.split > .cell { text-align: center; flex: 1; }
+.split > .sep { width: 1px; background: var(--surface-alt); }
+.cell .value { font-size: 32px; color: var(--ink); }
+.cell .value--gold { color: var(--gold); }
+.cell .label {
+  font-size: 12px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Formulare (Login) */
+.field {
+  width: 100%;
+  background: var(--surface-alt);
+  border: 1px solid var(--surface-2);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: 'Work Sans', sans-serif;
+  font-size: 18px;
+  padding: 14px;
+}
+.field:focus { outline: 2px solid var(--green); border-color: var(--green); }
+
+.error-msg { color: var(--brick); font-size: 14px; min-height: 1.2em; }
