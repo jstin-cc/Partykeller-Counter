@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SV Partykeller – Dein Zähler</title>
+<link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<div class="screen">
+  <div class="watermark"></div>
+
+  <div class="screen-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <a href="/" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
+      <img src="assets/logo-gold.svg" alt="SV Partykeller" style="height:34px;width:auto;object-fit:contain;">
+      <div id="rank-pill" class="pill num" hidden></div>
+    </div>
+
+    <div id="user-view" hidden style="display:flex;flex-direction:column;gap:18px;">
+      <div style="text-align:center;">
+        <div id="player-name" style="font-family:'Bitter',serif;font-weight:800;font-size:32px;color:var(--creme);"></div>
+      </div>
+
+      <div class="card card--green" style="text-align:center;padding:18px;">
+        <div class="eyebrow">Getränke heute</div>
+        <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px oklch(0.64 0.15 152 / 0.45);">0</div>
+        <div style="font-size:14px;color:var(--ink-muted);margin-top:4px;">
+          Gesamt seit Beginn: <span id="alltime-total" style="color:var(--gold);font-weight:700;">0</span>
+        </div>
+      </div>
+
+      <div class="card card--amber" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card-title" style="color:var(--amber);">Bier</div>
+        <button id="add-beer" class="btn-big" style="background:var(--amber);">+ Bier hinzufügen</button>
+        <div class="split">
+          <div class="cell">
+            <div id="beers-today" class="num value">0</div>
+            <div class="label">Heute</div>
+          </div>
+          <div class="sep"></div>
+          <div class="cell">
+            <div id="beers-total" class="num value value--gold">0</div>
+            <div class="label">Gesamt</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card--brick" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card-title" style="color:var(--brick);">Shots</div>
+        <button id="add-shot" class="btn-big" style="background:var(--brick);color:var(--ink);">+ Shot hinzufügen</button>
+        <div class="split">
+          <div class="cell">
+            <div id="shots-today" class="num value">0</div>
+            <div class="label">Heute</div>
+          </div>
+          <div class="sep"></div>
+          <div class="cell">
+            <div id="shots-total" class="num value value--gold">0</div>
+            <div class="label">Gesamt</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="ws-error" class="error-msg" style="text-align:center;"></div>
+    </div>
+
+    <div id="no-user-view" hidden style="text-align:center;margin-top:80px;color:var(--ink-muted);">
+      <div style="font-size:17px;margin-bottom:16px;">Kein Nutzer ausgewählt.</div>
+      <a href="/" style="font-weight:600;">Zur Anmeldung</a>
+    </div>
+
+    <a href="#" id="logout" style="text-align:center;color:var(--ink-muted);font-size:13px;text-decoration:none;margin-top:auto;padding-top:12px;">Abmelden</a>
+  </div>
+
+  <img src="assets/footer-woods.svg" alt="" class="footer-woods">
+</div>
+
+<script type="module">
+import { getSession, clearSession } from './js/api.js';
+import { connectState } from './js/ws-client.js';
+
+const { token, playerId } = getSession();
+const $ = (id) => document.getElementById(id);
+
+if (!token || !playerId) {
+  $('no-user-view').hidden = false;
+} else {
+  $('user-view').hidden = false;
+
+  const errEl = $('ws-error');
+  let errTimer;
+  function showError(message) {
+    errEl.textContent = message;
+    clearTimeout(errTimer);
+    errTimer = setTimeout(() => { errEl.textContent = ''; }, 4000);
+  }
+
+  const ws = connectState({
+    onState({ players }) {
+      const me = players.find((p) => p.id === playerId);
+      if (!me) {
+        // Account wurde (vom Admin) gelöscht
+        clearSession();
+        location.href = '/';
+        return;
+      }
+      $('player-name').textContent = me.name;
+      $('rank-pill').textContent = `#${me.rank}/${players.length}`;
+      $('rank-pill').hidden = false;
+      $('today-total').textContent = me.beersToday + me.shotsToday;
+      $('alltime-total').textContent = me.total;
+      $('beers-today').textContent = me.beersToday;
+      $('beers-total').textContent = me.beers;
+      $('shots-today').textContent = me.shotsToday;
+      $('shots-total').textContent = me.shots;
+      document.title = `SV Partykeller – ${me.name}`;
+    },
+    onError: showError,
+  });
+
+  const send = (drink) => ws.send({ type: 'increment', token, playerId, drink, delta: 1 });
+  $('add-beer').addEventListener('click', () => send('beer'));
+  $('add-shot').addEventListener('click', () => send('shot'));
+}
+
+$('logout').addEventListener('click', (e) => {
+  e.preventDefault();
+  clearSession();
+  location.href = '/';
+});
+</script>
+</body>
+</html>

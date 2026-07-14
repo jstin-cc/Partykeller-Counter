@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SV Partykeller – Anmeldung</title>
+<link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<!-- Funktionaler Login (M3-Minimalversion); Feinschliff nach User Login v3 folgt in M4 -->
+<div class="screen">
+  <div class="watermark"></div>
+
+  <div class="screen-inner">
+    <div style="display:flex;justify-content:center;padding-top:8px;">
+      <img src="assets/logo-gold.svg" alt="SV Partykeller" style="height:48px;width:auto;object-fit:contain;">
+    </div>
+
+    <div style="text-align:center;">
+      <div style="font-family:'Bitter',serif;font-weight:800;font-size:26px;color:var(--creme);">Wer bist du?</div>
+      <div style="font-size:14px;color:var(--ink-muted);margin-top:4px;">Name wählen und mit PIN anmelden</div>
+    </div>
+
+    <div id="player-list" class="card card--green" style="display:flex;flex-direction:column;gap:10px;">
+      <div class="eyebrow">Name wählen</div>
+      <div id="player-buttons" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      <div id="list-empty" hidden style="color:var(--ink-muted);font-size:14px;">Noch niemand da – leg unten einen Namen an.</div>
+    </div>
+
+    <form id="login-form" class="card card--amber" hidden style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card-title" style="color:var(--amber);">PIN für <span id="login-name"></span></div>
+      <input id="login-pin" class="field num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="••••" autocomplete="off" required>
+      <button class="btn-big" style="background:var(--amber);">Anmelden</button>
+      <div id="login-error" class="error-msg"></div>
+    </form>
+
+    <form id="create-form" class="card card--brick" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card-title" style="color:var(--brick);">Neu hier?</div>
+      <input id="create-name" class="field" type="text" maxlength="24" placeholder="Dein Name" autocomplete="off" required>
+      <input id="create-pin" class="field num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="4-stellige PIN wählen" autocomplete="off" required>
+      <button class="btn-big" style="background:var(--brick);color:var(--ink);">Account anlegen</button>
+      <div id="create-error" class="error-msg"></div>
+    </form>
+  </div>
+
+  <img src="assets/footer-woods.svg" alt="" class="footer-woods">
+</div>
+
+<script type="module">
+import { post, fetchState, setSession } from './js/api.js';
+
+const $ = (id) => document.getElementById(id);
+let selected = null;
+
+async function loadPlayers() {
+  const { players } = await fetchState();
+  const box = $('player-buttons');
+  box.textContent = '';
+  $('list-empty').hidden = players.length > 0;
+  for (const p of players) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = p.name;
+    btn.className = 'pill';
+    btn.style.cssText = 'border:none;cursor:pointer;font-size:16px;padding:10px 16px;color:var(--creme);';
+    btn.addEventListener('click', () => {
+      selected = p;
+      $('login-name').textContent = p.name;
+      $('login-form').hidden = false;
+      $('login-error').textContent = '';
+      $('login-pin').value = '';
+      $('login-pin').focus();
+    });
+    box.appendChild(btn);
+  }
+}
+
+$('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!selected) return;
+  try {
+    const { token, player } = await post('/api/login', { playerId: selected.id, pin: $('login-pin').value });
+    setSession(token, player.id);
+    location.href = '/dashboard';
+  } catch (err) {
+    $('login-error').textContent = err.message;
+  }
+});
+
+$('create-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    const { token, player } = await post('/api/players', { name: $('create-name').value, pin: $('create-pin').value });
+    setSession(token, player.id);
+    location.href = '/dashboard';
+  } catch (err) {
+    $('create-error').textContent = err.message;
+  }
+});
+
+loadPlayers().catch(() => { $('list-empty').hidden = false; });
+</script>
+</body>
+</html>
