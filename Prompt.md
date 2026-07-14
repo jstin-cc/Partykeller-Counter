@@ -61,8 +61,9 @@ DEINE AUFGABE IN DIESER SESSION
 3. Lege das Projekt-Gerüst und die Kontextdateien an: CLAUDE.md (Projektregeln,
    Stack, Konventionen), PROGRESS.md (Meilensteine, Status), DECISIONS.md
    (Architektur- und Stack-Entscheidungen mit Begründung). Die Schritte im Plan sollen 
-   sauber in einer .MD Datei aufgeführt sein und nach abgehakt werden um den aktuellen Stand
-   im Fall von Kontextverlust beizubehalten. Das Repo ist immer sauber und klar strukturiert zu halten 
+   sauber in der PROGRESS.MD Datei aufgeführt sein und nach und nach abgehakt werden um den aktuellen Stand
+   im Fall von Kontextverlust beizubehalten. Das Repo ist immer sauber und klar strukturiert und 
+   die CLAUDE.MD sowie die README.MD immer aktuell zu halten
 4. Schreibe noch keinen Feature-Code, bis ich den Plan bestätigt habe.
    
    
