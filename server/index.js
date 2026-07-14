@@ -14,6 +14,8 @@ app.use(express.json());
 app.use(express.static(publicDir));
 
 app.get('/dashboard', (_req, res) => res.sendFile(path.join(publicDir, 'dashboard.html')));
+app.get('/tv', (_req, res) => res.sendFile(path.join(publicDir, 'tv.html')));
+app.get('/admin', (_req, res) => res.sendFile(path.join(publicDir, 'admin.html')));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 

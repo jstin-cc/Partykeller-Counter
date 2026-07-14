@@ -4,9 +4,9 @@ Gäste zählen ihre Biere und Shots über das Handy, ein Fernseher zeigt die
 dauerhafte All-Time-Rangliste. Läuft komplett im lokalen WLAN auf einem
 Raspberry Pi — keine Internet-Abhängigkeit.
 
-**Status:** M0–M3 fertig — Server, Design-Basis und das Nutzer-Dashboard
-laufen. Noch offen: Login-Feinschliff (M4), TV-Scoreboard (M5), Admin (M6),
-Pi-Betrieb (M7). Details in [PROGRESS.md](PROGRESS.md).
+**Status:** Funktional komplett (M0–M7) — Login, Nutzer-Dashboard,
+TV-Scoreboard mit QR-Code und Admin-Bereich laufen live über WebSocket.
+Offene Restpunkte in [PROGRESS.md](PROGRESS.md).
 
 ## Schnellstart (Entwicklung)
 
@@ -39,8 +39,9 @@ statisches Frontend ohne Build-Step. Ein Prozess serviert alles.
 - [CLAUDE.md](CLAUDE.md) — Projektregeln und Konventionen
 - [Prompt.md](Prompt.md) — ursprüngliche Aufgabenstellung
 
-## Später: Betrieb auf dem Raspberry Pi
+## Betrieb auf dem Raspberry Pi
 
-Geplant (M7): systemd-Service, mDNS-Name `partykeller.local`, TV im
-Chromium-Kiosk-Modus auf `/tv`. Konfiguration über `.env`
-(siehe `.env.example`).
+Anleitung in [deploy/PI-SETUP.md](deploy/PI-SETUP.md): systemd-Service
+([deploy/partykeller.service](deploy/partykeller.service)), mDNS-Name
+`partykeller.local`, TV im Chromium-Kiosk-Modus auf `/tv`, Backup der
+`data/partykeller.db`. Konfiguration über `.env` (siehe `.env.example`).

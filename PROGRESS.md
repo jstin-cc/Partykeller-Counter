@@ -3,12 +3,12 @@
 Nach jedem abgeschlossenen Schritt hier abhaken und committen. Diese Datei ist
 die Wahrheit über den Projektstand (Kontextverlust-sicher).
 
-**Aktueller Stand:** Plan freigegeben (PR #1 gemerged). M0–M3 abgeschlossen:
-Server-Fundament, Design-Basis und Nutzer-Dashboard laufen und sind
-end-to-end getestet (REST + WS + Browser-Screenshot). Nächster Schritt: M4
-(Login-Screen nach v3-Design verfeinern) oder M5 (TV-Scoreboard).
-Offen aus M2: die zwei Original-PNGs (logo-gold, footer-woods) einmal
-manuell aus dem Design-Projekt nach `public/assets/` exportieren (D-008).
+**Aktueller Stand:** Alle Meilensteine M0–M7 abgeschlossen — die App ist
+funktional komplett (Login, Dashboard, TV-Scoreboard mit QR, Admin,
+Pi-Deploy-Dateien) und end-to-end im Browser getestet.
+**Offen:** (1) die zwei Original-PNGs (logo-gold, footer-woods) einmal
+manuell aus dem Design-Projekt nach `public/assets/` exportieren (D-008);
+(2) echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅
 
@@ -51,27 +51,36 @@ manuell aus dem Design-Projekt nach `public/assets/` exportieren (D-008).
 - [x] Auth: Nutzer-Login per REST + funktionale Login-Seite (Minimalversion, Feinschliff in M4)
 - [x] End-to-end verifiziert: REST-Tests, WS-Rechte-Checks, Browser-Test mit Screenshots
 
-## M4 — Nutzer-Login
+## M4 — Nutzer-Login ✅
 
-- [ ] `public/index.html` nach `User Login v3.dc.html`: Name wählen (Liste) oder anlegen
-- [ ] Pflicht-PIN: Eingabe bei Anlage und Login, scrypt-Hash serverseitig
-- [ ] Token in localStorage, Redirect zum Dashboard, Abmelden-Flow
+- [x] `public/index.html` nach `User Login v3.dc.html`: Avatar-Liste mit PIN-Zeile, Trenner, Neu-Anmelden-Formular, Admin-Link
+- [x] Pflicht-PIN: Eingabe bei Anlage und Login (Design sagte „PIN (optional)", D-002 macht sie Pflicht), scrypt-Hash serverseitig
+- [x] Token in localStorage, Redirect zum Dashboard, Abmelden-Flow
 
-## M5 — TV-Scoreboard
+## M5 — TV-Scoreboard ✅
 
-- [ ] `public/tv.html` nach `TV Scoreboard v3.dc.html` (Querformat, Podest Top 3, Rangliste, live)
-- [ ] QR-Code zum Beitritt (vendored Lib, zeigt auf `http://partykeller.local:<PORT>/`)
+- [x] `public/tv.html` nach `TV Scoreboard v3.dc.html` (Querformat, Podest 2-1-3, Rangliste ab Platz 4, Kopf mit Teilnehmer-/Gesamt-Zahlen, live über WS)
+- [x] QR-Code zum Beitritt (qrcode-generator vendored in `public/js/vendor/`, zeigt auf die Adresse, unter der der TV die Seite lädt)
 
-## M6 — Admin
+## M6 — Admin ✅
 
-- [ ] Admin-Login (`POST /api/admin/login` gegen `ADMIN_PASSWORD`)
-- [ ] `public/admin.html` nach Admin-v3-Designs: Nutzer anlegen/umbenennen/löschen
-- [ ] Zähler jedes Nutzers direkt bearbeiten (`setCounter`), PIN-Reset (`setPin`)
-- [ ] Geschützter Komplett-Reset (`reset` mit Bestätigung)
+- [x] Admin-Login nach `Admin Login v3` (`POST /api/admin/login` gegen `ADMIN_PASSWORD`, Token in sessionStorage)
+- [x] `public/admin.html` nach `Admin Dashboard v3`: Nutzer anlegen (mit Pflicht-PIN)/umbenennen/löschen (mit Rückfrage)
+- [x] Zähler jedes Nutzers: ±1-Stepper (`increment`) und Direkteingabe (`setCounter`), PIN-Reset (`setPin`, D-002)
+- [x] Geschützter Komplett-Reset: Gedrückt-halten-Button (~1,2 s) → `reset` mit confirm "RESET"
 
-## M7 — Betrieb auf dem Pi
+## M7 — Betrieb auf dem Pi ✅ (bis auf echten Pi-Testlauf)
 
-- [ ] `deploy/partykeller.service` (systemd, Restart=always, EnvironmentFile)
-- [ ] `deploy/PI-SETUP.md`: avahi/mDNS (`partykeller.local`), Chromium-Kiosk-Autostart für `/tv`
-- [ ] README finalisieren (Install, Betrieb, Backup der data/)
-- [ ] End-to-End-Testlauf: 2 Handys + TV, Server-Neustart ohne Datenverlust
+- [x] `deploy/partykeller.service` (systemd, Restart=always, EnvironmentFile)
+- [x] `deploy/PI-SETUP.md`: Installation, avahi/mDNS (`partykeller.local`), Chromium-Kiosk-Autostart für `/tv`, Backup, Update
+- [x] README finalisiert (Schnellstart, Screens, Pi-Verweis)
+- [x] Server-Neustart ohne Datenverlust verifiziert (8 Nutzer vor/nach Neustart)
+- [ ] Echter Testlauf auf dem Pi: 2 Handys + TV im WLAN
+
+## Verifikation (2026-07-14)
+
+Browser-Tests (Chromium): Login mit PIN → Dashboard; „+ Bier" am Handy
+aktualisiert das TV-Podest live; Admin-Login → −1 Bier per Stepper →
+Nutzer anlegen per Modal; Komplett-Reset nullt Zähler und Log, Accounts
+bleiben. Dabei gefundener und gefixter Bug: `[hidden]` gegen
+`display:flex`-Regeln (jetzt global in theme.css gelöst).
