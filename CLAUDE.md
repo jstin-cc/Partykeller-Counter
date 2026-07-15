@@ -24,9 +24,9 @@ einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Vollständiger Plan in
 3. README.md und CLAUDE.md bei relevanten Änderungen sofort mitziehen.
 4. **Keine CDN-/Internet-Ressourcen im Frontend** — alles wird in `public/`
    vendored (Fonts, Libs). Die App muss offline im WLAN funktionieren.
-5. Keine Secrets im Repo: `ADMIN_PASSWORD` und `TOKEN_SECRET` nur über `.env`
-   (Vorlage: `.env.example`). Der Design-Prototyp-Wert `keller2026` wird nie
-   übernommen.
+5. Keine Secrets im Repo: `ADMIN_PASSWORD`, `RESET_PASSWORD` und `TOKEN_SECRET`
+   nur über `.env` (Vorlage: `.env.example`). Der Design-Prototyp-Wert
+   `keller2026` wird nie übernommen.
 6. Server validiert jede Mutation (Token, Rolle, Wertebereiche); Nutzer dürfen
    nur den eigenen Zähler um +1 erhöhen, alles andere ist Admin (D-004).
 7. Persistenz ist zwingend: Ein Server-Neustart darf keine Daten und keine

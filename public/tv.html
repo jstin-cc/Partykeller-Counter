@@ -65,6 +65,7 @@
     gap: 28px;
     padding: 0 24px;
     flex: 0 0 auto;
+    position: relative;
     border: 1px solid var(--glass-edge);
     border-radius: var(--radius);
     backdrop-filter: blur(var(--glass-blur));
@@ -72,6 +73,17 @@
   }
   .row:nth-child(odd) { background: var(--surface); }
   .row:nth-child(even) { background: var(--surface-alt); }
+  /* kurzes Aufleuchten der Zeile, wenn sich ihr Wert erhöht */
+  .row.pk-rowflash::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    animation: pk-rowflash 0.85s ease;
+  }
+  @keyframes pk-rowflash {
+    0%   { background: oklch(0.80 0.15 83 / 0); }
+    30%  { background: oklch(0.80 0.15 83 / 0.20); }
+    100% { background: oklch(0.80 0.15 83 / 0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .row.pk-rowflash::after { animation: none; } }
   .col-rank { width: 70px; font-family:'Bitter',serif; font-weight:700; font-size:24px; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
   .col-name { flex: 1; font-family:'Bitter',serif; font-weight:700; font-size:28px; }
   .col-beer { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--amber); font-variant-numeric:tabular-nums; }
@@ -102,8 +114,8 @@
         <div id="participant-count" class="num" style="font-size:22px;color:var(--creme);font-weight:700;">0 Teilnehmer</div>
         <div id="totals" style="font-size:14px;color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums;">0 Bier · 0 Shots gesamt</div>
       </div>
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div style="font-size:14px;color:var(--ink-muted);text-align:right;line-height:1.4;">Scan zum<br>Beitreten</div>
+      <div class="glass" style="display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface-alt);border-radius:var(--radius-lg);">
+        <div style="font-size:14px;color:var(--creme);text-align:right;line-height:1.4;font-family:'Bitter',serif;font-weight:600;">Scan zum<br>Beitreten</div>
         <div id="qr" style="width:90px;height:90px;border-radius:0;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;"></div>
       </div>
     </div>
@@ -197,9 +209,9 @@ function fillPodium(el, p, slot) {
   el.querySelector('[data-f=mixes]').textContent = `${p.mixes} Mische`;
 
   const prev = prevPod[slot];
-  if (prev && prev.id === p.id && p.total > prev.total) {
+  if (!modeSwitching && prev && prev.id === p.id && p.total > prev.total) {
     pop(totalEl);                                    // gleicher Mensch, mehr Getränke
-  } else if (prev && prev.id !== p.id) {
+  } else if (!modeSwitching && prev && prev.id !== p.id) {
     flash(el.querySelector('.podium-card'));         // neue:r auf diesem Podestplatz
   }
   prevPod[slot] = { id: p.id, total: p.total };
@@ -216,28 +228,39 @@ const SCROLL_MS = 650;    // sanft eine Zeile weiter
 const RESET_MS = 900;     // schnell zurück nach oben
 
 let others = [];          // Spieler ab Platz 4 (aktuellster State)
+let prevOthers = [];      // vorheriger 4+-Stand (Diff: Umsortierung erkennen)
+let prevVals = {};        // id -> {beers,shots,mixes,total} (Pop bei Anstieg)
 let track = null;
 let rowH = 0;
 let pos = 0;
 let maxPos = 0;
 let scrollTimer = null;
+let modeSwitching = false; // beim Moduswechsel keine Zeilen-Animation (Slide übernimmt)
 
-function buildRow(p) {
+function popEl(el) { el.classList.remove('pk-pop'); void el.offsetWidth; el.classList.add('pk-pop'); }
+function rowFlash(el) { el.classList.remove('pk-rowflash'); void el.offsetWidth; el.classList.add('pk-rowflash'); }
+
+// prev = Vorwerte desselben Spielers; gestiegene Zähler bekommen direkt „Pop",
+// die ganze Zeile leuchtet kurz auf.
+function buildRow(p, prev) {
   const row = document.createElement('div');
   row.className = 'row';
-  for (const [cls, text] of [
-    ['col-rank', p.rank],
-    ['col-name', p.name],
-    ['col-beer', p.beers],
-    ['col-shot', p.shots],
-    ['col-mix', p.mixes],
-    ['col-total', p.total],
+  row.dataset.id = p.id;
+  for (const [cls, text, key] of [
+    ['col-rank', p.rank, null],
+    ['col-name', p.name, null],
+    ['col-beer', p.beers, 'beers'],
+    ['col-shot', p.shots, 'shots'],
+    ['col-mix', p.mixes, 'mixes'],
+    ['col-total', p.total, 'total'],
   ]) {
     const cell = document.createElement('div');
     cell.className = cls;
     cell.textContent = text;
+    if (key && prev && p[key] > prev[key]) cell.classList.add('pk-pop');
     row.appendChild(cell);
   }
+  if (prev && p.total > prev.total) row.classList.add('pk-rowflash');
   return row;
 }
 
@@ -258,16 +281,50 @@ function scrollStep() {
   track.style.transform = `translateY(${-pos * (rowH + GAP)}px)`;
 }
 
-function renderRest() {
+function sameIds(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i].id !== b[i].id) return false;
+  return true;
+}
+
+// Reihenfolge unverändert: Werte in den vorhandenen Zeilen aktualisieren, ohne
+// neu aufzubauen. Die Scrollposition bleibt erhalten, gestiegene Zähler poppen.
+function updateRowsInPlace(list) {
+  for (let i = 0; i < list.length; i++) {
+    const p = list[i];
+    const el = track.children[i];
+    if (!el) continue;
+    const prev = prevVals[p.id];
+    const set = (cls, val, key) => {
+      const cell = el.querySelector('.' + cls);
+      if (cell.textContent !== String(val)) cell.textContent = val;
+      if (key && prev && val > prev[key]) popEl(cell);
+    };
+    set('col-rank', p.rank);
+    set('col-name', p.name);
+    set('col-beer', p.beers, 'beers');
+    set('col-shot', p.shots, 'shots');
+    set('col-mix', p.mixes, 'mixes');
+    set('col-total', p.total, 'total');
+    if (prev && p.total > prev.total) rowFlash(el);
+  }
+}
+
+// Reihenfolge/Menge geändert: neu aufbauen. Bei Umsortierung gleiten die Zeilen
+// per FLIP von ihrer alten an die neue Position.
+function rebuildRest(animate) {
   const viewport = $('rest');
+  const oldTop = {};
+  if (track) for (const r of track.children) oldTop[r.dataset.id] = r.getBoundingClientRect().top;
+
   stopScroll();
   viewport.textContent = '';
   pos = 0;
-  if (others.length === 0) return;
+  if (others.length === 0) { track = null; return; }
 
   track = document.createElement('div');
   track.className = 'rest-track';
-  for (const p of others) track.appendChild(buildRow(p));
+  for (const p of others) track.appendChild(buildRow(p, modeSwitching ? null : prevVals[p.id]));
   viewport.appendChild(track);
 
   // Zeilenhöhe so wählen, dass genau WINDOW Zeilen (inkl. Lücken) das Fenster füllen
@@ -275,10 +332,43 @@ function renderRest() {
   const vh = viewport.clientHeight;
   rowH = (vh - (visible - 1) * GAP) / visible;
   for (const r of track.children) r.style.height = `${rowH}px`;
+  track.style.transition = 'none';
   track.style.transform = 'translateY(0)';
+
+  if (animate && !modeSwitching) {
+    for (const r of track.children) {
+      const id = r.dataset.id;
+      const newTop = r.getBoundingClientRect().top;
+      if (oldTop[id] != null) {
+        const delta = oldTop[id] - newTop;
+        if (delta) {
+          r.style.transform = `translateY(${delta}px)`;
+          requestAnimationFrame(() => {
+            r.style.transition = 'transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            r.style.transform = 'translateY(0)';
+          });
+        }
+      } else {
+        r.style.opacity = '0';               // neue Zeile: sanft einblenden
+        requestAnimationFrame(() => { r.style.transition = 'opacity 0.55s ease'; r.style.opacity = '1'; });
+      }
+    }
+  }
 
   maxPos = others.length - visible;
   if (maxPos > 0) scrollTimer = setInterval(scrollStep, STEP_MS);
+}
+
+// Einstieg: In-Place-Update bei gleicher Reihenfolge, sonst Neuaufbau mit FLIP.
+function updateRest(newOthers) {
+  const reorder = modeSwitching || !track || !sameIds(prevOthers, newOthers);
+  others = newOthers;
+  if (reorder) rebuildRest(prevOthers.length > 0);
+  else updateRowsInPlace(newOthers);
+
+  prevVals = {};
+  for (const p of newOthers) prevVals[p.id] = { beers: p.beers, shots: p.shots, mixes: p.mixes, total: p.total };
+  prevOthers = newOthers;
 }
 
 // --- Board-Modus (All-Time / Heute), im Admin umschaltbar ---
@@ -317,9 +407,8 @@ function applyState(state, mode) {
   fillPodium($('pod-2'), rows[1], 2);
   fillPodium($('pod-3'), rows[2], 3);
 
-  others = rows.slice(3);
-  renderRest();
-  updateFacts(state.players.filter((p) => !p.hidden));
+  updateRest(rows.slice(3));
+  updateFacts(state.players.filter((p) => !p.hidden), state.records);
 }
 
 // Moduswechsel: das ganze Board fährt raus und das neue fährt wieder ein
@@ -329,7 +418,9 @@ function slideSwap(rebuild) {
   board.style.transform = 'translateX(-70px)';
   board.style.opacity = '0';
   setTimeout(() => {
+    modeSwitching = true;
     rebuild();
+    modeSwitching = false;
     board.style.transition = 'none';
     board.style.transform = 'translateX(70px)';
     void board.offsetWidth;
@@ -372,20 +463,36 @@ function leaderBy(players, key) {
   return best;
 }
 
-function computeFacts(players) {
+// '2026-09-25' -> '25.09.2026'
+function fmtDay(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+function computeFacts(players, records) {
   const out = [];
+
+  // All-Time-Rekorde: meiste Getränke an einem einzelnen Abend, schön formuliert
+  if (records) {
+    if (records.beer) out.push(`Bier-Rekord: Die meisten Biere an einem Abend hat ${records.beer.name} am ${fmtDay(records.beer.day)} geschafft – ganze ${records.beer.n} Stück.`);
+    if (records.shot) out.push(`Shot-Rekord: ${records.shot.name} kippte am ${fmtDay(records.shot.day)} sagenhafte ${records.shot.n} Shots an einem Abend.`);
+    if (records.mix) out.push(`Mische-Rekord: ${records.mix.name} mixte am ${fmtDay(records.mix.day)} ${records.mix.n} Mischgetränke an einem Abend.`);
+  }
+
+  // Tages-Bestleistungen (heute)
   const b = leaderBy(players, 'beersToday');
-  if (b) out.push(`Bier-König des Abends: ${b.name} mit ${b.beersToday} Bier`);
+  if (b) out.push(`Bier-König des Abends: ${b.name} mit ${b.beersToday} Bier.`);
   const s = leaderBy(players, 'shotsToday');
-  if (s) out.push(`Shot-Meister des Abends: ${s.name} mit ${s.shotsToday} Shots`);
+  if (s) out.push(`Shot-Meister des Abends: ${s.name} mit ${s.shotsToday} Shots.`);
   const m = leaderBy(players, 'mixesToday');
-  if (m) out.push(`Misch-Meister des Abends: ${m.name} mit ${m.mixesToday} Mischen`);
+  if (m) out.push(`Misch-Meister des Abends: ${m.name} mit ${m.mixesToday} Mischen.`);
   let top = null, topN = 0;
   for (const p of players) {
     const n = (p.beersToday || 0) + (p.shotsToday || 0) + (p.mixesToday || 0);
     if (n > topN) { topN = n; top = p; }
   }
-  if (top) out.push(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken`);
+  if (top) out.push(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken.`);
   return out;
 }
 
@@ -393,8 +500,8 @@ function currentFactList() {
   return facts.length ? facts : [FUNFACT_FALLBACK];
 }
 
-function updateFacts(players) {
-  facts = computeFacts(players);
+function updateFacts(players, records) {
+  facts = computeFacts(players, records);
   const list = currentFactList();
   factIdx %= list.length;
   factEl.textContent = list[factIdx];

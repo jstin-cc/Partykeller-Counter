@@ -226,7 +226,7 @@ button:not(:disabled):active { transform: scale(0.95); }
   35%  { transform: scale(1.35); }
   100% { transform: scale(1); }
 }
-.pk-pop { animation: pk-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); transform-origin: center; display: inline-block; }
+.pk-pop { animation: pk-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); transform-origin: center; }
 
 /* Kurzes Aufleuchten (z. B. Podest bei Platzwechsel). */
 @keyframes pk-flash {

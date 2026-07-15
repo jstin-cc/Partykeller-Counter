@@ -11,11 +11,15 @@ Screens (inkl. DB-Migration ohne Datenverlust), **Live-Fun-Facts**
 (Tages-Bestleistungen), TV-Rangliste **scrollt** ab Platz 4 (Reset nach oben
 statt Endlos-Rotation), Podest-Überlappung behoben, Tabellen als großes
 gerundetes Panel mit einzeln gerundeten Zeilen, Wasserzeichen wieder rechts.
-Und (D-013): **Komplett-Reset mit Admin-Passwort**, **Nutzer im TV
+Und (D-013): **Komplett-Reset mit Passwort**, **Nutzer im TV
 ein-/ausblendbar** (Haken im Admin), **TV-Ansicht All-Time/Heute umschaltbar**
 (im Admin, animierter Wechsel), grüner Glas-Rand wieder zurückgenommen,
 durchgängig **Übergänge/Animationen** (Button-Druck, Pop beim Hochzählen,
 Podest-Effekte), Dashboard-Logo größer, Fun-Facts verdecken die Bäume nicht mehr.
+Und (D-014): **Animationen auch in der Rangliste** (Pop/Aufleuchten bei neuem
+Getränk, FLIP bei Platzwechsel), **Fun-Facts mit Tagesrekorden** (schön formuliert),
+**eigenes Lösch-Passwort** (`RESET_PASSWORD`, getrennt vom Admin), **Admin-Liste
+alphabetisch**, Glassmorphism-Kasten um den TV-QR-Code.
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅

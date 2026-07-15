@@ -68,6 +68,9 @@ CREATE INDEX idx_drink_log_player_ts ON drink_log(player_id, ts);
   ohne Datenverlust (D-006/D-012/D-013).
 - `settings` (Schlüssel/Wert) hält Laufzeit-Einstellungen: `join_url` (TV-QR-Ziel,
   D-010) und `board_mode` (`alltime`|`today`, TV-Ansicht, D-013).
+- `getState().records` liefert je Sorte den All-Time-Tagesrekord (Spieler, Datum,
+  Anzahl) für die Fun-Facts (D-014); der destruktive Reset ist mit einem eigenen
+  Passwort `RESET_PASSWORD` abgesichert (getrennt von `ADMIN_PASSWORD`, D-013/D-014).
 - Admin-Korrekturen ändern nur die Zähler (kein Log-Eintrag); Komplett-Reset
   leert Zähler und Log.
 
