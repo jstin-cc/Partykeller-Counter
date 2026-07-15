@@ -149,3 +149,19 @@ Platzhalter (später echte Statistiken wie Bier-Rekord/Shot-Meister).
 können, ohne Code-Änderung — daher einstellbar und persistent. Die Rotation hält
 auch bei vielen Gästen die Liste lesbar, ohne dass das Podest Platz verschwendet.
 Kein Build-Step, keine neuen Dependencies (D-007).
+
+## 2026-07-15 · D-011: Dunkles „Liquid Glass" statt brauner Flächen (experimentell)
+
+**Entscheidung (auf Nutzerwunsch zum Ausprobieren):** Die braunen Oberflächen
+(Design-Tokens mit Hue 55) werden durch dunkles Glassmorphism ersetzt. Die
+`--surface`-Tokens sind jetzt halbtransparent und leicht grünstichig
+(Hue 160, Alpha 0.55–0.68 = „relativ dunkel, relativ undurchsichtig"). Eine
+Utility-Klasse `.glass` (plus direkte Anwendung an `.card`, `.field`, Podest,
+Nutzer-/Admin-Zeilen, Modals, Fun-Facts-Band) ergänzt `backdrop-filter: blur(16px)`
+und eine feine helle Glaskante (`--glass-edge`). Farbige Aktions-Elemente
+(Bier-/Shot-/Grün-Buttons, Podest-Badges) bleiben bewusst kräftig.
+
+**Begründung:** Der Nutzer möchte die Optik testen; Braun gefiel noch nicht.
+Reine CSS-Änderung, offline (D-007), keine neuen Dependencies. `backdrop-filter`
+wird von Chromium (Pi-Kiosk) unterstützt; ohne Unterstützung bleibt die Fläche
+einfach dunkel-transluzent. Kann bei Nichtgefallen leicht zurückgedreht werden.

@@ -15,7 +15,9 @@
   }
   .input-flat {
     background: var(--surface-2);
-    border: none;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-edge);
     border-radius: var(--radius);
     padding: 13px 16px;
     color: var(--ink);
@@ -27,14 +29,19 @@
     font-family: 'Work Sans', sans-serif;
   }
   .btn-flat {
-    background: var(--surface-2); border: none; color: var(--ink-muted);
+    background: var(--surface-2); border: 1px solid var(--glass-edge); color: var(--ink-muted);
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
     border-radius: var(--radius); cursor: pointer; font-family: 'Work Sans', sans-serif;
   }
   .error-banner {
     background: oklch(0.3 0.1 38 / 0.4); color: var(--ink);
     border-radius: var(--radius); padding: 12px 16px; font-size: 14px; font-weight: 600;
   }
-  .admin-row { display: flex; align-items: center; gap: 16px; padding: 12px 20px; flex-wrap: wrap; }
+  .admin-row {
+    display: flex; align-items: center; gap: 16px; padding: 12px 20px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--glass-edge);
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
   .admin-row:nth-child(odd) { background: var(--surface); }
   .admin-row:nth-child(even) { background: var(--surface-alt); }
   .stepper { width: 170px; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -43,14 +50,15 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .stepper input {
-    width: 56px; text-align: center; background: var(--surface-2); border: none;
+    width: 56px; text-align: center; background: var(--surface-2); border: 1px solid var(--glass-edge);
     border-radius: var(--radius); padding: 6px 4px; font-family: 'Bitter', serif; font-weight: 700;
     font-size: 17px; font-variant-numeric: tabular-nums;
   }
   .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 13px; text-decoration: underline; cursor: pointer; }
   .modal-backdrop {
-    position: fixed; inset: 0; background: oklch(0.1 0.02 155 / 0.6);
+    position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center; z-index: 10;
   }
 </style>
@@ -62,7 +70,7 @@
   <div class="admin-watermark" style="left:50%;top:-260px;width:600px;height:600px;margin-left:-300px;opacity:0.18;"></div>
 
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;">
-    <form id="login-form" style="width:100%;max-width:400px;background:var(--surface);border-top:4px solid var(--green);padding:36px 28px;display:flex;flex-direction:column;gap:18px;">
+    <form id="login-form" class="glass" style="width:100%;max-width:400px;background:var(--surface);border-top:4px solid var(--green);padding:36px 28px;display:flex;flex-direction:column;gap:18px;">
       <div style="text-align:center;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:64px;width:auto;object-fit:contain;margin-bottom:14px;">
         <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0 0 6px 0;">Admin-Zugang</h1>
@@ -100,7 +108,7 @@
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
+    <div class="glass" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
       <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">QR-Adresse</div>
       <input id="join-url" class="input-flat" type="text" placeholder="z. B. http://192.168.1.50:3000/" autocomplete="off" style="flex:1;min-width:240px;padding:10px 14px;font-size:14px;">
       <button id="join-save" class="btn-green" style="padding:10px 18px;font-size:14px;">Speichern</button>
@@ -123,7 +131,7 @@
 
 <!-- Modal: Neuer Nutzer -->
 <div id="add-modal" class="modal-backdrop" hidden>
-  <form id="add-form" style="background:var(--surface);border-top:4px solid var(--green);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
+  <form id="add-form" class="glass" style="background:var(--surface);border-top:4px solid var(--green);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
     <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Neuer Nutzer</h2>
     <input id="add-name" class="input-flat" type="text" maxlength="24" placeholder="Name" autocomplete="off" required>
     <input id="add-pin" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (4 Ziffern)" autocomplete="off" required>
@@ -136,7 +144,7 @@
 
 <!-- Modal: PIN zurücksetzen (D-002) -->
 <div id="pin-modal" class="modal-backdrop" hidden>
-  <form id="pin-form" style="background:var(--surface);border-top:4px solid var(--green);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
+  <form id="pin-form" class="glass" style="background:var(--surface);border-top:4px solid var(--green);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
     <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">PIN zurücksetzen: <span id="pin-name"></span></h2>
     <input id="pin-value" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="Neue PIN (4 Ziffern)" autocomplete="off" required>
     <div style="display:flex;gap:10px;justify-content:flex-end;">

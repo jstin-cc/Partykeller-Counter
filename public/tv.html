@@ -10,7 +10,7 @@
 <style>
   :root {
     --bg-lo: oklch(0.11 0.03 155);
-    --surface-hi: oklch(0.32 0.045 55);
+    --surface-hi: oklch(0.30 0.022 160 / 0.66);
   }
   html, body { height: 100%; }
   body { overflow: hidden; }
@@ -27,6 +27,9 @@
   }
   .podium-card {
     background: linear-gradient(180deg, var(--surface-hi), var(--surface));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-edge);
     border-radius: var(--radius-lg);
     width: 100%;
     display: flex;
@@ -51,6 +54,9 @@
     padding: 0 28px;
     flex: 1;
     min-height: 0;
+    border-bottom: 1px solid var(--glass-edge);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
   }
   .row:nth-child(odd) { background: var(--surface); }
   .row:nth-child(even) { background: var(--surface-alt); }
@@ -129,7 +135,7 @@
 
     <!-- Fun-Facts (Platzhalter): hier werden später Statistiken eingeblendet,
          z. B. Bier-Rekord des Abends, Shot-Meister usw. -->
-    <div id="funfacts" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 24px;margin-top:8px;background:var(--surface-alt);border-top:3px solid var(--gold);border-radius:var(--radius-lg);">
+    <div id="funfacts" class="glass" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 24px;margin-top:8px;background:var(--surface-alt);border-top:3px solid var(--gold);border-radius:var(--radius-lg);">
       <span style="font-family:'Bitter',serif;font-weight:800;font-size:15px;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;flex-shrink:0;">Fun Fact</span>
       <span id="funfact-text" style="font-size:19px;color:var(--creme);font-family:'Bitter',serif;font-weight:600;transition:opacity 0.4s;">Bald gibt's hier Statistiken.</span>
     </div>

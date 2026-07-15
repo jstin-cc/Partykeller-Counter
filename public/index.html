@@ -23,7 +23,9 @@
     align-items: center;
     gap: 14px;
     background: var(--surface);
-    border: none;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-edge);
     border-radius: var(--radius);
     padding: 13px 16px;
     cursor: pointer;
@@ -49,7 +51,9 @@
   .pin-row { display: flex; gap: 8px; padding: 10px 4px 4px 4px; }
   .input-flat {
     background: var(--surface-2);
-    border: none;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-edge);
     border-radius: var(--radius);
     padding: 13px 16px;
     color: var(--ink);

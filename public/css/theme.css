@@ -25,13 +25,25 @@
   --brick: oklch(0.56 0.14 38);
   --bg: oklch(0.15 0.035 155);
   --bg-hi: oklch(0.19 0.035 155);
-  --surface: oklch(0.25 0.035 55);
-  --surface-alt: oklch(0.21 0.03 55);
-  --surface-2: oklch(0.30 0.04 55);
+  /* Dunkles „Liquid Glass" (Glassmorphism): relativ dunkel, relativ
+     undurchsichtig, leicht grünstichig statt braun. Alpha < 1, damit
+     backdrop-filter den Hintergrund durchscheinen lässt. */
+  --surface: oklch(0.23 0.02 160 / 0.62);
+  --surface-alt: oklch(0.19 0.018 160 / 0.55);
+  --surface-2: oklch(0.29 0.022 160 / 0.68);
+  --glass-edge: oklch(0.92 0.02 160 / 0.12);   /* feine helle Glaskante */
+  --glass-blur: 16px;
 
   /* Eckenradien – Kanten sind bewusst leicht abgerundet */
   --radius: 12px;      /* Buttons, Felder, kleine Controls */
   --radius-lg: 18px;   /* Karten und große Flächen */
+}
+
+/* Wiederverwendbare Glas-Behandlung */
+.glass {
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
 }
 
 * { box-sizing: border-box; }
@@ -98,6 +110,9 @@ a:hover { color: var(--gold); }
 /* Karten mit Farbkante oben */
 .card {
   background: var(--surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
   border-top: 3px solid var(--edge, var(--green));
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -147,6 +162,9 @@ a:hover { color: var(--gold); }
 /* Rang-Pill */
 .pill {
   background: var(--surface-2);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
   border-radius: 999px;
   padding: 5px 12px;
   font-size: 12px;
@@ -172,7 +190,9 @@ a:hover { color: var(--gold); }
 .field {
   width: 100%;
   background: var(--surface-alt);
-  border: 1px solid var(--surface-2);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: 'Work Sans', sans-serif;
