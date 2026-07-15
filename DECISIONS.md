@@ -207,3 +207,37 @@ einfach dunkel-transluzent. Kann bei Nichtgefallen leicht zurückgedreht werden.
 **Begründung:** Alles vom Nutzer angefordert. Keine neuen Dependencies, offline
 (D-007), Persistenz gewahrt (D-006). Die Fun-Facts erfüllen den in D-010
 angekündigten „echte Statistiken"-Platzhalter.
+
+## 2026-07-15 · D-013: Reset-Passwort, Scoreboard-Sichtbarkeit, TV-Modus, Lebendigkeit
+
+**Entscheidung (auf Nutzerwunsch):**
+
+- **Komplett-Reset braucht das Admin-Passwort.** Das „Gedrückt halten"-Muster
+  ist durch ein Modal ersetzt, in dem das Admin-Passwort (dieselbe `.env` wie der
+  Login, D-003) erneut eingegeben werden muss. Der Server prüft es im `reset`-
+  Handler gegen `config.adminPassword`; ohne korrektes Passwort passiert nichts.
+- **Sichtbarkeit pro Nutzer im Scoreboard.** Neue Spalte `players.hidden`
+  (Migration für bestehende DBs, D-006). Ein Haken je Zeile im Admin schaltet
+  `setHidden` (admin-only). Der TV **filtert** verborgene Spieler komplett heraus
+  und **rankt die sichtbaren neu** (Teilnehmerzahl, Summen und Fun-Facts zählen
+  nur Sichtbare). Dashboard/Login bleiben unberührt – „hidden" betrifft nur den TV.
+- **TV-Ansicht umschaltbar: All-Time ↔ Heute.** Neue Einstellung `board_mode`
+  (`settings`-Tabelle, Default `alltime`), nur im Admin umschaltbar (kein
+  Auto-Wechsel). Der TV rechnet die Spalten/Podest-Werte je Modus (All-Time =
+  Gesamtzähler, Heute = Party-Tag-Werte) und sortiert/rankt entsprechend neu.
+  Beim Wechsel fährt das ganze Board seitlich raus und wieder rein (CSS-Transition
+  auf `#board`); Kopf, Fun-Fact und Wald-Footer bleiben stehen.
+- **Grüner Glas-Rand zurückgenommen.** Der Test aus D-012 (dunkelgrüne
+  `--glass-edge`) gefiel nicht → zurück auf die feine helle Glaskante
+  (oklch 0.92 0.02 160 / 0.12).
+- **Mehr Lebendigkeit (reines CSS/JS):** jeder Button sinkt beim Drücken leicht ein
+  (`:active` scale), Zähler „ploppen" beim Hochzählen (`pk-pop`), Podest-Zahlen
+  poppen bei Anstieg und leuchten kurz auf, wenn ein anderer Mensch den Platz
+  übernimmt (`pk-flash`). `prefers-reduced-motion` schaltet die Keyframes ab.
+- **Dashboard-Logo größer** (34 → 80 px).
+- **Fun-Facts-Band schlanker, Wald-Footer höher** (70 → 96 px), damit die Bäume
+  frei bleiben und nicht vom Band verdeckt wirken.
+
+**Begründung:** Alles vom Nutzer angefordert. Keine neuen Dependencies, offline
+(D-007), Persistenz und Migrationen gewahrt (D-006). Der Board-Modus ist bewusst
+nur manuell (Admin) – ein Auto-Wechsel kann später ergänzt werden.

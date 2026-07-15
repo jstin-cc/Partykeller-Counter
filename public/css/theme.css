@@ -32,9 +32,7 @@
   --surface: oklch(0.23 0.02 160 / 0.54);
   --surface-alt: oklch(0.19 0.018 160 / 0.47);
   --surface-2: oklch(0.29 0.022 160 / 0.60);
-  /* Test: dünner, dunkelgrüner Rand rund um die Glass-Elemente (D-012),
-     abgestimmt auf das Glassmorphism. Vorher: helle Glaskante 0.92/0.12. */
-  --glass-edge: oklch(0.52 0.11 150 / 0.60);
+  --glass-edge: oklch(0.92 0.02 160 / 0.12);   /* feine helle Glaskante */
   --glass-blur: 16px;
 
   /* Eckenradien – Kanten sind bewusst leicht abgerundet */
@@ -205,3 +203,39 @@ a:hover { color: var(--gold); }
 .field:focus { outline: 2px solid var(--green); border-color: var(--green); }
 
 .error-msg { color: var(--brick); font-size: 14px; min-height: 1.2em; }
+
+/* --- Lebendigkeit: Übergänge, Klick-Reaktion, Pop-Animation --- */
+
+/* Jeder Button reagiert auf Druck (leichtes Einsinken). */
+button {
+  transition: transform 0.09s ease, filter 0.12s ease, box-shadow 0.18s ease, background-color 0.15s ease;
+}
+button:not(:disabled):active { transform: scale(0.95); }
+
+.btn-big { transition: transform 0.1s ease, filter 0.12s ease, box-shadow 0.2s ease; }
+.btn-big:not(:disabled):active { transform: scale(0.97); filter: brightness(1.14); }
+.btn-big:not(:disabled):hover { filter: brightness(1.05); }
+
+/* Flächen wechseln Zustände weich (Hover, Umsortierung, Sichtbarkeit). */
+.card, .user-row, .pill { transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease, opacity 0.25s ease; }
+.user-row:active { transform: scale(0.99); }
+
+/* Zahl „ploppt" kurz auf, wenn ein Zähler steigt. */
+@keyframes pk-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.pk-pop { animation: pk-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); transform-origin: center; display: inline-block; }
+
+/* Kurzes Aufleuchten (z. B. Podest bei Platzwechsel). */
+@keyframes pk-flash {
+  0%   { box-shadow: 0 0 0 0 var(--pk-flash, oklch(0.80 0.15 83 / 0.0)); }
+  30%  { box-shadow: 0 0 26px 4px var(--pk-flash, oklch(0.80 0.15 83 / 0.55)); }
+  100% { box-shadow: 0 0 0 0 var(--pk-flash, oklch(0.80 0.15 83 / 0.0)); }
+}
+.pk-flash { animation: pk-flash 0.9s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-pop, .pk-flash { animation: none; }
+}

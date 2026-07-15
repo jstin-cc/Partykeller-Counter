@@ -58,6 +58,15 @@
   }
   .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 13px; text-decoration: underline; cursor: pointer; }
+  .mode-btn {
+    background: var(--surface-2); border: 1px solid var(--glass-edge); color: var(--ink-muted);
+    border-radius: var(--radius); padding: 8px 18px; font-weight: 700; cursor: pointer;
+    font-family: 'Work Sans', sans-serif; font-size: 14px;
+  }
+  .mode-btn.active { background: var(--green); color: var(--bg); border-color: var(--green); }
+  .vis-check { width: 20px; height: 20px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+  .admin-row { transition: opacity 0.2s ease, background-color 0.2s ease; }
+  .admin-row.is-hidden { opacity: 0.5; }
   .modal-backdrop {
     position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -102,12 +111,18 @@
         <div id="reset-done" hidden style="color:var(--green);font-size:14px;font-weight:600;">Zurückgesetzt!</div>
         <div id="dash-error" class="error-msg"></div>
         <button id="open-add" class="btn-green" style="padding:12px 22px;font-size:14px;">+ Neuer Nutzer</button>
-        <div style="position:relative;overflow:hidden;border-radius:var(--radius);">
-          <div id="hold-progress" style="position:absolute;inset:0;background:var(--brick);width:0%;opacity:0.35;"></div>
-          <button id="reset-btn" style="position:relative;background:var(--surface-2);border:none;color:var(--brick);font-weight:700;font-size:14px;padding:12px 20px;cursor:pointer;font-family:'Work Sans',sans-serif;">Gedrückt halten: Alles zurücksetzen</button>
-        </div>
+        <button id="reset-btn" class="btn-flat" style="color:var(--brick);border-color:var(--brick);padding:12px 20px;font-size:14px;font-weight:700;">Alles zurücksetzen</button>
         <button id="logout" class="link-btn">Abmelden</button>
       </div>
+    </div>
+
+    <div class="glass" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
+      <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">TV-Anzeige</div>
+      <div style="display:flex;gap:8px;">
+        <button id="mode-alltime" class="mode-btn" data-mode="alltime">All-Time</button>
+        <button id="mode-today" class="mode-btn" data-mode="today">Heute</button>
+      </div>
+      <div style="font-size:13px;color:var(--ink-muted);">Steuert nur den TV. Haken in der Liste = im TV sichtbar.</div>
     </div>
 
     <div class="glass" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
@@ -141,6 +156,20 @@
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button type="button" id="close-add" class="btn-flat" style="padding:10px 18px;">Abbrechen</button>
       <button class="btn-green" style="padding:10px 18px;">Anlegen</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal: Alles zurücksetzen – Admin-Passwort erneut nötig -->
+<div id="reset-modal" class="modal-backdrop" hidden>
+  <form id="reset-form" class="glass" style="background:var(--surface);border-top:4px solid var(--brick);border-radius:var(--radius-lg);padding:28px;width:400px;display:flex;flex-direction:column;gap:14px;">
+    <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Alles zurücksetzen</h2>
+    <p style="font-size:14px;color:var(--ink-muted);margin:0;line-height:1.5;">Setzt alle Zähler auf 0 und löscht das Getränke-Log. Accounts und PINs bleiben erhalten. Zum Bestätigen bitte das Admin-Passwort eingeben.</p>
+    <div id="reset-error" class="error-banner" hidden></div>
+    <input id="reset-pw" class="input-flat" type="password" placeholder="Admin-Passwort" autocomplete="current-password" required>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button type="button" id="close-reset" class="btn-flat" style="padding:10px 18px;">Abbrechen</button>
+      <button class="btn-green" style="padding:10px 18px;background:var(--brick);color:var(--ink);">Endgültig zurücksetzen</button>
     </div>
   </form>
 </div>
@@ -190,7 +219,16 @@ $('logout').addEventListener('click', () => {
 
 // --- Dashboard ---
 let errTimer;
+let pendingReset = false;
 function showError(message) {
+  // Fehler beim Zurücksetzen (z. B. falsches Passwort) im Reset-Modal zeigen
+  if (pendingReset) {
+    pendingReset = false;
+    const el = $('reset-error');
+    el.textContent = message;
+    el.hidden = false;
+    return;
+  }
   $('dash-error').textContent = message;
   clearTimeout(errTimer);
   errTimer = setTimeout(() => { $('dash-error').textContent = ''; }, 4000);
@@ -208,10 +246,28 @@ function enterDashboard() {
       players = state.players;
       renderRows();
       updateJoinField(state.joinUrl ?? '');
+      updateBoardMode(state.boardMode ?? 'alltime');
+      // Ein State-Broadcast nach dem Reset = Erfolg (Passwort war korrekt)
+      if (pendingReset) {
+        pendingReset = false;
+        $('reset-modal').hidden = true;
+        $('reset-done').hidden = false;
+        setTimeout(() => { $('reset-done').hidden = true; }, 2000);
+      }
     },
     onError: showError,
   });
 }
+
+// --- TV-Anzeige umschalten (All-Time / Heute) ---
+function updateBoardMode(mode) {
+  for (const b of document.querySelectorAll('.mode-btn')) {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  }
+}
+document.querySelectorAll('.mode-btn').forEach((b) => {
+  b.addEventListener('click', () => send({ type: 'setBoardMode', mode: b.dataset.mode }));
+});
 
 // --- QR-Adresse (Beitritt) ---
 function updateJoinField(joinUrl) {
@@ -235,7 +291,7 @@ function renderRows() {
 
   for (const p of players) {
     const row = document.createElement('div');
-    row.className = 'admin-row';
+    row.className = 'admin-row' + (p.hidden ? ' is-hidden' : '');
 
     // Name / Umbenennen
     const nameCell = document.createElement('div');
@@ -270,6 +326,13 @@ function renderRows() {
     } else {
       const wrap = document.createElement('div');
       wrap.style.cssText = 'display:flex;align-items:center;gap:10px;';
+      // Sichtbarkeit im TV-Scoreboard: Haken = sichtbar
+      const vis = document.createElement('input');
+      vis.type = 'checkbox';
+      vis.className = 'vis-check';
+      vis.checked = !p.hidden;
+      vis.title = 'Im TV-Scoreboard anzeigen';
+      vis.addEventListener('change', () => send({ type: 'setHidden', id: p.id, hidden: !vis.checked }));
       const name = document.createElement('div');
       name.style.cssText = "font-size:16px;font-weight:600;font-family:'Bitter',serif;";
       name.textContent = p.name;
@@ -281,7 +344,7 @@ function renderRows() {
       pinBtn.className = 'link-btn';
       pinBtn.textContent = 'PIN';
       pinBtn.addEventListener('click', () => openPinModal(p));
-      wrap.append(name, edit, pinBtn);
+      wrap.append(vis, name, edit, pinBtn);
       nameCell.appendChild(wrap);
     }
 
@@ -361,34 +424,20 @@ $('pin-form').addEventListener('submit', (e) => {
   $('pin-modal').hidden = true;
 });
 
-// --- Gedrückt halten: Komplett-Reset ---
-let holdTimer = null;
-function startHold() {
-  stopHold();
-  let progress = 0;
-  holdTimer = setInterval(() => {
-    progress += 100 / 40; // ~1,2 Sekunden halten
-    if (progress >= 100) {
-      stopHold();
-      send({ type: 'reset', confirm: 'RESET' });
-      $('reset-done').hidden = false;
-      setTimeout(() => { $('reset-done').hidden = true; }, 2000);
-    } else {
-      $('hold-progress').style.width = `${progress}%`;
-    }
-  }, 30);
-}
-function stopHold() {
-  clearInterval(holdTimer);
-  holdTimer = null;
-  $('hold-progress').style.width = '0%';
-}
-const resetBtn = $('reset-btn');
-resetBtn.addEventListener('mousedown', startHold);
-resetBtn.addEventListener('mouseup', stopHold);
-resetBtn.addEventListener('mouseleave', stopHold);
-resetBtn.addEventListener('touchstart', startHold);
-resetBtn.addEventListener('touchend', stopHold);
+// --- Komplett-Reset: nur mit erneuter Passwort-Eingabe (gleiche .env wie Login) ---
+$('reset-btn').addEventListener('click', () => {
+  $('reset-form').reset();
+  $('reset-error').hidden = true;
+  $('reset-modal').hidden = false;
+  $('reset-pw').focus();
+});
+$('close-reset').addEventListener('click', () => { $('reset-modal').hidden = true; });
+$('reset-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  $('reset-error').hidden = true;
+  pendingReset = true;
+  send({ type: 'reset', confirm: 'RESET', password: $('reset-pw').value });
+});
 
 // Bereits angemeldet? (Token überlebt Reload in der Session)
 if (token) enterDashboard();

@@ -14,7 +14,7 @@
   <div class="screen-inner">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <a href="/" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
-      <img src="assets/logo.png" alt="SV Partykeller" style="height:34px;width:auto;object-fit:contain;">
+      <img src="assets/logo.png" alt="SV Partykeller" style="height:80px;width:auto;object-fit:contain;">
       <div id="rank-pill" class="pill num" hidden></div>
     </div>
 
@@ -113,6 +113,20 @@ if (!token || !playerId) {
     errTimer = setTimeout(() => { errEl.textContent = ''; }, 4000);
   }
 
+  // Zahl setzen und bei Anstieg kurz „aufploppen" lassen
+  const prev = {};
+  function bump(id, value) {
+    const el = $(id);
+    const had = id in prev;
+    el.textContent = value;
+    if (had && value > prev[id]) {
+      el.classList.remove('pk-pop');
+      void el.offsetWidth;   // Reflow erzwingen, damit die Animation neu startet
+      el.classList.add('pk-pop');
+    }
+    prev[id] = value;
+  }
+
   const ws = connectState({
     onState({ players }) {
       const me = players.find((p) => p.id === playerId);
@@ -125,14 +139,14 @@ if (!token || !playerId) {
       $('player-name').textContent = me.name;
       $('rank-pill').textContent = `#${me.rank}/${players.length}`;
       $('rank-pill').hidden = false;
-      $('today-total').textContent = me.beersToday + me.shotsToday + me.mixesToday;
-      $('alltime-total').textContent = me.total;
-      $('beers-today').textContent = me.beersToday;
-      $('beers-total').textContent = me.beers;
-      $('shots-today').textContent = me.shotsToday;
-      $('shots-total').textContent = me.shots;
-      $('mixes-today').textContent = me.mixesToday;
-      $('mixes-total').textContent = me.mixes;
+      bump('today-total', me.beersToday + me.shotsToday + me.mixesToday);
+      bump('alltime-total', me.total);
+      bump('beers-today', me.beersToday);
+      bump('beers-total', me.beers);
+      bump('shots-today', me.shotsToday);
+      bump('shots-total', me.shots);
+      bump('mixes-today', me.mixesToday);
+      bump('mixes-total', me.mixes);
       document.title = `SV Partykeller – ${me.name}`;
     },
     onError: showError,
