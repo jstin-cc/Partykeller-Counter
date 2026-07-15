@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws';
 import * as db from './db.js';
 import { verifyToken, hashPin } from './auth.js';
-import { validName, validPin } from './validate.js';
+import { validName, validPin, normalizeJoinUrl } from './validate.js';
 
 let wss;
 
@@ -74,6 +74,11 @@ const handlers = {
     requireAdmin(auth);
     if (confirm !== 'RESET') throw new Error('Reset braucht confirm: "RESET"');
     db.resetAll();
+  },
+
+  setJoinUrl(auth, { url }) {
+    requireAdmin(auth);
+    db.setSetting('join_url', normalizeJoinUrl(url));
   },
 };
 

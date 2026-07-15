@@ -94,3 +94,74 @@ und nach `public/assets/` gelegt werden (offener Punkt in PROGRESS.md M2).
 SVGs nutzen dieselben Farb-Tokens und Platzverhältnisse, sodass der spätere
 Tausch nur die zwei `<img src>`-Verweise betrifft. `zapfen-raw.svg` (das
 Wasserzeichen) konnte 1:1 übernommen werden.
+
+## 2026-07-15 · D-009: Finale Bild-Assets eingesetzt, Interims ersetzt
+
+**Entscheidung:** Die vom Nutzer hochgeladenen Original-Assets sind jetzt
+eingebunden; die Interims aus D-008 wurden gelöscht:
+
+- `logo.png` — das weiße Logo (`SVPartykellerLogo2.0`), da die gesamte UI
+  dunkel ist. (Die mitgelieferten „SVG"-Logos waren nur PNG-Raster in einem
+  SVG-Rahmen, boten also keinen Vektorvorteil → PNG genommen.)
+- `footer-woods.png` — der echte Wald-Streifen; der Abdunkel-Filter wurde von
+  `brightness(0.55)` auf `0.8` gelockert, damit das Grün sichtbar bleibt.
+- `zapfen-bg.svg` — der Rothaus-Zapfen (vom Nutzer als `gemini-svg` mit
+  Grünfüllung `#11682e` geliefert), **fest um 180° gedreht** (Zapfen hängen nach
+  unten) und mit fester Pixelgröße versehen. Weil die Drehung nun in der Datei
+  steckt, entfielen die kompensierenden `rotate(180deg)` in Login/TV/Admin.
+  Das Wasserzeichen wird als **Hintergrundbild** mit niedriger Deckkraft
+  (~0.14–0.22) eingesetzt, nicht mehr als CSS-Maske: die frühere Masken-Variante
+  (`mask-image` + `--bg-hi`) blieb auf dem fast schwarzen Grün unsichtbar. So
+  scheinen die grünen Zapfen dezent durch — die vom Nutzer gewünschte, „leicht
+  andere Helligkeit" gegenüber dem Rest.
+- `cones-flat.png` — als Favicon eingebunden.
+
+**Rundung:** Neue Tokens `--radius` (12px) und `--radius-lg` (18px) ersetzen
+die bisherigen 3–4px-Ecken (Karten, Buttons, Felder, Stepper, Podest, QR),
+sodass die eckigen Elemente durchgängig leicht abgerundet sind.
+
+**Begründung:** Vom Nutzer angefordert. Alles bleibt offline/vendored
+(D-007); keine neuen Dependencies. D-008 ist damit erledigt.
+
+## 2026-07-15 · D-010: settings-Tabelle + einstellbare QR-Adresse, TV-Feinschliff
+
+**Entscheidung:**
+
+- Neue Tabelle `settings (key TEXT PRIMARY KEY, value TEXT)` als schlichter
+  Schlüssel-Wert-Speicher. Erster Eintrag: `join_url` — die Adresse, auf die der
+  TV-QR-Code zeigt. Sie steckt jetzt im persistenten State (`getState().joinUrl`)
+  und übersteht damit Neustarts (D-006).
+- Neuer WS-Handler `setJoinUrl` (admin-only). Eingaben werden über
+  `normalizeJoinUrl()` validiert: leer = Fallback auf die eigene Server-Adresse,
+  sonst zu einer vollständigen `http(s)`-URL normalisiert (fehlt das Schema, wird
+  `http://` ergänzt). Ungültiges wirft und wird nicht gespeichert.
+- Der TV baut den QR aus `joinUrl` (Fallback `location.origin`), rendert ihn neu,
+  sobald sich die Adresse ändert; der QR-Rahmen ist bewusst **nicht** abgerundet.
+- Admin bekommt dafür ein Feld „QR-Adresse" über der Nutzerliste.
+
+**TV-Layout (kein Architektur-, nur UI-Feinschliff, hier der Vollständigkeit
+halber):** Podest deutlich kompakter (Höhen/Schriftgrößen reduziert); unter dem
+Podest maximal 5 Plätze gleichzeitig, bei mehr rotiert das Fenster alle 4,5 s um
+eine Position nach oben; zwischen Tabelle und Footer ein Fun-Facts-Band als
+Platzhalter (später echte Statistiken wie Bier-Rekord/Shot-Meister).
+
+**Begründung:** Der QR muss auf die tatsächliche LAN-Adresse des Pi zeigen
+können, ohne Code-Änderung — daher einstellbar und persistent. Die Rotation hält
+auch bei vielen Gästen die Liste lesbar, ohne dass das Podest Platz verschwendet.
+Kein Build-Step, keine neuen Dependencies (D-007).
+
+## 2026-07-15 · D-011: Dunkles „Liquid Glass" statt brauner Flächen (experimentell)
+
+**Entscheidung (auf Nutzerwunsch zum Ausprobieren):** Die braunen Oberflächen
+(Design-Tokens mit Hue 55) werden durch dunkles Glassmorphism ersetzt. Die
+`--surface`-Tokens sind jetzt halbtransparent und leicht grünstichig
+(Hue 160, Alpha 0.55–0.68 = „relativ dunkel, relativ undurchsichtig"). Eine
+Utility-Klasse `.glass` (plus direkte Anwendung an `.card`, `.field`, Podest,
+Nutzer-/Admin-Zeilen, Modals, Fun-Facts-Band) ergänzt `backdrop-filter: blur(16px)`
+und eine feine helle Glaskante (`--glass-edge`). Farbige Aktions-Elemente
+(Bier-/Shot-/Grün-Buttons, Podest-Badges) bleiben bewusst kräftig.
+
+**Begründung:** Der Nutzer möchte die Optik testen; Braun gefiel noch nicht.
+Reine CSS-Änderung, offline (D-007), keine neuen Dependencies. `backdrop-filter`
+wird von Chromium (Pi-Kiosk) unterstützt; ohne Unterstützung bleibt die Fläche
+einfach dunkel-transluzent. Kann bei Nichtgefallen leicht zurückgedreht werden.

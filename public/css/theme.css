@@ -25,9 +25,25 @@
   --brick: oklch(0.56 0.14 38);
   --bg: oklch(0.15 0.035 155);
   --bg-hi: oklch(0.19 0.035 155);
-  --surface: oklch(0.25 0.035 55);
-  --surface-alt: oklch(0.21 0.03 55);
-  --surface-2: oklch(0.30 0.04 55);
+  /* Dunkles „Liquid Glass" (Glassmorphism): relativ dunkel, relativ
+     undurchsichtig, leicht grünstichig statt braun. Alpha < 1, damit
+     backdrop-filter den Hintergrund durchscheinen lässt. */
+  --surface: oklch(0.23 0.02 160 / 0.54);
+  --surface-alt: oklch(0.19 0.018 160 / 0.47);
+  --surface-2: oklch(0.29 0.022 160 / 0.60);
+  --glass-edge: oklch(0.92 0.02 160 / 0.12);   /* feine helle Glaskante */
+  --glass-blur: 16px;
+
+  /* Eckenradien – Kanten sind bewusst leicht abgerundet */
+  --radius: 12px;      /* Buttons, Felder, kleine Controls */
+  --radius-lg: 18px;   /* Karten und große Flächen */
+}
+
+/* Wiederverwendbare Glas-Behandlung */
+.glass {
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
 }
 
 * { box-sizing: border-box; }
@@ -74,14 +90,8 @@ a:hover { color: var(--gold); }
   bottom: 60px;
   width: 480px;
   height: 480px;
-  background-color: var(--bg-hi);
-  opacity: 0.07;
-  -webkit-mask-image: url('../assets/zapfen-raw.svg');
-  mask-image: url('../assets/zapfen-raw.svg');
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  background: url('../assets/zapfen-bg.svg') no-repeat center / contain;
+  opacity: 0.22;
   transform: rotate(-12deg);
   pointer-events: none;
   z-index: 0;
@@ -92,7 +102,7 @@ a:hover { color: var(--gold); }
   width: 100%;
   height: auto;
   display: block;
-  filter: brightness(0.55) saturate(0.9);
+  filter: brightness(0.8) saturate(0.95);
   position: relative;
   z-index: 1;
 }
@@ -100,7 +110,11 @@ a:hover { color: var(--gold); }
 /* Karten mit Farbkante oben */
 .card {
   background: var(--surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
   border-top: 3px solid var(--edge, var(--green));
+  border-radius: var(--radius-lg);
   padding: 20px;
 }
 .card--green { --edge: var(--green); }
@@ -135,7 +149,7 @@ a:hover { color: var(--gold); }
   width: 100%;
   color: var(--bg);
   border: none;
-  border-radius: 3px;
+  border-radius: var(--radius);
   padding: 22px;
   font-family: 'Bitter', serif;
   font-weight: 800;
@@ -148,6 +162,9 @@ a:hover { color: var(--gold); }
 /* Rang-Pill */
 .pill {
   background: var(--surface-2);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
   border-radius: 999px;
   padding: 5px 12px;
   font-size: 12px;
@@ -173,8 +190,10 @@ a:hover { color: var(--gold); }
 .field {
   width: 100%;
   background: var(--surface-alt);
-  border: 1px solid var(--surface-2);
-  border-radius: 3px;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius);
   color: var(--ink);
   font-family: 'Work Sans', sans-serif;
   font-size: 18px;

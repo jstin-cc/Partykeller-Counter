@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Anmeldung</title>
+<link rel="icon" href="assets/cones-flat.png">
 <link rel="stylesheet" href="css/theme.css">
 <style>
   .login-watermark {
@@ -12,15 +13,8 @@
     top: -100px;
     width: 520px;
     height: 520px;
-    background-color: var(--bg-hi);
-    opacity: 0.08;
-    -webkit-mask-image: url('assets/zapfen-raw.svg');
-    mask-image: url('assets/zapfen-raw.svg');
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    transform: rotate(180deg);
+    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
+    opacity: 0.22;
     pointer-events: none;
     z-index: 0;
   }
@@ -29,8 +23,10 @@
     align-items: center;
     gap: 14px;
     background: var(--surface);
-    border: none;
-    border-radius: 3px;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--radius);
     padding: 13px 16px;
     cursor: pointer;
     text-align: left;
@@ -55,8 +51,10 @@
   .pin-row { display: flex; gap: 8px; padding: 10px 4px 4px 4px; }
   .input-flat {
     background: var(--surface-2);
-    border: none;
-    border-radius: 3px;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--radius);
     padding: 13px 16px;
     color: var(--ink);
     font-size: 16px;
@@ -66,7 +64,7 @@
     background: var(--green);
     color: var(--bg);
     border: none;
-    border-radius: 3px;
+    border-radius: var(--radius);
     font-weight: 700;
     cursor: pointer;
     font-family: 'Work Sans', sans-serif;
@@ -74,7 +72,7 @@
   .error-banner {
     background: oklch(0.3 0.1 38 / 0.4);
     color: var(--ink);
-    border-radius: 3px;
+    border-radius: var(--radius);
     padding: 12px 16px;
     font-size: 14px;
     font-weight: 600;
@@ -88,7 +86,7 @@
   <div class="screen-inner" style="padding:32px 24px;gap:22px;">
 
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
-      <img src="assets/logo-gold.svg" alt="SV Partykeller" style="height:76px;width:auto;object-fit:contain;">
+      <img src="assets/logo.png" alt="SV Partykeller" style="height:76px;width:auto;object-fit:contain;">
       <div>
         <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:30px;color:var(--creme);margin:0 0 4px 0;">Wer bist du?</h1>
         <p style="font-size:15px;color:var(--ink-muted);margin:0;">Wähle deinen Account oder starte neu.</p>
@@ -118,7 +116,7 @@
     <a href="/admin" style="text-align:center;font-size:13px;text-decoration:none;margin-top:auto;padding-top:12px;">Admin-Zugang</a>
   </div>
 
-  <img src="assets/footer-woods.svg" alt="" class="footer-woods">
+  <img src="assets/footer-woods.png" alt="" class="footer-woods">
 </div>
 
 <script type="module">
