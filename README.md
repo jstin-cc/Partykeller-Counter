@@ -23,8 +23,8 @@ npm start                  # http://localhost:3000
 |---|---|
 | `/` | Nutzer-Login (Name wählen/anlegen + PIN) |
 | `/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-Zähler, Heute & Gesamt, Rang |
-| `/tv` | TV-Scoreboard: All-Time-Rangliste, Podest Top 3, QR-Code zum Beitritt |
-| `/admin` | Admin: Nutzer & Zähler verwalten, geschützter Komplett-Reset |
+| `/tv` | TV-Scoreboard: All-Time-Rangliste, Podest Top 3, QR-Code zum Beitritt, ab Platz 4 rotierende Liste, Fun-Facts-Band |
+| `/admin` | Admin: Nutzer & Zähler verwalten, QR-Adresse setzen, geschützter Komplett-Reset |
 
 ## Stack
 

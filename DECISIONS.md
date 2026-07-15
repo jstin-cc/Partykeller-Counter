@@ -122,3 +122,30 @@ sodass die eckigen Elemente durchgängig leicht abgerundet sind.
 
 **Begründung:** Vom Nutzer angefordert. Alles bleibt offline/vendored
 (D-007); keine neuen Dependencies. D-008 ist damit erledigt.
+
+## 2026-07-15 · D-010: settings-Tabelle + einstellbare QR-Adresse, TV-Feinschliff
+
+**Entscheidung:**
+
+- Neue Tabelle `settings (key TEXT PRIMARY KEY, value TEXT)` als schlichter
+  Schlüssel-Wert-Speicher. Erster Eintrag: `join_url` — die Adresse, auf die der
+  TV-QR-Code zeigt. Sie steckt jetzt im persistenten State (`getState().joinUrl`)
+  und übersteht damit Neustarts (D-006).
+- Neuer WS-Handler `setJoinUrl` (admin-only). Eingaben werden über
+  `normalizeJoinUrl()` validiert: leer = Fallback auf die eigene Server-Adresse,
+  sonst zu einer vollständigen `http(s)`-URL normalisiert (fehlt das Schema, wird
+  `http://` ergänzt). Ungültiges wirft und wird nicht gespeichert.
+- Der TV baut den QR aus `joinUrl` (Fallback `location.origin`), rendert ihn neu,
+  sobald sich die Adresse ändert; der QR-Rahmen ist bewusst **nicht** abgerundet.
+- Admin bekommt dafür ein Feld „QR-Adresse" über der Nutzerliste.
+
+**TV-Layout (kein Architektur-, nur UI-Feinschliff, hier der Vollständigkeit
+halber):** Podest deutlich kompakter (Höhen/Schriftgrößen reduziert); unter dem
+Podest maximal 5 Plätze gleichzeitig, bei mehr rotiert das Fenster alle 4,5 s um
+eine Position nach oben; zwischen Tabelle und Footer ein Fun-Facts-Band als
+Platzhalter (später echte Statistiken wie Bier-Rekord/Shot-Meister).
+
+**Begründung:** Der QR muss auf die tatsächliche LAN-Adresse des Pi zeigen
+können, ohne Code-Änderung — daher einstellbar und persistent. Die Rotation hält
+auch bei vielen Gästen die Liste lesbar, ohne dass das Podest Platz verschwendet.
+Kein Build-Step, keine neuen Dependencies (D-007).

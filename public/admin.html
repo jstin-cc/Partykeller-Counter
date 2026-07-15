@@ -100,6 +100,13 @@
       </div>
     </div>
 
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
+      <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">QR-Adresse</div>
+      <input id="join-url" class="input-flat" type="text" placeholder="z. B. http://192.168.1.50:3000/" autocomplete="off" style="flex:1;min-width:240px;padding:10px 14px;font-size:14px;">
+      <button id="join-save" class="btn-green" style="padding:10px 18px;font-size:14px;">Speichern</button>
+      <div id="join-hint" style="font-size:13px;color:var(--ink-muted);min-width:180px;"></div>
+    </div>
+
     <div>
       <div style="display:flex;align-items:center;gap:16px;padding:0 20px 10px 20px;border-bottom:1px solid var(--surface-2);text-transform:uppercase;letter-spacing:0.08em;font-size:13px;color:var(--gold);">
         <div style="flex:1;">Name</div>
@@ -189,10 +196,27 @@ function enterDashboard() {
     onState(state) {
       players = state.players;
       renderRows();
+      updateJoinField(state.joinUrl ?? '');
     },
     onError: showError,
   });
 }
+
+// --- QR-Adresse (Beitritt) ---
+function updateJoinField(joinUrl) {
+  const input = $('join-url');
+  // laufende Eingabe des Admins nicht überschreiben
+  if (document.activeElement !== input) input.value = joinUrl;
+  $('join-hint').textContent = joinUrl
+    ? 'Aktiv – der TV-QR zeigt hierauf.'
+    : 'Leer = Adresse dieses Servers.';
+}
+
+$('join-save').addEventListener('click', () => {
+  send({ type: 'setJoinUrl', url: $('join-url').value });
+  $('join-url').blur();
+  $('join-hint').textContent = '✓ Gespeichert';
+});
 
 function renderRows() {
   const box = $('rows');

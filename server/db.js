@@ -27,6 +27,11 @@ db.exec(`
     ts        INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_drink_log_player_ts ON drink_log(player_id, ts);
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
 `);
 
 // Party-Tag läuft 06:00 -> 05:59 des Folgetags (D-005)
@@ -57,7 +62,21 @@ const stmts = {
   ),
   resetCounters: db.prepare('UPDATE players SET beers = 0, shots = 0'),
   clearLog: db.prepare('DELETE FROM drink_log'),
+  getSetting: db.prepare('SELECT value FROM settings WHERE key = ?'),
+  setSetting: db.prepare(
+    'INSERT INTO settings (key, value) VALUES (?, ?) ' +
+    'ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+  ),
 };
+
+export function getSetting(key, fallback = null) {
+  const row = stmts.getSetting.get(key);
+  return row ? row.value : fallback;
+}
+
+export function setSetting(key, value) {
+  stmts.setSetting.run(key, value);
+}
 
 export function createPlayer(name, pinHash) {
   const id = crypto.randomUUID();
@@ -135,5 +154,7 @@ export function getState() {
     .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'de'));
 
   players.forEach((p, i) => { p.rank = i + 1; });
-  return { players };
+  // joinUrl: vom Admin gesetzte Beitritts-Adresse für den TV-QR-Code
+  // (leer => TV nutzt die eigene Server-Adresse als Fallback)
+  return { players, joinUrl: getSetting('join_url', '') };
 }
