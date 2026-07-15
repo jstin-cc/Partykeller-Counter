@@ -105,12 +105,15 @@ eingebunden; die Interims aus D-008 wurden gelöscht:
   SVG-Rahmen, boten also keinen Vektorvorteil → PNG genommen.)
 - `footer-woods.png` — der echte Wald-Streifen; der Abdunkel-Filter wurde von
   `brightness(0.55)` auf `0.8` gelockert, damit das Grün sichtbar bleibt.
-- `zapfen-bg.svg` — der Rothaus-Zapfen (identische Geometrie wie das frühere
-  `zapfen-raw.svg`, vom Nutzer als `gemini-svg` mit Grünfüllung geliefert),
-  **fest um 180° gedreht** (Zapfen hängen nach unten). Weil die Drehung nun in
-  der Datei steckt, entfielen die kompensierenden `rotate(180deg)` in
-  Login/TV/Admin. Als Maske mit `--bg-hi` und niedriger Deckkraft ergibt das
-  die gewünschte, „leicht andere Helligkeit" gegenüber dem Rest.
+- `zapfen-bg.svg` — der Rothaus-Zapfen (vom Nutzer als `gemini-svg` mit
+  Grünfüllung `#11682e` geliefert), **fest um 180° gedreht** (Zapfen hängen nach
+  unten) und mit fester Pixelgröße versehen. Weil die Drehung nun in der Datei
+  steckt, entfielen die kompensierenden `rotate(180deg)` in Login/TV/Admin.
+  Das Wasserzeichen wird als **Hintergrundbild** mit niedriger Deckkraft
+  (~0.14–0.22) eingesetzt, nicht mehr als CSS-Maske: die frühere Masken-Variante
+  (`mask-image` + `--bg-hi`) blieb auf dem fast schwarzen Grün unsichtbar. So
+  scheinen die grünen Zapfen dezent durch — die vom Nutzer gewünschte, „leicht
+  andere Helligkeit" gegenüber dem Rest.
 - `cones-flat.png` — als Favicon eingebunden.
 
 **Rundung:** Neue Tokens `--radius` (12px) und `--radius-lg` (18px) ersetzen

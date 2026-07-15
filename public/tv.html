@@ -23,15 +23,7 @@
   }
   .tv-mark {
     position: absolute;
-    background-color: var(--bg-hi);
-    -webkit-mask-image: url('assets/zapfen-bg.svg');
-    mask-image: url('assets/zapfen-bg.svg');
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
+    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
   }
   .podium-card {
     background: linear-gradient(180deg, var(--surface-hi), var(--surface));
@@ -72,9 +64,9 @@
 <body>
 <div class="tv">
   <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;">
-    <div class="tv-mark" style="left:485px;top:-225px;width:950px;height:950px;opacity:0.08;transform:rotate(0deg);"></div>
-    <div class="tv-mark" style="left:1660px;top:-140px;width:420px;height:420px;opacity:0.07;background-color:var(--bg-lo);transform:rotate(-15deg);"></div>
-    <div class="tv-mark" style="left:-160px;top:860px;width:380px;height:380px;opacity:0.06;transform:rotate(8deg);"></div>
+    <div class="tv-mark" style="left:485px;top:-225px;width:950px;height:950px;opacity:0.20;"></div>
+    <div class="tv-mark" style="left:1660px;top:-140px;width:420px;height:420px;opacity:0.14;transform:rotate(-15deg);"></div>
+    <div class="tv-mark" style="left:-160px;top:860px;width:380px;height:380px;opacity:0.14;transform:rotate(8deg);"></div>
   </div>
 
   <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:22px;height:100%;padding:36px 64px 0 64px;">

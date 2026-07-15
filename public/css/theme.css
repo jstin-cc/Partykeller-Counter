@@ -78,14 +78,8 @@ a:hover { color: var(--gold); }
   bottom: 60px;
   width: 480px;
   height: 480px;
-  background-color: var(--bg-hi);
-  opacity: 0.07;
-  -webkit-mask-image: url('../assets/zapfen-bg.svg');
-  mask-image: url('../assets/zapfen-bg.svg');
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  background: url('../assets/zapfen-bg.svg') no-repeat center / contain;
+  opacity: 0.22;
   transform: rotate(-12deg);
   pointer-events: none;
   z-index: 0;

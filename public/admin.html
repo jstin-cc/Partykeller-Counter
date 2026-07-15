@@ -9,13 +9,7 @@
 <style>
   .admin-watermark {
     position: absolute;
-    background-color: var(--bg-hi);
-    -webkit-mask-image: url('assets/zapfen-bg.svg');
-    mask-image: url('assets/zapfen-bg.svg');
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
+    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
     pointer-events: none;
     z-index: 0;
   }
@@ -65,7 +59,7 @@
 
 <!-- Ansicht 1: Admin-Login (Admin Login v3) -->
 <div id="login-view" class="screen">
-  <div class="admin-watermark" style="left:50%;top:-260px;width:600px;height:600px;margin-left:-300px;opacity:0.07;transform:rotate(0deg);"></div>
+  <div class="admin-watermark" style="left:50%;top:-260px;width:600px;height:600px;margin-left:-300px;opacity:0.18;"></div>
 
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;">
     <form id="login-form" style="width:100%;max-width:400px;background:var(--surface);border-top:4px solid var(--green);padding:36px 28px;display:flex;flex-direction:column;gap:18px;">
@@ -85,7 +79,7 @@
 
 <!-- Ansicht 2: Admin-Dashboard (Admin Dashboard v3) -->
 <div id="dash-view" hidden style="min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;">
-  <div class="admin-watermark" style="right:-200px;top:-160px;width:700px;height:700px;opacity:0.06;transform:rotate(20deg);"></div>
+  <div class="admin-watermark" style="right:-200px;top:-160px;width:700px;height:700px;opacity:0.16;transform:rotate(20deg);"></div>
 
   <div style="max-width:1200px;margin:0 auto;width:100%;padding:28px 40px 0 40px;position:relative;z-index:1;flex:1;">
 
