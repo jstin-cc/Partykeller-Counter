@@ -82,8 +82,8 @@ nichts geändert, hilft `git reset --hard origin/main` — das lässt `data/` un
 |---|---|
 | `/` | Nutzer-Login (Name wählen/anlegen + PIN) |
 | `/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt, Rang |
-| `/tv` | TV-Scoreboard: All-Time-Rangliste, Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste, Live-Fun-Facts (Tages-Bestleistungen) |
-| `/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, QR-Adresse setzen, geschützter Komplett-Reset |
+| `/tv` | TV-Scoreboard: umschaltbar All-Time / Heute (animiert), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste, Live-Fun-Facts (Tages-Bestleistungen) |
+| `/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, im TV ein-/ausblenden, TV-Ansicht umschalten, QR-Adresse setzen, Komplett-Reset (mit Passwort) |
 
 ## Stack
 

@@ -18,6 +18,7 @@ db.exec(`
     beers      INTEGER NOT NULL DEFAULT 0,
     shots      INTEGER NOT NULL DEFAULT 0,
     mixes      INTEGER NOT NULL DEFAULT 0,
+    hidden     INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -39,13 +40,13 @@ db.exec(`
 // Daten verlieren). CREATE TABLE IF NOT EXISTS ändert vorhandene Tabellen nicht,
 // darum hier idempotent nachziehen.
 
-// 1) players.mixes ergänzen, falls die DB noch aus der Zeit vor „Mischen" stammt.
-const hasMixes = db
-  .prepare('PRAGMA table_info(players)')
-  .all()
-  .some((c) => c.name === 'mixes');
-if (!hasMixes) {
+// 1) players.mixes / players.hidden ergänzen, falls die DB älter ist.
+const playerCols = db.prepare('PRAGMA table_info(players)').all().map((c) => c.name);
+if (!playerCols.includes('mixes')) {
   db.exec('ALTER TABLE players ADD COLUMN mixes INTEGER NOT NULL DEFAULT 0');
+}
+if (!playerCols.includes('hidden')) {
+  db.exec('ALTER TABLE players ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0');
 }
 
 // 2) drink_log durfte früher nur beer/shot. SQLite kann eine CHECK-Constraint
@@ -91,6 +92,7 @@ const stmts = {
   ),
   setCounter: db.prepare('UPDATE players SET beers = ?, shots = ?, mixes = ? WHERE id = ?'),
   rename: db.prepare('UPDATE players SET name = ? WHERE id = ?'),
+  setHidden: db.prepare('UPDATE players SET hidden = ? WHERE id = ?'),
   setPinHash: db.prepare('UPDATE players SET pin_hash = ? WHERE id = ?'),
   deletePlayer: db.prepare('DELETE FROM players WHERE id = ?'),
   insertLog: db.prepare('INSERT INTO drink_log (player_id, drink, ts) VALUES (?, ?, ?)'),
@@ -153,6 +155,10 @@ export function renamePlayer(id, name) {
   return stmts.rename.run(name, id).changes > 0;
 }
 
+export function setHidden(id, hidden) {
+  return stmts.setHidden.run(hidden ? 1 : 0, id).changes > 0;
+}
+
 export function setPinHash(id, pinHash) {
   return stmts.setPinHash.run(pinHash, id).changes > 0;
 }
@@ -189,6 +195,7 @@ export function getState() {
         beersToday: t.beer,
         shotsToday: t.shot,
         mixesToday: t.mix,
+        hidden: !!p.hidden,
         createdAt: p.created_at,
       };
     })
@@ -197,5 +204,10 @@ export function getState() {
   players.forEach((p, i) => { p.rank = i + 1; });
   // joinUrl: vom Admin gesetzte Beitritts-Adresse für den TV-QR-Code
   // (leer => TV nutzt die eigene Server-Adresse als Fallback)
-  return { players, joinUrl: getSetting('join_url', '') };
+  // boardMode: vom Admin gewählte TV-Ansicht ('alltime' | 'today')
+  return {
+    players,
+    joinUrl: getSetting('join_url', ''),
+    boardMode: getSetting('board_mode', 'alltime'),
+  };
 }

@@ -46,6 +46,7 @@ CREATE TABLE players (
   beers      INTEGER NOT NULL DEFAULT 0,  -- All-Time-Zähler
   shots      INTEGER NOT NULL DEFAULT 0,
   mixes      INTEGER NOT NULL DEFAULT 0,  -- „Mischen" (D-012)
+  hidden     INTEGER NOT NULL DEFAULT 0,  -- aus dem TV-Scoreboard ausgeblendet (D-013)
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -63,8 +64,10 @@ CREATE INDEX idx_drink_log_player_ts ON drink_log(player_id, ts);
   **„Getränke heute"**. „Heute" = Party-Tag von **06:00 bis 05:59** des
   Folgetags (aus dem Design-Prototyp übernommen).
 - Gesamt wird abgeleitet: `total = beers + shots + mixes`; Rang = Sortierung nach total.
-- Bestehende DBs werden beim Start migriert (mixes-Spalte, erweiterte CHECK), ohne
-  Datenverlust (D-006/D-012).
+- Bestehende DBs werden beim Start migriert (mixes-/hidden-Spalte, erweiterte CHECK),
+  ohne Datenverlust (D-006/D-012/D-013).
+- `settings` (Schlüssel/Wert) hält Laufzeit-Einstellungen: `join_url` (TV-QR-Ziel,
+  D-010) und `board_mode` (`alltime`|`today`, TV-Ansicht, D-013).
 - Admin-Korrekturen ändern nur die Zähler (kein Log-Eintrag); Komplett-Reset
   leert Zähler und Log.
 

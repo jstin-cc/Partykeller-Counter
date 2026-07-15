@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 import * as db from './db.js';
+import { config } from './config.js';
 import { verifyToken, hashPin } from './auth.js';
 import { validName, validPin, normalizeJoinUrl } from './validate.js';
 
@@ -65,14 +66,28 @@ const handlers = {
     if (!db.setCounter(id, drink, value)) throw new Error('Nutzer nicht gefunden');
   },
 
+  setHidden(auth, { id, hidden }) {
+    requireAdmin(auth);
+    if (typeof hidden !== 'boolean') throw new Error('hidden muss boolean sein');
+    if (!db.setHidden(id, hidden)) throw new Error('Nutzer nicht gefunden');
+  },
+
+  setBoardMode(auth, { mode }) {
+    requireAdmin(auth);
+    if (!['alltime', 'today'].includes(mode)) throw new Error('Unbekannter Anzeigemodus');
+    db.setSetting('board_mode', mode);
+  },
+
   deletePlayer(auth, { id }) {
     requireAdmin(auth);
     if (!db.deletePlayer(id)) throw new Error('Nutzer nicht gefunden');
   },
 
-  reset(auth, { confirm }) {
+  reset(auth, { confirm, password }) {
     requireAdmin(auth);
     if (confirm !== 'RESET') throw new Error('Reset braucht confirm: "RESET"');
+    // Zusätzliche Sicherung: Admin-Passwort erneut eingeben (gleiche .env wie Login)
+    if (password !== config.adminPassword) throw new Error('Falsches Passwort');
     db.resetAll();
   },
 

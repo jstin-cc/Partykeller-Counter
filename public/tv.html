@@ -88,14 +88,14 @@
     <div class="tv-mark" style="right:360px;bottom:-140px;width:420px;height:420px;opacity:0.12;transform:rotate(12deg);"></div>
   </div>
 
-  <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:22px;height:100%;padding:36px 64px 0 64px;">
+  <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;height:100%;padding:32px 64px 0 64px;">
 
     <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:22px;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:80px;width:auto;object-fit:contain;flex-shrink:0;">
         <div>
           <div style="font-family:'Bitter',serif;font-weight:800;font-size:36px;color:var(--creme);line-height:1.1;">Getränke-Counter</div>
-          <div style="font-family:'Bitter',serif;font-weight:600;font-size:16px;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;">All-Time Rangliste</div>
+          <div id="board-subtitle" style="font-family:'Bitter',serif;font-weight:600;font-size:16px;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;transition:color 0.3s ease;">All-Time Rangliste</div>
         </div>
       </div>
       <div style="text-align:center;">
@@ -108,10 +108,12 @@
       </div>
     </div>
 
-    <div id="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:32px;flex-shrink:0;height:250px;">
+    <div id="board" style="display:flex;flex-direction:column;gap:16px;flex:1;min-height:0;">
+
+    <div id="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:32px;flex-shrink:0;height:224px;">
       <div id="pod-2" hidden style="width:250px;display:flex;flex-direction:column;align-items:center;">
         <div class="podium-badge" style="width:56px;height:56px;font-size:22px;background:oklch(0.78 0.015 240);margin-bottom:-28px;box-shadow:0 0 16px oklch(0.78 0.015 240 / 0.4);">2</div>
-        <div class="podium-card" style="border-top:3px solid oklch(0.78 0.015 240);padding:42px 18px 14px 18px;height:158px;gap:2px;">
+        <div class="podium-card" style="border-top:3px solid oklch(0.78 0.015 240);padding:40px 18px 14px 18px;height:148px;gap:2px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:23px;"></div>
           <div data-f="total" class="num" style="font-size:46px;line-height:1;color:var(--gold);text-shadow:0 0 20px oklch(0.80 0.15 83 / 0.35);"></div>
           <div style="font-size:13px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
@@ -119,15 +121,15 @@
       </div>
       <div id="pod-1" hidden style="width:300px;display:flex;flex-direction:column;align-items:center;">
         <div class="podium-badge" style="width:70px;height:70px;font-size:30px;background:var(--gold);margin-bottom:-35px;box-shadow:0 0 28px oklch(0.80 0.15 83 / 0.6);">1</div>
-        <div class="podium-card" style="border-top:4px solid var(--gold);padding:50px 20px 16px 20px;height:212px;gap:4px;">
+        <div class="podium-card" style="border-top:4px solid var(--gold);padding:46px 20px 14px 20px;height:196px;gap:4px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:800;font-size:28px;"></div>
-          <div data-f="total" class="num" style="font-size:72px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
+          <div data-f="total" class="num" style="font-size:66px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
           <div style="font-size:14px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
         </div>
       </div>
       <div id="pod-3" hidden style="width:240px;display:flex;flex-direction:column;align-items:center;">
         <div class="podium-badge" style="width:52px;height:52px;font-size:21px;background:oklch(0.64 0.09 45);margin-bottom:-26px;box-shadow:0 0 16px oklch(0.64 0.09 45 / 0.4);">3</div>
-        <div class="podium-card" style="border-top:3px solid oklch(0.64 0.09 45);padding:40px 18px 12px 18px;height:138px;gap:2px;">
+        <div class="podium-card" style="border-top:3px solid oklch(0.64 0.09 45);padding:38px 18px 12px 18px;height:130px;gap:2px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:21px;"></div>
           <div data-f="total" class="num" style="font-size:38px;line-height:1;color:var(--gold);text-shadow:0 0 14px oklch(0.80 0.15 83 / 0.3);"></div>
           <div style="font-size:12px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
@@ -147,14 +149,15 @@
       <div id="rest" class="rest-viewport"></div>
     </div>
 
-    <!-- Fun-Facts (Platzhalter): hier werden später Statistiken eingeblendet,
-         z. B. Bier-Rekord des Abends, Shot-Meister usw. -->
-    <div id="funfacts" class="glass" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 24px;margin-top:8px;background:var(--surface-alt);border-top:3px solid var(--gold);border-radius:var(--radius-lg);">
+    </div><!-- /#board -->
+
+    <!-- Fun-Facts (live): kompaktes Band direkt über den Bäumen, verdeckt sie nicht -->
+    <div id="funfacts" class="glass" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:9px 24px;background:var(--surface-alt);border-top:3px solid var(--gold);border-radius:var(--radius-lg);">
       <span style="font-family:'Bitter',serif;font-weight:800;font-size:15px;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;flex-shrink:0;">Fun Fact</span>
-      <span id="funfact-text" style="font-size:19px;color:var(--creme);font-family:'Bitter',serif;font-weight:600;transition:opacity 0.4s;">Bald gibt's hier Statistiken.</span>
+      <span id="funfact-text" style="font-size:18px;color:var(--creme);font-family:'Bitter',serif;font-weight:600;transition:opacity 0.4s;">Bald gibt's hier Statistiken.</span>
     </div>
 
-    <img src="assets/footer-woods.png" alt="" style="width:calc(100% + 128px);margin-left:-64px;height:70px;object-fit:cover;display:block;flex-shrink:0;filter:brightness(0.8) saturate(0.95);">
+    <img src="assets/footer-woods.png" alt="" style="width:calc(100% + 128px);margin-left:-64px;height:96px;object-fit:cover;object-position:center 30%;display:block;flex-shrink:0;filter:brightness(0.85) saturate(1);">
   </div>
 </div>
 
@@ -177,14 +180,29 @@ function renderQr(url) {
   $('qr').firstElementChild.style.cssText = 'width:100%;height:100%;display:block;';
 }
 
-function fillPodium(el, p) {
+// kurze Animationen (Reflow erzwingt Neustart)
+function pop(el) { el.classList.remove('pk-pop'); void el.offsetWidth; el.classList.add('pk-pop'); }
+function flash(el) { el.classList.remove('pk-flash'); void el.offsetWidth; el.classList.add('pk-flash'); }
+
+const prevPod = { 1: null, 2: null, 3: null };
+
+function fillPodium(el, p, slot) {
   el.hidden = !p;
-  if (!p) return;
+  if (!p) { prevPod[slot] = null; return; }
+  const totalEl = el.querySelector('[data-f=total]');
   el.querySelector('[data-f=name]').textContent = p.name;
-  el.querySelector('[data-f=total]').textContent = p.total;
+  totalEl.textContent = p.total;
   el.querySelector('[data-f=beers]').textContent = `${p.beers} Bier`;
   el.querySelector('[data-f=shots]').textContent = `${p.shots} Shots`;
   el.querySelector('[data-f=mixes]').textContent = `${p.mixes} Mische`;
+
+  const prev = prevPod[slot];
+  if (prev && prev.id === p.id && p.total > prev.total) {
+    pop(totalEl);                                    // gleicher Mensch, mehr Getränke
+  } else if (prev && prev.id !== p.id) {
+    flash(el.querySelector('.podium-card'));         // neue:r auf diesem Podestplatz
+  }
+  prevPod[slot] = { id: p.id, total: p.total };
 }
 
 // --- Rangliste ab Platz 4: max. 5 gleichzeitig sichtbar ---
@@ -263,23 +281,76 @@ function renderRest() {
   if (maxPos > 0) scrollTimer = setInterval(scrollStep, STEP_MS);
 }
 
+// --- Board-Modus (All-Time / Heute), im Admin umschaltbar ---
+let currentMode = null;
+
+function metricsFor(p, mode) {
+  return mode === 'today'
+    ? { beers: p.beersToday, shots: p.shotsToday, mixes: p.mixesToday,
+        total: p.beersToday + p.shotsToday + p.mixesToday }
+    : { beers: p.beers, shots: p.shots, mixes: p.mixes, total: p.total };
+}
+
+// Nur sichtbare Spieler, nach dem gewählten Modus sortiert und neu gerankt
+function boardRows(players, mode) {
+  const rows = players
+    .filter((p) => !p.hidden)
+    .map((p) => ({ id: p.id, name: p.name, ...metricsFor(p, mode) }));
+  rows.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'de'));
+  rows.forEach((r, i) => { r.rank = i + 1; });
+  return rows;
+}
+
+function applyState(state, mode) {
+  const rows = boardRows(state.players, mode);
+  const visibleCount = state.players.filter((p) => !p.hidden).length;
+
+  $('board-subtitle').textContent = mode === 'today' ? 'Rangliste heute' : 'All-Time Rangliste';
+  $('participant-count').textContent = `${visibleCount} Teilnehmer`;
+  const beers = rows.reduce((s, r) => s + r.beers, 0);
+  const shots = rows.reduce((s, r) => s + r.shots, 0);
+  const mixes = rows.reduce((s, r) => s + r.mixes, 0);
+  const suffix = mode === 'today' ? 'heute' : 'gesamt';
+  $('totals').textContent = `${beers} Bier · ${shots} Shots · ${mixes} Mische ${suffix}`;
+
+  fillPodium($('pod-1'), rows[0], 1);
+  fillPodium($('pod-2'), rows[1], 2);
+  fillPodium($('pod-3'), rows[2], 3);
+
+  others = rows.slice(3);
+  renderRest();
+  updateFacts(state.players.filter((p) => !p.hidden));
+}
+
+// Moduswechsel: das ganze Board fährt raus und das neue fährt wieder ein
+function slideSwap(rebuild) {
+  const board = $('board');
+  board.style.transition = 'transform 0.32s ease, opacity 0.32s ease';
+  board.style.transform = 'translateX(-70px)';
+  board.style.opacity = '0';
+  setTimeout(() => {
+    rebuild();
+    board.style.transition = 'none';
+    board.style.transform = 'translateX(70px)';
+    void board.offsetWidth;
+    board.style.transition = 'transform 0.32s ease, opacity 0.32s ease';
+    board.style.transform = 'translateX(0)';
+    board.style.opacity = '1';
+  }, 340);
+}
+
 connectState({
-  onState({ players, joinUrl }) {
+  onState(state) {
+    const { joinUrl, boardMode } = state;
     renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + '/'));
+    const mode = boardMode === 'today' ? 'today' : 'alltime';
 
-    $('participant-count').textContent = `${players.length} Teilnehmer`;
-    const beers = players.reduce((s, p) => s + p.beers, 0);
-    const shots = players.reduce((s, p) => s + p.shots, 0);
-    const mixes = players.reduce((s, p) => s + p.mixes, 0);
-    $('totals').textContent = `${beers} Bier · ${shots} Shots · ${mixes} Mische gesamt`;
-
-    fillPodium($('pod-1'), players[0]);
-    fillPodium($('pod-2'), players[1]);
-    fillPodium($('pod-3'), players[2]);
-
-    others = players.slice(3);
-    renderRest();
-    updateFacts(players);
+    if (currentMode !== null && mode !== currentMode) {
+      slideSwap(() => { currentMode = mode; applyState(state, mode); });
+    } else {
+      currentMode = mode;
+      applyState(state, mode);
+    }
   },
 });
 

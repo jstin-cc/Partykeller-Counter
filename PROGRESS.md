@@ -10,8 +10,12 @@ Seit 2026-07-15 zusätzlich (D-012): **drittes Getränk „Mischen"** über alle
 Screens (inkl. DB-Migration ohne Datenverlust), **Live-Fun-Facts**
 (Tages-Bestleistungen), TV-Rangliste **scrollt** ab Platz 4 (Reset nach oben
 statt Endlos-Rotation), Podest-Überlappung behoben, Tabellen als großes
-gerundetes Panel mit einzeln gerundeten Zeilen, Wasserzeichen wieder rechts,
-testweise dünner dunkelgrüner Glas-Rand.
+gerundetes Panel mit einzeln gerundeten Zeilen, Wasserzeichen wieder rechts.
+Und (D-013): **Komplett-Reset mit Admin-Passwort**, **Nutzer im TV
+ein-/ausblendbar** (Haken im Admin), **TV-Ansicht All-Time/Heute umschaltbar**
+(im Admin, animierter Wechsel), grüner Glas-Rand wieder zurückgenommen,
+durchgängig **Übergänge/Animationen** (Button-Druck, Pop beim Hochzählen,
+Podest-Effekte), Dashboard-Logo größer, Fun-Facts verdecken die Bäume nicht mehr.
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅
@@ -75,7 +79,8 @@ testweise dünner dunkelgrüner Glas-Rand.
 - [x] Admin-Login nach `Admin Login v3` (`POST /api/admin/login` gegen `ADMIN_PASSWORD`, Token in sessionStorage)
 - [x] `public/admin.html` nach `Admin Dashboard v3`: Nutzer anlegen (mit Pflicht-PIN)/umbenennen/löschen (mit Rückfrage)
 - [x] Zähler jedes Nutzers (Bier/Shots/Mischen): ±1-Stepper (`increment`) und Direkteingabe (`setCounter`), PIN-Reset (`setPin`, D-002)
-- [x] Geschützter Komplett-Reset: Gedrückt-halten-Button (~1,2 s) → `reset` mit confirm "RESET"
+- [x] Geschützter Komplett-Reset: Modal mit erneuter Admin-Passwort-Eingabe (D-013)
+- [x] Nutzer im TV ein-/ausblenden (Haken, `setHidden`) und TV-Ansicht All-Time/Heute umschalten (`setBoardMode`, D-013)
 
 ## M7 — Betrieb auf dem Pi ✅ (bis auf echten Pi-Testlauf)
 
