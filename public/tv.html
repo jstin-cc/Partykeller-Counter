@@ -47,14 +47,26 @@
     color: var(--bg);
     z-index: 1;
   }
+  /* Rangliste ab Platz 4: großes gerundetes Panel, darin einzeln
+     abgerundete Zeilen, die als Fenster durchscrollen. */
+  .table-panel {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    background: var(--surface-alt);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    overflow: hidden;
+  }
+  .rest-viewport { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+  .rest-track { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; gap: 8px; }
   .row {
     display: flex;
     align-items: center;
     gap: 28px;
-    padding: 0 28px;
-    flex: 1;
-    min-height: 0;
-    border-bottom: 1px solid var(--glass-edge);
+    padding: 0 24px;
+    flex: 0 0 auto;
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--radius);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
   }
@@ -62,17 +74,18 @@
   .row:nth-child(even) { background: var(--surface-alt); }
   .col-rank { width: 70px; font-family:'Bitter',serif; font-weight:700; font-size:24px; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
   .col-name { flex: 1; font-family:'Bitter',serif; font-weight:700; font-size:28px; }
-  .col-beer { width:130px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--amber); font-variant-numeric:tabular-nums; }
-  .col-shot { width:130px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--brick); font-variant-numeric:tabular-nums; }
-  .col-total { width:150px; text-align:right; font-family:'Bitter',serif; font-weight:800; font-size:34px; color:var(--gold); text-shadow:0 0 10px oklch(0.80 0.15 83 / 0.25); font-variant-numeric:tabular-nums; }
+  .col-beer { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--amber); font-variant-numeric:tabular-nums; }
+  .col-shot { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--brick); font-variant-numeric:tabular-nums; }
+  .col-mix { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--mix); font-variant-numeric:tabular-nums; }
+  .col-total { width:140px; text-align:right; font-family:'Bitter',serif; font-weight:800; font-size:34px; color:var(--gold); text-shadow:0 0 10px oklch(0.80 0.15 83 / 0.25); font-variant-numeric:tabular-nums; }
 </style>
 </head>
 <body>
 <div class="tv">
   <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;">
-    <div class="tv-mark" style="left:485px;top:-225px;width:950px;height:950px;opacity:0.20;"></div>
-    <div class="tv-mark" style="left:1660px;top:-140px;width:420px;height:420px;opacity:0.14;transform:rotate(-15deg);"></div>
-    <div class="tv-mark" style="left:-160px;top:860px;width:380px;height:380px;opacity:0.14;transform:rotate(8deg);"></div>
+    <!-- Zapfen-Wasserzeichen rechts (wie zuvor bevorzugt), nicht mittig -->
+    <div class="tv-mark" style="right:-220px;top:-180px;width:900px;height:900px;opacity:0.20;transform:rotate(-8deg);"></div>
+    <div class="tv-mark" style="right:360px;bottom:-140px;width:420px;height:420px;opacity:0.12;transform:rotate(12deg);"></div>
   </div>
 
   <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:22px;height:100%;padding:36px 64px 0 64px;">
@@ -95,42 +108,43 @@
       </div>
     </div>
 
-    <div id="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:32px;flex-shrink:0;height:220px;">
+    <div id="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:32px;flex-shrink:0;height:250px;">
       <div id="pod-2" hidden style="width:250px;display:flex;flex-direction:column;align-items:center;">
         <div class="podium-badge" style="width:56px;height:56px;font-size:22px;background:oklch(0.78 0.015 240);margin-bottom:-28px;box-shadow:0 0 16px oklch(0.78 0.015 240 / 0.4);">2</div>
-        <div class="podium-card" style="border-top:3px solid oklch(0.78 0.015 240);padding:24px 18px 14px 18px;height:140px;gap:2px;">
+        <div class="podium-card" style="border-top:3px solid oklch(0.78 0.015 240);padding:42px 18px 14px 18px;height:158px;gap:2px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:23px;"></div>
-          <div data-f="total" class="num" style="font-size:48px;line-height:1;color:var(--gold);text-shadow:0 0 20px oklch(0.80 0.15 83 / 0.35);"></div>
-          <div style="font-size:14px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span></div>
+          <div data-f="total" class="num" style="font-size:46px;line-height:1;color:var(--gold);text-shadow:0 0 20px oklch(0.80 0.15 83 / 0.35);"></div>
+          <div style="font-size:13px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
         </div>
       </div>
       <div id="pod-1" hidden style="width:300px;display:flex;flex-direction:column;align-items:center;">
         <div class="podium-badge" style="width:70px;height:70px;font-size:30px;background:var(--gold);margin-bottom:-35px;box-shadow:0 0 28px oklch(0.80 0.15 83 / 0.6);">1</div>
-        <div class="podium-card" style="border-top:4px solid var(--gold);padding:30px 20px 16px 20px;height:190px;gap:4px;">
+        <div class="podium-card" style="border-top:4px solid var(--gold);padding:50px 20px 16px 20px;height:212px;gap:4px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:800;font-size:28px;"></div>
-          <div data-f="total" class="num" style="font-size:76px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
-          <div style="font-size:15px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span></div>
+          <div data-f="total" class="num" style="font-size:72px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
+          <div style="font-size:14px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
         </div>
       </div>
       <div id="pod-3" hidden style="width:240px;display:flex;flex-direction:column;align-items:center;">
         <div class="podium-badge" style="width:52px;height:52px;font-size:21px;background:oklch(0.64 0.09 45);margin-bottom:-26px;box-shadow:0 0 16px oklch(0.64 0.09 45 / 0.4);">3</div>
-        <div class="podium-card" style="border-top:3px solid oklch(0.64 0.09 45);padding:22px 18px 12px 18px;height:110px;gap:2px;">
+        <div class="podium-card" style="border-top:3px solid oklch(0.64 0.09 45);padding:40px 18px 12px 18px;height:138px;gap:2px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:21px;"></div>
-          <div data-f="total" class="num" style="font-size:40px;line-height:1;color:var(--gold);text-shadow:0 0 14px oklch(0.80 0.15 83 / 0.3);"></div>
-          <div style="font-size:13px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span></div>
+          <div data-f="total" class="num" style="font-size:38px;line-height:1;color:var(--gold);text-shadow:0 0 14px oklch(0.80 0.15 83 / 0.3);"></div>
+          <div style="font-size:12px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
         </div>
       </div>
     </div>
 
-    <div style="flex:1;display:flex;flex-direction:column;min-height:0;">
-      <div style="display:flex;align-items:center;gap:28px;padding:0 28px 10px 28px;border-bottom:1px solid var(--surface-2);text-transform:uppercase;letter-spacing:0.08em;font-size:14px;color:var(--gold);flex-shrink:0;">
+    <div class="glass table-panel">
+      <div style="display:flex;align-items:center;gap:28px;padding:0 24px 12px 24px;text-transform:uppercase;letter-spacing:0.08em;font-size:14px;color:var(--gold);flex-shrink:0;">
         <div style="width:70px;">Rang</div>
         <div style="flex:1;">Name</div>
-        <div style="width:130px;text-align:right;">Bier</div>
-        <div style="width:130px;text-align:right;">Shots</div>
-        <div style="width:150px;text-align:right;">Gesamt</div>
+        <div style="width:120px;text-align:right;">Bier</div>
+        <div style="width:120px;text-align:right;">Shots</div>
+        <div style="width:120px;text-align:right;">Mischen</div>
+        <div style="width:140px;text-align:right;">Gesamt</div>
       </div>
-      <div id="rest" style="display:flex;flex-direction:column;flex:1;min-height:0;"></div>
+      <div id="rest" class="rest-viewport"></div>
     </div>
 
     <!-- Fun-Facts (Platzhalter): hier werden später Statistiken eingeblendet,
@@ -170,14 +184,25 @@ function fillPodium(el, p) {
   el.querySelector('[data-f=total]').textContent = p.total;
   el.querySelector('[data-f=beers]').textContent = `${p.beers} Bier`;
   el.querySelector('[data-f=shots]').textContent = `${p.shots} Shots`;
+  el.querySelector('[data-f=mixes]').textContent = `${p.mixes} Mische`;
 }
 
-// --- Rangliste ab Platz 4: max. 5 gleichzeitig, sonst langsam rotierend ---
+// --- Rangliste ab Platz 4: max. 5 gleichzeitig sichtbar ---
+// Bei mehr als 5 scrollt das Fenster Zeile für Zeile nach unten; unten
+// angekommen springt es schnell wieder ganz nach oben und beginnt von vorne
+// (kein endloses Durchlaufen).
 const WINDOW = 5;
-const ROTATE_MS = 4500;
-let others = [];       // Spieler ab Platz 4 (aktuellster State)
-let rotOffset = 0;
-let rotTimer = null;
+const GAP = 8;            // px zwischen den Zeilen (muss zu .rest-track passen)
+const STEP_MS = 3200;     // Verweildauer pro Schritt
+const SCROLL_MS = 650;    // sanft eine Zeile weiter
+const RESET_MS = 900;     // schnell zurück nach oben
+
+let others = [];          // Spieler ab Platz 4 (aktuellster State)
+let track = null;
+let rowH = 0;
+let pos = 0;
+let maxPos = 0;
+let scrollTimer = null;
 
 function buildRow(p) {
   const row = document.createElement('div');
@@ -187,6 +212,7 @@ function buildRow(p) {
     ['col-name', p.name],
     ['col-beer', p.beers],
     ['col-shot', p.shots],
+    ['col-mix', p.mixes],
     ['col-total', p.total],
   ]) {
     const cell = document.createElement('div');
@@ -197,27 +223,44 @@ function buildRow(p) {
   return row;
 }
 
-function renderRest() {
-  const rest = $('rest');
-  rest.textContent = '';
-  if (others.length === 0) return;
-  const view = others.length <= WINDOW
-    ? others
-    : Array.from({ length: WINDOW }, (_, i) => others[(rotOffset + i) % others.length]);
-  for (const p of view) rest.appendChild(buildRow(p));
+function stopScroll() {
+  if (scrollTimer) { clearInterval(scrollTimer); scrollTimer = null; }
 }
 
-function manageRotation() {
-  if (others.length > WINDOW && !rotTimer) {
-    rotTimer = setInterval(() => {
-      rotOffset = (rotOffset + 1) % others.length;
-      renderRest();
-    }, ROTATE_MS);
-  } else if (others.length <= WINDOW && rotTimer) {
-    clearInterval(rotTimer);
-    rotTimer = null;
-    rotOffset = 0;
+function scrollStep() {
+  if (maxPos <= 0) return;
+  if (pos >= maxPos) {
+    // Ende erreicht: schnell zurück nach oben und von vorne
+    track.style.transition = `transform ${RESET_MS}ms ease-in-out`;
+    pos = 0;
+  } else {
+    track.style.transition = `transform ${SCROLL_MS}ms ease`;
+    pos += 1;
   }
+  track.style.transform = `translateY(${-pos * (rowH + GAP)}px)`;
+}
+
+function renderRest() {
+  const viewport = $('rest');
+  stopScroll();
+  viewport.textContent = '';
+  pos = 0;
+  if (others.length === 0) return;
+
+  track = document.createElement('div');
+  track.className = 'rest-track';
+  for (const p of others) track.appendChild(buildRow(p));
+  viewport.appendChild(track);
+
+  // Zeilenhöhe so wählen, dass genau WINDOW Zeilen (inkl. Lücken) das Fenster füllen
+  const visible = Math.min(WINDOW, others.length);
+  const vh = viewport.clientHeight;
+  rowH = (vh - (visible - 1) * GAP) / visible;
+  for (const r of track.children) r.style.height = `${rowH}px`;
+  track.style.transform = 'translateY(0)';
+
+  maxPos = others.length - visible;
+  if (maxPos > 0) scrollTimer = setInterval(scrollStep, STEP_MS);
 }
 
 connectState({
@@ -227,35 +270,71 @@ connectState({
     $('participant-count').textContent = `${players.length} Teilnehmer`;
     const beers = players.reduce((s, p) => s + p.beers, 0);
     const shots = players.reduce((s, p) => s + p.shots, 0);
-    $('totals').textContent = `${beers} Bier · ${shots} Shots gesamt`;
+    const mixes = players.reduce((s, p) => s + p.mixes, 0);
+    $('totals').textContent = `${beers} Bier · ${shots} Shots · ${mixes} Mische gesamt`;
 
     fillPodium($('pod-1'), players[0]);
     fillPodium($('pod-2'), players[1]);
     fillPodium($('pod-3'), players[2]);
 
     others = players.slice(3);
-    if (others.length) rotOffset %= others.length;
     renderRest();
-    manageRotation();
+    updateFacts(players);
   },
 });
 
-// --- Fun-Facts (Platzhalter) ---
-// Später kommen hier echte Statistiken rein (Bier-Rekord, Shot-Meister, …).
-// Bis dahin blenden ein paar Platzhalter-Texte im Wechsel ein.
-const FUNFACTS_PLACEHOLDER = [
-  'Bald gibt’s hier Statistiken.',
-  'Bier-Rekord an einem Abend: folgt bald …',
-  'Shot-Meister des Abends: folgt bald …',
-  'Meiste Getränke insgesamt: folgt bald …',
-];
+// --- Fun-Facts (live) ---
+// Tages-Bestleistungen direkt aus dem aktuellen State: Top-Trinker heute je
+// Getränk (Bier / Shots / Mischen) plus die fleißigste Person insgesamt.
+// „Heute" = Party-Tag 06:00–05:59 (kommt schon aggregiert vom Server).
+const FUNFACT_FALLBACK = 'Heute noch nichts getrunken – auf geht’s!';
+let facts = [];
 let factIdx = 0;
 const factEl = $('funfact-text');
+
+function leaderBy(players, key) {
+  let best = null;
+  for (const p of players) {
+    const v = p[key] || 0;
+    if (v > 0 && (!best || v > (best[key] || 0))) best = p;
+  }
+  return best;
+}
+
+function computeFacts(players) {
+  const out = [];
+  const b = leaderBy(players, 'beersToday');
+  if (b) out.push(`Bier-König des Abends: ${b.name} mit ${b.beersToday} Bier`);
+  const s = leaderBy(players, 'shotsToday');
+  if (s) out.push(`Shot-Meister des Abends: ${s.name} mit ${s.shotsToday} Shots`);
+  const m = leaderBy(players, 'mixesToday');
+  if (m) out.push(`Misch-Meister des Abends: ${m.name} mit ${m.mixesToday} Mischen`);
+  let top = null, topN = 0;
+  for (const p of players) {
+    const n = (p.beersToday || 0) + (p.shotsToday || 0) + (p.mixesToday || 0);
+    if (n > topN) { topN = n; top = p; }
+  }
+  if (top) out.push(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken`);
+  return out;
+}
+
+function currentFactList() {
+  return facts.length ? facts : [FUNFACT_FALLBACK];
+}
+
+function updateFacts(players) {
+  facts = computeFacts(players);
+  const list = currentFactList();
+  factIdx %= list.length;
+  factEl.textContent = list[factIdx];
+}
+
 setInterval(() => {
-  factIdx = (factIdx + 1) % FUNFACTS_PLACEHOLDER.length;
+  const list = currentFactList();
+  factIdx = (factIdx + 1) % list.length;
   factEl.style.opacity = '0';
   setTimeout(() => {
-    factEl.textContent = FUNFACTS_PLACEHOLDER[factIdx];
+    factEl.textContent = list[factIdx];
     factEl.style.opacity = '1';
   }, 400);
 }, 7000);

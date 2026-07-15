@@ -20,7 +20,7 @@ function requireAdmin(auth) {
 // Nachrichten-Contract siehe PLAN.md §5; Server validiert alles.
 const handlers = {
   increment(auth, { playerId, drink, delta }) {
-    if (!['beer', 'shot'].includes(drink)) throw new Error('Unbekanntes Getränk');
+    if (!['beer', 'shot', 'mix'].includes(drink)) throw new Error('Unbekanntes Getränk');
     if (!Number.isInteger(delta)) throw new Error('delta muss ganzzahlig sein');
 
     if (auth?.role === 'player') {
@@ -60,7 +60,7 @@ const handlers = {
 
   setCounter(auth, { id, drink, value }) {
     requireAdmin(auth);
-    if (!['beer', 'shot'].includes(drink)) throw new Error('Unbekanntes Getränk');
+    if (!['beer', 'shot', 'mix'].includes(drink)) throw new Error('Unbekanntes Getränk');
     if (!Number.isInteger(value) || value < 0) throw new Error('Wert muss >= 0 sein');
     if (!db.setCounter(id, drink, value)) throw new Error('Nutzer nicht gefunden');
   },

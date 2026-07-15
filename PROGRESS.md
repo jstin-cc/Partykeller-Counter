@@ -6,9 +6,13 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 **Aktueller Stand:** Alle Meilensteine M0–M7 abgeschlossen — die App ist
 funktional komplett (Login, Dashboard, TV-Scoreboard mit QR, Admin,
 Pi-Deploy-Dateien) und end-to-end im Browser getestet.
+Seit 2026-07-15 zusätzlich (D-012): **drittes Getränk „Mischen"** über alle
+Screens (inkl. DB-Migration ohne Datenverlust), **Live-Fun-Facts**
+(Tages-Bestleistungen), TV-Rangliste **scrollt** ab Platz 4 (Reset nach oben
+statt Endlos-Rotation), Podest-Überlappung behoben, Tabellen als großes
+gerundetes Panel mit einzeln gerundeten Zeilen, Wasserzeichen wieder rechts,
+testweise dünner dunkelgrüner Glas-Rand.
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
-Die finalen Bild-Assets sind seit 2026-07-15 eingebunden (D-009), die
-Interims-SVGs gelöscht; die Ecken sind durchgängig leicht abgerundet.
 
 ## M0 — Planung & Projekt-Gerüst ✅
 
@@ -43,7 +47,7 @@ Interims-SVGs gelöscht; die Ecken sind durchgängig leicht abgerundet.
 
 ## M3 — Nutzer-Dashboard (erster Screen) ✅
 
-- [x] `public/dashboard.html` nach `User Dashboard v3.dc.html` (Kopfzeile mit Rang-Pill, Heute-Karte, Bier-/Shot-Karten, Abmelden)
+- [x] `public/dashboard.html` nach `User Dashboard v3.dc.html` (Kopfzeile mit Rang-Pill, Heute-Karte, Bier-/Shot-/Mischen-Karten, Abmelden)
 - [x] `increment` über WS (+1 Bier / +1 Shot), Anzeige über State-Broadcast (LAN-Latenz vernachlässigbar)
 - [x] Heute/Gesamt-Werte und Rang live aus dem State
 - [x] Zustand „kein Nutzer ausgewählt" → Link zur Anmeldung
@@ -62,14 +66,15 @@ Interims-SVGs gelöscht; die Ecken sind durchgängig leicht abgerundet.
 - [x] `public/tv.html` nach `TV Scoreboard v3.dc.html` (Querformat, Podest 2-1-3, Rangliste ab Platz 4, Kopf mit Teilnehmer-/Gesamt-Zahlen, live über WS)
 - [x] QR-Code zum Beitritt (qrcode-generator vendored in `public/js/vendor/`)
 - [x] QR-Adresse im Admin einstellbar (settings-Tabelle, `setJoinUrl`, D-010); QR-Rahmen nicht abgerundet
-- [x] Podest kompakter; unter dem Podest max. 5 Plätze, bei mehr langsam rotierend (D-010)
-- [x] Fun-Facts-Band als Platzhalter zwischen Tabelle und Footer (D-010)
+- [x] Podest kompakter; unter dem Podest max. 5 Plätze, bei mehr durchscrollend mit Reset nach oben (D-010/D-012)
+- [x] Fun-Facts-Band jetzt live: Tages-Bestleistungen je Getränk (D-012)
+- [x] Drittes Getränk „Mischen" auch im TV (Podest + Ranglisten-Spalte, D-012)
 
 ## M6 — Admin ✅
 
 - [x] Admin-Login nach `Admin Login v3` (`POST /api/admin/login` gegen `ADMIN_PASSWORD`, Token in sessionStorage)
 - [x] `public/admin.html` nach `Admin Dashboard v3`: Nutzer anlegen (mit Pflicht-PIN)/umbenennen/löschen (mit Rückfrage)
-- [x] Zähler jedes Nutzers: ±1-Stepper (`increment`) und Direkteingabe (`setCounter`), PIN-Reset (`setPin`, D-002)
+- [x] Zähler jedes Nutzers (Bier/Shots/Mischen): ±1-Stepper (`increment`) und Direkteingabe (`setCounter`), PIN-Reset (`setPin`, D-002)
 - [x] Geschützter Komplett-Reset: Gedrückt-halten-Button (~1,2 s) → `reset` mit confirm "RESET"
 
 ## M7 — Betrieb auf dem Pi ✅ (bis auf echten Pi-Testlauf)

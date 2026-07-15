@@ -2,8 +2,8 @@
 
 ## Was das ist
 
-Getränke-Counter für einen Partykeller: Gäste zählen Biere/Shots am Handy,
-ein TV zeigt die All-Time-Rangliste. Läuft als **ein Node.js-Prozess** auf
+Getränke-Counter für einen Partykeller: Gäste zählen Biere/Shots/Mischen am
+Handy, ein TV zeigt die All-Time-Rangliste. Läuft als **ein Node.js-Prozess** auf
 einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Vollständiger Plan in
 [PLAN.md](PLAN.md), Entscheidungen in [DECISIONS.md](DECISIONS.md), Stand in
 [PROGRESS.md](PROGRESS.md).
