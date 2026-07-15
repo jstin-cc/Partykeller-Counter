@@ -45,23 +45,26 @@ CREATE TABLE players (
   pin_hash   TEXT NOT NULL,               -- PIN ist Pflicht (scrypt-Hash, node:crypto)
   beers      INTEGER NOT NULL DEFAULT 0,  -- All-Time-Zähler
   shots      INTEGER NOT NULL DEFAULT 0,
+  mixes      INTEGER NOT NULL DEFAULT 0,  -- „Mischen" (D-012)
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE drink_log (
   id        INTEGER PRIMARY KEY AUTOINCREMENT,
   player_id TEXT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-  drink     TEXT NOT NULL CHECK (drink IN ('beer','shot')),
+  drink     TEXT NOT NULL CHECK (drink IN ('beer','shot','mix')),
   ts        INTEGER NOT NULL              -- Unix-Millis
 );
 CREATE INDEX idx_drink_log_player_ts ON drink_log(player_id, ts);
 ```
 
-- `beers`/`shots` bleiben die schnelle All-Time-Wahrheit (wie in Prompt.md).
+- `beers`/`shots`/`mixes` bleiben die schnelle All-Time-Wahrheit (wie in Prompt.md).
 - `drink_log` ergänzt das Prompt-Modell: das v3-Design zeigt zusätzlich
   **„Getränke heute"**. „Heute" = Party-Tag von **06:00 bis 05:59** des
   Folgetags (aus dem Design-Prototyp übernommen).
-- Gesamt wird abgeleitet: `total = beers + shots`; Rang = Sortierung nach total.
+- Gesamt wird abgeleitet: `total = beers + shots + mixes`; Rang = Sortierung nach total.
+- Bestehende DBs werden beim Start migriert (mixes-Spalte, erweiterte CHECK), ohne
+  Datenverlust (D-006/D-012).
 - Admin-Korrekturen ändern nur die Zähler (kein Log-Eintrag); Komplett-Reset
   leert Zähler und Log.
 

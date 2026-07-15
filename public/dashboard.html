@@ -63,6 +63,22 @@
         </div>
       </div>
 
+      <div class="card" style="--edge:var(--mix);display:flex;flex-direction:column;gap:14px;">
+        <div class="card-title" style="color:var(--mix);">Mischen</div>
+        <button id="add-mix" class="btn-big" style="background:var(--mix);">+ Mische hinzufügen</button>
+        <div class="split">
+          <div class="cell">
+            <div id="mixes-today" class="num value">0</div>
+            <div class="label">Heute</div>
+          </div>
+          <div class="sep"></div>
+          <div class="cell">
+            <div id="mixes-total" class="num value value--gold">0</div>
+            <div class="label">Gesamt</div>
+          </div>
+        </div>
+      </div>
+
       <div id="ws-error" class="error-msg" style="text-align:center;"></div>
     </div>
 
@@ -109,12 +125,14 @@ if (!token || !playerId) {
       $('player-name').textContent = me.name;
       $('rank-pill').textContent = `#${me.rank}/${players.length}`;
       $('rank-pill').hidden = false;
-      $('today-total').textContent = me.beersToday + me.shotsToday;
+      $('today-total').textContent = me.beersToday + me.shotsToday + me.mixesToday;
       $('alltime-total').textContent = me.total;
       $('beers-today').textContent = me.beersToday;
       $('beers-total').textContent = me.beers;
       $('shots-today').textContent = me.shotsToday;
       $('shots-total').textContent = me.shots;
+      $('mixes-today').textContent = me.mixesToday;
+      $('mixes-total').textContent = me.mixes;
       document.title = `SV Partykeller – ${me.name}`;
     },
     onError: showError,
@@ -123,6 +141,7 @@ if (!token || !playerId) {
   const send = (drink) => ws.send({ type: 'increment', token, playerId, drink, delta: 1 });
   $('add-beer').addEventListener('click', () => send('beer'));
   $('add-shot').addEventListener('click', () => send('shot'));
+  $('add-mix').addEventListener('click', () => send('mix'));
 }
 
 $('logout').addEventListener('click', (e) => {

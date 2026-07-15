@@ -37,9 +37,11 @@
     background: oklch(0.3 0.1 38 / 0.4); color: var(--ink);
     border-radius: var(--radius); padding: 12px 16px; font-size: 14px; font-weight: 600;
   }
+  /* Zeilen als einzeln abgerundete Glas-Elemente in einem großen Panel */
+  #rows { display: flex; flex-direction: column; gap: 8px; }
   .admin-row {
     display: flex; align-items: center; gap: 16px; padding: 12px 20px; flex-wrap: wrap;
-    border-bottom: 1px solid var(--glass-edge);
+    border: 1px solid var(--glass-edge); border-radius: var(--radius);
     backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
   }
   .admin-row:nth-child(odd) { background: var(--surface); }
@@ -115,11 +117,12 @@
       <div id="join-hint" style="font-size:13px;color:var(--ink-muted);min-width:180px;"></div>
     </div>
 
-    <div>
-      <div style="display:flex;align-items:center;gap:16px;padding:0 20px 10px 20px;border-bottom:1px solid var(--surface-2);text-transform:uppercase;letter-spacing:0.08em;font-size:13px;color:var(--gold);">
-        <div style="flex:1;">Name</div>
+    <div class="glass" style="background:var(--surface-alt);border-radius:var(--radius-lg);padding:14px 16px;">
+      <div style="display:flex;align-items:center;gap:16px;padding:0 20px 12px 20px;text-transform:uppercase;letter-spacing:0.08em;font-size:13px;color:var(--gold);">
+        <div style="flex:1;min-width:220px;">Name</div>
         <div style="width:170px;text-align:center;">Bier</div>
         <div style="width:170px;text-align:center;">Shots</div>
+        <div style="width:170px;text-align:center;">Mischen</div>
         <div style="width:90px;text-align:right;">Gesamt</div>
         <div style="width:90px;text-align:right;">&nbsp;</div>
       </div>
@@ -324,7 +327,7 @@ function renderRows() {
     });
     delCell.appendChild(del);
 
-    row.append(nameCell, stepper('beer', p.beers, 'amber', 'bg'), stepper('shot', p.shots, 'brick', 'ink'), total, delCell);
+    row.append(nameCell, stepper('beer', p.beers, 'amber', 'bg'), stepper('shot', p.shots, 'brick', 'ink'), stepper('mix', p.mixes, 'mix', 'bg'), total, delCell);
     box.appendChild(row);
   }
 }

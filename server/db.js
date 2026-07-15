@@ -17,13 +17,14 @@ db.exec(`
     pin_hash   TEXT NOT NULL,
     beers      INTEGER NOT NULL DEFAULT 0,
     shots      INTEGER NOT NULL DEFAULT 0,
+    mixes      INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
   CREATE TABLE IF NOT EXISTS drink_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     player_id TEXT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-    drink     TEXT NOT NULL CHECK (drink IN ('beer','shot')),
+    drink     TEXT NOT NULL CHECK (drink IN ('beer','shot','mix')),
     ts        INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_drink_log_player_ts ON drink_log(player_id, ts);
@@ -33,6 +34,42 @@ db.exec(`
     value TEXT NOT NULL
   );
 `);
+
+// Migrationen für bestehende Datenbanken (D-006: Neustart/Update darf keine
+// Daten verlieren). CREATE TABLE IF NOT EXISTS ändert vorhandene Tabellen nicht,
+// darum hier idempotent nachziehen.
+
+// 1) players.mixes ergänzen, falls die DB noch aus der Zeit vor „Mischen" stammt.
+const hasMixes = db
+  .prepare('PRAGMA table_info(players)')
+  .all()
+  .some((c) => c.name === 'mixes');
+if (!hasMixes) {
+  db.exec('ALTER TABLE players ADD COLUMN mixes INTEGER NOT NULL DEFAULT 0');
+}
+
+// 2) drink_log durfte früher nur beer/shot. SQLite kann eine CHECK-Constraint
+//    nicht per ALTER ändern, deshalb die Tabelle einmalig neu aufbauen und die
+//    vorhandenen Log-Einträge übernehmen (Reihenfolge/Heute-Werte bleiben).
+const logSql =
+  db
+    .prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='drink_log'")
+    .get()?.sql ?? '';
+if (!logSql.includes("'mix'")) {
+  db.exec(`
+    CREATE TABLE drink_log_new (
+      id        INTEGER PRIMARY KEY AUTOINCREMENT,
+      player_id TEXT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+      drink     TEXT NOT NULL CHECK (drink IN ('beer','shot','mix')),
+      ts        INTEGER NOT NULL
+    );
+    INSERT INTO drink_log_new (id, player_id, drink, ts)
+      SELECT id, player_id, drink, ts FROM drink_log;
+    DROP TABLE drink_log;
+    ALTER TABLE drink_log_new RENAME TO drink_log;
+    CREATE INDEX IF NOT EXISTS idx_drink_log_player_ts ON drink_log(player_id, ts);
+  `);
+}
 
 // Party-Tag läuft 06:00 -> 05:59 des Folgetags (D-005)
 export function partyDayStartMs(now = Date.now()) {
@@ -50,9 +87,9 @@ const stmts = {
   getPlayerByName: db.prepare('SELECT * FROM players WHERE name = ? COLLATE NOCASE'),
   listPlayers: db.prepare('SELECT * FROM players'),
   increment: db.prepare(
-    'UPDATE players SET beers = MAX(0, beers + ?), shots = MAX(0, shots + ?) WHERE id = ?'
+    'UPDATE players SET beers = MAX(0, beers + ?), shots = MAX(0, shots + ?), mixes = MAX(0, mixes + ?) WHERE id = ?'
   ),
-  setCounter: db.prepare('UPDATE players SET beers = ?, shots = ? WHERE id = ?'),
+  setCounter: db.prepare('UPDATE players SET beers = ?, shots = ?, mixes = ? WHERE id = ?'),
   rename: db.prepare('UPDATE players SET name = ? WHERE id = ?'),
   setPinHash: db.prepare('UPDATE players SET pin_hash = ? WHERE id = ?'),
   deletePlayer: db.prepare('DELETE FROM players WHERE id = ?'),
@@ -60,7 +97,7 @@ const stmts = {
   todayCounts: db.prepare(
     'SELECT player_id, drink, COUNT(*) AS n FROM drink_log WHERE ts >= ? GROUP BY player_id, drink'
   ),
-  resetCounters: db.prepare('UPDATE players SET beers = 0, shots = 0'),
+  resetCounters: db.prepare('UPDATE players SET beers = 0, shots = 0, mixes = 0'),
   clearLog: db.prepare('DELETE FROM drink_log'),
   getSetting: db.prepare('SELECT value FROM settings WHERE key = ?'),
   setSetting: db.prepare(
@@ -95,7 +132,8 @@ export function getPlayerByName(name) {
 export function incrementDrink(id, drink, delta) {
   const beers = drink === 'beer' ? delta : 0;
   const shots = drink === 'shot' ? delta : 0;
-  return stmts.increment.run(beers, shots, id).changes > 0;
+  const mixes = drink === 'mix' ? delta : 0;
+  return stmts.increment.run(beers, shots, mixes, id).changes > 0;
 }
 
 export function addLogEntry(id, drink, ts = Date.now()) {
@@ -107,7 +145,8 @@ export function setCounter(id, drink, value) {
   if (!p) return false;
   const beers = drink === 'beer' ? value : p.beers;
   const shots = drink === 'shot' ? value : p.shots;
-  return stmts.setCounter.run(beers, shots, id).changes > 0;
+  const mixes = drink === 'mix' ? value : p.mixes;
+  return stmts.setCounter.run(beers, shots, mixes, id).changes > 0;
 }
 
 export function renamePlayer(id, name) {
@@ -131,7 +170,7 @@ export const resetAll = db.transaction(() => {
 export function getState() {
   const today = new Map();
   for (const row of stmts.todayCounts.all(partyDayStartMs())) {
-    const entry = today.get(row.player_id) ?? { beer: 0, shot: 0 };
+    const entry = today.get(row.player_id) ?? { beer: 0, shot: 0, mix: 0 };
     entry[row.drink] = row.n;
     today.set(row.player_id, entry);
   }
@@ -139,15 +178,17 @@ export function getState() {
   const players = stmts.listPlayers
     .all()
     .map((p) => {
-      const t = today.get(p.id) ?? { beer: 0, shot: 0 };
+      const t = today.get(p.id) ?? { beer: 0, shot: 0, mix: 0 };
       return {
         id: p.id,
         name: p.name,
         beers: p.beers,
         shots: p.shots,
-        total: p.beers + p.shots,
+        mixes: p.mixes,
+        total: p.beers + p.shots + p.mixes,
         beersToday: t.beer,
         shotsToday: t.shot,
+        mixesToday: t.mix,
         createdAt: p.created_at,
       };
     })

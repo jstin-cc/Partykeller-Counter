@@ -165,3 +165,45 @@ und eine feine helle Glaskante (`--glass-edge`). Farbige Aktions-Elemente
 Reine CSS-Änderung, offline (D-007), keine neuen Dependencies. `backdrop-filter`
 wird von Chromium (Pi-Kiosk) unterstützt; ohne Unterstützung bleibt die Fläche
 einfach dunkel-transluzent. Kann bei Nichtgefallen leicht zurückgedreht werden.
+
+## 2026-07-15 · D-012: Drittes Getränk „Mischen" + TV-Feinschliff, Live-Fun-Facts, grüner Glas-Rand
+
+**Entscheidung (auf Nutzerwunsch):**
+
+- **Drittes Getränk „Mischen"** (Code-Bezeichner `mix`, Spalte `players.mixes`,
+  Log-Wert `'mix'`). Zieht sich durch alle Ebenen: DB, Validierung
+  (`increment`/`setCounter` erlauben jetzt `beer|shot|mix`), Nutzer-Dashboard
+  (eigene Mischen-Karte), Admin (eigene Mischen-Spalte mit Stepper) und TV
+  (Podest-Detailzeile + Ranglisten-Spalte). `total = beers + shots + mixes`.
+  Eigene Farbe `--mix` (violett/cocktailhaft), um es klar von Bier (amber) und
+  Shots (brick) zu trennen.
+- **DB-Migration statt Datenverlust (D-006):** Bestehende Datenbanken werden
+  beim Start idempotent nachgezogen — `players.mixes` per `ALTER TABLE`, und
+  `drink_log` wird einmalig neu aufgebaut, weil SQLite die alte CHECK-Constraint
+  (`drink IN ('beer','shot')`) nicht per ALTER auf `'mix'` erweitern kann. Die
+  vorhandenen Log-Einträge und Einstellungen (`join_url`) bleiben erhalten.
+- **Fun-Facts jetzt live** statt Platzhalter: berechnet aus dem State die
+  Tages-Bestleistungen (Bier-König / Shot-Meister / Misch-Meister des Abends je
+  nach höchstem Heute-Wert) plus „Fleißigste:r heute" (meiste Getränke gesamt).
+  Ohne Getränke heute erscheint ein Fallback-Text. Kein neuer Server-Endpunkt —
+  „Heute"-Werte kommen ohnehin aggregiert aus `getState()`.
+- **Rangliste ab Platz 4 scrollt jetzt endlich (nicht mehr endlos rotierend):**
+  max. 5 sichtbar; bei mehr wandert das Fenster Zeile für Zeile nach unten und
+  springt am Ende **schnell zurück nach oben**, dann von vorne. Umsetzung per
+  `translateY` auf einem Track im Viewport (kein Framework, reines CSS/JS).
+- **Podest-Überlappung behoben:** die Rang-Badges (1/2/3) ragten in den Namen;
+  die Karten haben nun mehr Kopf-Abstand (padding-top), Zahl/Name überschneiden
+  sich nicht mehr.
+- **Tabellen als großes gerundetes Panel:** TV-Rangliste und Admin-Liste liegen
+  in einem `--radius-lg`-Panel, die einzelnen Zeilen sind eigenständig
+  abgerundet (`--radius`) mit Lücke — statt flacher Trennlinien.
+- **Wasserzeichen zurück nach rechts:** der große Zapfen auf dem TV sitzt wieder
+  rechts (vom Nutzer bevorzugt), nicht mehr mittig.
+- **Test: dünner dunkelgrüner Glas-Rand.** `--glass-edge` ist von der hellen
+  Kante (oklch 0.92/0.12) auf ein dezentes Dunkelgrün (oklch 0.52 0.11 150 / 0.60)
+  umgestellt — passend zum Glassmorphism, wirkt auf alle `.glass`-Elemente.
+  Reine Token-Änderung, leicht zurückdrehbar.
+
+**Begründung:** Alles vom Nutzer angefordert. Keine neuen Dependencies, offline
+(D-007), Persistenz gewahrt (D-006). Die Fun-Facts erfüllen den in D-010
+angekündigten „echte Statistiken"-Platzhalter.
