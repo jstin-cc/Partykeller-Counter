@@ -28,6 +28,10 @@
   --surface: oklch(0.25 0.035 55);
   --surface-alt: oklch(0.21 0.03 55);
   --surface-2: oklch(0.30 0.04 55);
+
+  /* Eckenradien – Kanten sind bewusst leicht abgerundet */
+  --radius: 12px;      /* Buttons, Felder, kleine Controls */
+  --radius-lg: 18px;   /* Karten und große Flächen */
 }
 
 * { box-sizing: border-box; }
@@ -76,8 +80,8 @@ a:hover { color: var(--gold); }
   height: 480px;
   background-color: var(--bg-hi);
   opacity: 0.07;
-  -webkit-mask-image: url('../assets/zapfen-raw.svg');
-  mask-image: url('../assets/zapfen-raw.svg');
+  -webkit-mask-image: url('../assets/zapfen-bg.svg');
+  mask-image: url('../assets/zapfen-bg.svg');
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -92,7 +96,7 @@ a:hover { color: var(--gold); }
   width: 100%;
   height: auto;
   display: block;
-  filter: brightness(0.55) saturate(0.9);
+  filter: brightness(0.8) saturate(0.95);
   position: relative;
   z-index: 1;
 }
@@ -101,6 +105,7 @@ a:hover { color: var(--gold); }
 .card {
   background: var(--surface);
   border-top: 3px solid var(--edge, var(--green));
+  border-radius: var(--radius-lg);
   padding: 20px;
 }
 .card--green { --edge: var(--green); }
@@ -135,7 +140,7 @@ a:hover { color: var(--gold); }
   width: 100%;
   color: var(--bg);
   border: none;
-  border-radius: 3px;
+  border-radius: var(--radius);
   padding: 22px;
   font-family: 'Bitter', serif;
   font-weight: 800;
@@ -174,7 +179,7 @@ a:hover { color: var(--gold); }
   width: 100%;
   background: var(--surface-alt);
   border: 1px solid var(--surface-2);
-  border-radius: 3px;
+  border-radius: var(--radius);
   color: var(--ink);
   font-family: 'Work Sans', sans-serif;
   font-size: 18px;

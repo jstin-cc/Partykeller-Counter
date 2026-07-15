@@ -94,3 +94,28 @@ und nach `public/assets/` gelegt werden (offener Punkt in PROGRESS.md M2).
 SVGs nutzen dieselben Farb-Tokens und Platzverhältnisse, sodass der spätere
 Tausch nur die zwei `<img src>`-Verweise betrifft. `zapfen-raw.svg` (das
 Wasserzeichen) konnte 1:1 übernommen werden.
+
+## 2026-07-15 · D-009: Finale Bild-Assets eingesetzt, Interims ersetzt
+
+**Entscheidung:** Die vom Nutzer hochgeladenen Original-Assets sind jetzt
+eingebunden; die Interims aus D-008 wurden gelöscht:
+
+- `logo.png` — das weiße Logo (`SVPartykellerLogo2.0`), da die gesamte UI
+  dunkel ist. (Die mitgelieferten „SVG"-Logos waren nur PNG-Raster in einem
+  SVG-Rahmen, boten also keinen Vektorvorteil → PNG genommen.)
+- `footer-woods.png` — der echte Wald-Streifen; der Abdunkel-Filter wurde von
+  `brightness(0.55)` auf `0.8` gelockert, damit das Grün sichtbar bleibt.
+- `zapfen-bg.svg` — der Rothaus-Zapfen (identische Geometrie wie das frühere
+  `zapfen-raw.svg`, vom Nutzer als `gemini-svg` mit Grünfüllung geliefert),
+  **fest um 180° gedreht** (Zapfen hängen nach unten). Weil die Drehung nun in
+  der Datei steckt, entfielen die kompensierenden `rotate(180deg)` in
+  Login/TV/Admin. Als Maske mit `--bg-hi` und niedriger Deckkraft ergibt das
+  die gewünschte, „leicht andere Helligkeit" gegenüber dem Rest.
+- `cones-flat.png` — als Favicon eingebunden.
+
+**Rundung:** Neue Tokens `--radius` (12px) und `--radius-lg` (18px) ersetzen
+die bisherigen 3–4px-Ecken (Karten, Buttons, Felder, Stepper, Podest, QR),
+sodass die eckigen Elemente durchgängig leicht abgerundet sind.
+
+**Begründung:** Vom Nutzer angefordert. Alles bleibt offline/vendored
+(D-007); keine neuen Dependencies. D-008 ist damit erledigt.

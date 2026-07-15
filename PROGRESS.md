@@ -6,9 +6,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 **Aktueller Stand:** Alle Meilensteine M0–M7 abgeschlossen — die App ist
 funktional komplett (Login, Dashboard, TV-Scoreboard mit QR, Admin,
 Pi-Deploy-Dateien) und end-to-end im Browser getestet.
-**Offen:** (1) die zwei Original-PNGs (logo-gold, footer-woods) einmal
-manuell aus dem Design-Projekt nach `public/assets/` exportieren (D-008);
-(2) echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
+**Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
+Die finalen Bild-Assets sind seit 2026-07-15 eingebunden (D-009), die
+Interims-SVGs gelöscht; die Ecken sind durchgängig leicht abgerundet.
 
 ## M0 — Planung & Projekt-Gerüst ✅
 
@@ -31,11 +31,11 @@ manuell aus dem Design-Projekt nach `public/assets/` exportieren (D-008);
 
 ## M2 — Design-Basis ✅ (mit offenem Asset-Export)
 
-- [x] `zapfen-raw.svg` aus dem Design-Projekt vendored
-- [x] Interims-SVGs für Logo und Wald-Footer (D-008)
-- [ ] **Offen:** `logo-gold.png` + `footer-woods.png` manuell aus dem Design-Projekt
-      exportieren und nach `public/assets/` legen (Original > API-Limit von 256 KiB),
-      dann die zwei `<img src>`-Verweise auf .png umstellen
+- [x] Zapfen-Wasserzeichen vendored: `zapfen-bg.svg` (um 180° gedreht, D-009)
+- [x] ~~Interims-SVGs für Logo und Wald-Footer (D-008)~~ → ersetzt
+- [x] Finale Assets eingebunden (D-009): `logo.png` (weiß), `footer-woods.png`
+      (echter Wald), `zapfen-bg.svg` (Hintergrund), `cones-flat.png` (Favicon)
+- [x] Ecken leicht abgerundet (Tokens `--radius` / `--radius-lg`, D-009)
 - [x] Fonts Bitter + Work Sans als woff2 nach `public/assets/fonts/` (offline!)
 - [x] `public/css/theme.css`: Design-Tokens aus PLAN.md §8
 - [x] `public/js/ws-client.js`: WS-Client mit Auto-Reconnect + State-Subscription
