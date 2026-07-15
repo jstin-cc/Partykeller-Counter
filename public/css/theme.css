@@ -28,9 +28,9 @@
   /* Dunkles „Liquid Glass" (Glassmorphism): relativ dunkel, relativ
      undurchsichtig, leicht grünstichig statt braun. Alpha < 1, damit
      backdrop-filter den Hintergrund durchscheinen lässt. */
-  --surface: oklch(0.23 0.02 160 / 0.62);
-  --surface-alt: oklch(0.19 0.018 160 / 0.55);
-  --surface-2: oklch(0.29 0.022 160 / 0.68);
+  --surface: oklch(0.23 0.02 160 / 0.54);
+  --surface-alt: oklch(0.19 0.018 160 / 0.47);
+  --surface-2: oklch(0.29 0.022 160 / 0.60);
   --glass-edge: oklch(0.92 0.02 160 / 0.12);   /* feine helle Glaskante */
   --glass-blur: 16px;
 

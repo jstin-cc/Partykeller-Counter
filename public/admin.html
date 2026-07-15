@@ -70,7 +70,7 @@
   <div class="admin-watermark" style="left:50%;top:-260px;width:600px;height:600px;margin-left:-300px;opacity:0.18;"></div>
 
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;">
-    <form id="login-form" class="glass" style="width:100%;max-width:400px;background:var(--surface);border-top:4px solid var(--green);padding:36px 28px;display:flex;flex-direction:column;gap:18px;">
+    <form id="login-form" class="glass" style="width:100%;max-width:400px;background:var(--surface);border-top:4px solid var(--green);border-radius:var(--radius-lg);padding:36px 28px;display:flex;flex-direction:column;gap:18px;">
       <div style="text-align:center;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:64px;width:auto;object-fit:contain;margin-bottom:14px;">
         <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0 0 6px 0;">Admin-Zugang</h1>
@@ -131,7 +131,7 @@
 
 <!-- Modal: Neuer Nutzer -->
 <div id="add-modal" class="modal-backdrop" hidden>
-  <form id="add-form" class="glass" style="background:var(--surface);border-top:4px solid var(--green);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
+  <form id="add-form" class="glass" style="background:var(--surface);border-top:4px solid var(--green);border-radius:var(--radius-lg);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
     <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Neuer Nutzer</h2>
     <input id="add-name" class="input-flat" type="text" maxlength="24" placeholder="Name" autocomplete="off" required>
     <input id="add-pin" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (4 Ziffern)" autocomplete="off" required>
@@ -144,7 +144,7 @@
 
 <!-- Modal: PIN zurücksetzen (D-002) -->
 <div id="pin-modal" class="modal-backdrop" hidden>
-  <form id="pin-form" class="glass" style="background:var(--surface);border-top:4px solid var(--green);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
+  <form id="pin-form" class="glass" style="background:var(--surface);border-top:4px solid var(--green);border-radius:var(--radius-lg);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
     <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">PIN zurücksetzen: <span id="pin-name"></span></h2>
     <input id="pin-value" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="Neue PIN (4 Ziffern)" autocomplete="off" required>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
