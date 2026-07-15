@@ -241,3 +241,33 @@ angekündigten „echte Statistiken"-Platzhalter.
 **Begründung:** Alles vom Nutzer angefordert. Keine neuen Dependencies, offline
 (D-007), Persistenz und Migrationen gewahrt (D-006). Der Board-Modus ist bewusst
 nur manuell (Admin) – ein Auto-Wechsel kann später ergänzt werden.
+
+## 2026-07-15 · D-014: Tabellen-Animation, Rekord-Fun-Facts, getrenntes Lösch-Passwort, Admin-Sortierung, QR-Kasten
+
+**Entscheidung (auf Nutzerwunsch):**
+
+- **Animationen auch in der TV-Rangliste.** Das Rendern der Liste ab Platz 4 ist
+  jetzt diff-basiert: bei gleicher Reihenfolge werden die Werte in den vorhandenen
+  Zeilen aktualisiert (Scrollposition bleibt erhalten), gestiegene Zähler „poppen"
+  und die Zeile leuchtet kurz gold auf. Ändert sich die Reihenfolge, wird neu
+  aufgebaut und die Zeilen gleiten per **FLIP** von ihrer alten an die neue
+  Position (neue Zeilen blenden ein). `prefers-reduced-motion` schaltet das ab.
+- **Fun-Facts mit All-Time-Tagesrekorden**, schön ausformuliert, z. B. „Bier-Rekord:
+  Die meisten Biere an einem Abend hat Jonas am 25.09.2025 geschafft – ganze 13
+  Stück." Serverseitig neu: `getRecords()` bildet je Sorte den (Spieler, Party-Tag)
+  mit den meisten Getränken aus `drink_log` (Party-Tag-Grenze 06:00 in SQL über
+  `date((ts/1000)-21600,'unixepoch','localtime')`). Ausgeblendete Spieler zählen
+  nicht. Die Rekorde stehen im State (`records`) und rotieren mit den bisherigen
+  Tages-Bestleistungen im Fun-Fact-Band.
+- **Eigenes Lösch-Passwort** (`RESET_PASSWORD`), getrennt vom Admin-Login. Der
+  `reset`-Handler prüft gegen `config.resetPassword`. Ist `RESET_PASSWORD` nicht
+  gesetzt, gilt weiter `ADMIN_PASSWORD` (Backward-Compat). In `.env.example`
+  dokumentiert; das Reset-Modal fragt jetzt das „Lösch-Passwort" ab.
+- **Admin-Liste alphabetisch nach Name** sortiert (nicht mehr nach Punktestand),
+  damit Nutzer beim Verwalten leichter zu finden sind. Betrifft nur die Admin-
+  Ansicht; TV/Rangliste bleiben nach Punkten sortiert.
+- **Glassmorphism-Kasten um QR-Code** und „Scan zum Beitreten" auf dem TV (Test).
+
+**Begründung:** Alles vom Nutzer angefordert. Keine neuen Dependencies, offline
+(D-007), Persistenz gewahrt (D-006). `getRecords()` läuft pro State-Broadcast über
+das Log – bei Party-Größe vernachlässigbar; bei Bedarf später cachebar.

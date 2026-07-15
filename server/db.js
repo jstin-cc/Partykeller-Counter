@@ -99,6 +99,16 @@ const stmts = {
   todayCounts: db.prepare(
     'SELECT player_id, drink, COUNT(*) AS n FROM drink_log WHERE ts >= ? GROUP BY player_id, drink'
   ),
+  // All-Time-Rekorde: meiste Getränke je Sorte an einem einzelnen Party-Tag.
+  // Party-Tag beginnt 06:00, daher ts um 6 h (21600 s) zurückschieben, bevor
+  // das Datum gebildet wird (entspricht partyDayStartMs, aber in SQL).
+  dayCounts: db.prepare(
+    `SELECT drink, player_id,
+            date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
+            COUNT(*) AS n
+     FROM drink_log
+     GROUP BY drink, player_id, day`
+  ),
   resetCounters: db.prepare('UPDATE players SET beers = 0, shots = 0, mixes = 0'),
   clearLog: db.prepare('DELETE FROM drink_log'),
   getSetting: db.prepare('SELECT value FROM settings WHERE key = ?'),
@@ -159,6 +169,31 @@ export function setHidden(id, hidden) {
   return stmts.setHidden.run(hidden ? 1 : 0, id).changes > 0;
 }
 
+// Rekorde: pro Sorte der (Spieler, Party-Tag) mit den meisten Getränken.
+// Ausgeblendete Spieler zählen nicht (nicht Teil des Scoreboards).
+export function getRecords() {
+  const hiddenIds = new Set(
+    stmts.listPlayers.all().filter((p) => p.hidden).map((p) => p.id)
+  );
+  const best = { beer: null, shot: null, mix: null };
+  for (const row of stmts.dayCounts.all()) {
+    if (hiddenIds.has(row.player_id)) continue;
+    const cur = best[row.drink];
+    if (!cur || row.n > cur.n) {
+      best[row.drink] = { playerId: row.player_id, n: row.n, day: row.day };
+    }
+  }
+  for (const drink of Object.keys(best)) {
+    const rec = best[drink];
+    if (rec) {
+      const p = getPlayer(rec.playerId);
+      rec.name = p ? p.name : '—';
+      delete rec.playerId;
+    }
+  }
+  return best;
+}
+
 export function setPinHash(id, pinHash) {
   return stmts.setPinHash.run(pinHash, id).changes > 0;
 }
@@ -209,5 +244,6 @@ export function getState() {
     players,
     joinUrl: getSetting('join_url', ''),
     boardMode: getSetting('board_mode', 'alltime'),
+    records: getRecords(),
   };
 }

@@ -16,9 +16,14 @@ if (!adminPassword) fail('ADMIN_PASSWORD ist nicht gesetzt');
 const tokenSecret = process.env.TOKEN_SECRET;
 if (!tokenSecret || tokenSecret.length < 16) fail('TOKEN_SECRET fehlt oder ist zu kurz (min. 16 Zeichen)');
 
+// Eigenes Passwort für den destruktiven Komplett-Reset (getrennt vom Admin-Login).
+// Nicht gesetzt => fällt auf ADMIN_PASSWORD zurück (bestehende Setups bleiben lauffähig).
+const resetPassword = process.env.RESET_PASSWORD || adminPassword;
+
 export const config = {
   port,
   adminPassword,
+  resetPassword,
   tokenSecret,
   dbPath: process.env.DB_PATH ?? 'data/partykeller.db',
 };

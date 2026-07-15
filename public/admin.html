@@ -164,9 +164,9 @@
 <div id="reset-modal" class="modal-backdrop" hidden>
   <form id="reset-form" class="glass" style="background:var(--surface);border-top:4px solid var(--brick);border-radius:var(--radius-lg);padding:28px;width:400px;display:flex;flex-direction:column;gap:14px;">
     <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Alles zurücksetzen</h2>
-    <p style="font-size:14px;color:var(--ink-muted);margin:0;line-height:1.5;">Setzt alle Zähler auf 0 und löscht das Getränke-Log. Accounts und PINs bleiben erhalten. Zum Bestätigen bitte das Admin-Passwort eingeben.</p>
+    <p style="font-size:14px;color:var(--ink-muted);margin:0;line-height:1.5;">Setzt alle Zähler auf 0 und löscht das Getränke-Log. Accounts und PINs bleiben erhalten. Zum Bestätigen bitte das <strong>Lösch-Passwort</strong> eingeben (eigenes Passwort, nicht das Admin-Login).</p>
     <div id="reset-error" class="error-banner" hidden></div>
-    <input id="reset-pw" class="input-flat" type="password" placeholder="Admin-Passwort" autocomplete="current-password" required>
+    <input id="reset-pw" class="input-flat" type="password" placeholder="Lösch-Passwort" autocomplete="off" required>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button type="button" id="close-reset" class="btn-flat" style="padding:10px 18px;">Abbrechen</button>
       <button class="btn-green" style="padding:10px 18px;background:var(--brick);color:var(--ink);">Endgültig zurücksetzen</button>
@@ -289,7 +289,9 @@ function renderRows() {
   const box = $('rows');
   box.textContent = '';
 
-  for (const p of players) {
+  // Admin-Liste alphabetisch nach Name (nicht nach Punktestand)
+  const list = [...players].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  for (const p of list) {
     const row = document.createElement('div');
     row.className = 'admin-row' + (p.hidden ? ' is-hidden' : '');
 

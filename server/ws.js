@@ -86,8 +86,8 @@ const handlers = {
   reset(auth, { confirm, password }) {
     requireAdmin(auth);
     if (confirm !== 'RESET') throw new Error('Reset braucht confirm: "RESET"');
-    // Zusätzliche Sicherung: Admin-Passwort erneut eingeben (gleiche .env wie Login)
-    if (password !== config.adminPassword) throw new Error('Falsches Passwort');
+    // Eigenes Lösch-Passwort (RESET_PASSWORD, getrennt vom Admin-Login)
+    if (password !== config.resetPassword) throw new Error('Falsches Passwort');
     db.resetAll();
   },
 
