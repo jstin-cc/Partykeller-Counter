@@ -34,6 +34,9 @@ Und (D-016): **Fun-Fact-Wechseltakt im Admin einstellbar** (Regler 30 s – 5 mi
 Und (D-017, nach Security-Review): **Kontoerstellung gedrosselt** (6/min/IP +
 Deckel 200) und **Spieler-Increments pro Spieler gedrosselt** (Token-Bucket
 ~1/s, Burst 5; Admins ungedrosselt) – gegen Skript-Spam.
+Und (D-018): **PIN wieder optional pro Nutzer** (ersetzt die Pflicht aus D-002).
+Ohne PIN meldet ein Antippen direkt an; PIN-Konten bleiben geschützt. Admin
+kann PINs setzen/entfernen, PIN-lose Nutzer sind in der Admin-Liste markiert.
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅

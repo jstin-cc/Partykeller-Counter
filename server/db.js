@@ -356,6 +356,7 @@ export function getState() {
         shotsToday: t.shot,
         mixesToday: t.mix,
         hidden: !!p.hidden,
+        hasPin: !!p.pin_hash,   // ob eine PIN gesetzt ist (D-018); der Hash selbst bleibt geheim
         createdAt: p.created_at,
       };
     })

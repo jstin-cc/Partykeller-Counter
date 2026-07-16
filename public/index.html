@@ -112,7 +112,7 @@
 
     <form id="create-form" style="display:flex;flex-direction:column;gap:10px;">
       <input id="create-name" class="input-flat" type="text" maxlength="24" placeholder="Dein Name" autocomplete="off" required>
-      <input id="create-pin" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (4 Ziffern)" autocomplete="off" required>
+      <input id="create-pin" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (optional, 4 Ziffern)" autocomplete="off">
       <button class="btn-green" style="padding:15px;font-size:16px;margin-top:4px;">Konto erstellen &amp; los</button>
     </form>
 
@@ -165,9 +165,20 @@ function renderUsers(players) {
     row.append(avatar, name, chevron);
     wrap.appendChild(row);
 
-    row.addEventListener('click', () => {
-      selectedId = p.id;
+    row.addEventListener('click', async () => {
       showError('');
+      // Konto ohne PIN (D-018): direkt anmelden, keine Eingabe nötig
+      if (!p.hasPin) {
+        try {
+          const { token, player } = await post('/api/login', { playerId: p.id });
+          setSession(token, player.id);
+          location.href = '/dashboard';
+        } catch (err) {
+          showError(err.message);
+        }
+        return;
+      }
+      selectedId = p.id;
       renderUsers(players); // schließt andere PIN-Zeilen
     });
 
