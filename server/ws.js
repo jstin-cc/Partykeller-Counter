@@ -2,7 +2,7 @@ import { WebSocketServer } from 'ws';
 import * as db from './db.js';
 import { config } from './config.js';
 import { verifyToken, hashPin } from './auth.js';
-import { validName, validPin, normalizeJoinUrl } from './validate.js';
+import { validName, validPin, validFactTitle, validFactText, normalizeJoinUrl } from './validate.js';
 
 let wss;
 
@@ -76,6 +76,28 @@ const handlers = {
     requireAdmin(auth);
     if (!['alltime', 'today'].includes(mode)) throw new Error('Unbekannter Anzeigemodus');
     db.setSetting('board_mode', mode);
+  },
+
+  // Rotationsgeschwindigkeit der TV-Rangliste: Sekunden pro Scroll-Schritt
+  setScrollSpeed(auth, { seconds }) {
+    requireAdmin(auth);
+    if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds < 1 || seconds > 30) {
+      throw new Error('Geschwindigkeit muss zwischen 1 und 30 Sekunden liegen');
+    }
+    db.setSetting('scroll_seconds', String(seconds));
+  },
+
+  addFact(auth, { title, text }) {
+    requireAdmin(auth);
+    if (!validFactTitle(title)) throw new Error('Titel: 1-30 Zeichen');
+    if (!validFactText(text)) throw new Error('Text: 1-160 Zeichen');
+    db.addFact(title.trim(), text.trim());
+  },
+
+  deleteFact(auth, { id }) {
+    requireAdmin(auth);
+    if (!Number.isInteger(id)) throw new Error('Ungültige Meldung');
+    if (!db.deleteFact(id)) throw new Error('Meldung nicht gefunden');
   },
 
   deletePlayer(auth, { id }) {

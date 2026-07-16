@@ -5,7 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Dein Zähler</title>
 <link rel="icon" href="assets/cones-flat.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#010f05">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
+<style>
+  /* Achievement-Badges: klein, mit Zustand „geschafft" (gold) / offen (gedimmt) */
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    color: var(--ink-muted); opacity: 0.55;
+    transition: opacity 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+  .badge.earned {
+    opacity: 1; color: var(--gold);
+    border-color: oklch(0.80 0.15 83 / 0.55);
+    box-shadow: 0 0 12px oklch(0.80 0.15 83 / 0.18);
+  }
+  /* Verteilungsbalken Bier/Shots/Mischen */
+  .dist-bar {
+    display: flex; height: 14px; border-radius: 999px; overflow: hidden;
+    background: var(--surface-2); border: 1px solid var(--glass-edge);
+  }
+  .dist-bar > div { transition: width 0.5s ease; }
+  .dist-legend { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; }
+</style>
 </head>
 <body>
 <div class="screen">
@@ -79,6 +105,44 @@
         </div>
       </div>
 
+      <!-- Persönliche Statistik: eigene Abende, bestes Ergebnis, Verteilung -->
+      <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:16px;">
+        <div class="card-title" style="color:var(--gold);">Deine Statistik</div>
+        <div class="split">
+          <div class="cell">
+            <div id="stat-days" class="num value" style="font-size:34px;">0</div>
+            <div class="label" style="font-size:12px;color:var(--ink-muted);">Abende</div>
+          </div>
+          <div class="sep"></div>
+          <div class="cell">
+            <div id="stat-best" class="num value value--gold" style="font-size:34px;color:var(--gold);">–</div>
+            <div id="stat-best-label" class="label" style="font-size:12px;color:var(--ink-muted);">Bestes Ergebnis</div>
+          </div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px;">Deine Mischung</div>
+          <div class="dist-bar">
+            <div id="dist-beer" style="background:var(--amber);width:0;"></div>
+            <div id="dist-shot" style="background:var(--brick);width:0;"></div>
+            <div id="dist-mix" style="background:var(--mix);width:0;"></div>
+          </div>
+          <div class="dist-legend">
+            <span style="color:var(--amber);">Bier <span id="pct-beer" class="num">0%</span></span>
+            <span style="color:var(--brick);">Shots <span id="pct-shot" class="num">0%</span></span>
+            <span style="color:var(--mix);">Mischen <span id="pct-mix" class="num">0%</span></span>
+          </div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px;">Abzeichen heute</div>
+          <div class="badges">
+            <div id="badge-first" class="badge" title="Das erste Getränk des Abends kam von dir">🥇 Erster Trinker</div>
+            <div id="badge-midnight" class="badge" title="Ein Bier zwischen 0 und 1 Uhr">🌙 Mitternachtsbier</div>
+            <div id="badge-hour" class="badge" title="Drei Getränke innerhalb einer Stunde">⚡ Drei in einer Stunde</div>
+            <div id="badge-mix" class="badge" title="Mindestens drei Mischgetränke heute">🍹 Mischmeister</div>
+          </div>
+        </div>
+      </div>
+
       <div id="ws-error" class="error-msg" style="text-align:center;"></div>
     </div>
 
@@ -87,7 +151,10 @@
       <a href="/" style="font-weight:600;">Zur Anmeldung</a>
     </div>
 
-    <a href="#" id="logout" style="text-align:center;color:var(--ink-muted);font-size:13px;text-decoration:none;margin-top:auto;padding-top:12px;">Abmelden</a>
+    <div style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
+      <a href="/abende" style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abend-Archiv</a>
+      <a href="#" id="logout" style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abmelden</a>
+    </div>
   </div>
 
   <img src="assets/footer-woods.png" alt="" class="footer-woods">
@@ -127,6 +194,41 @@ if (!token || !playerId) {
     prev[id] = value;
   }
 
+  // --- Persönliche Statistik + Achievements (REST, aktualisiert bei eigener Änderung) ---
+  // '2026-09-25' -> '25.09.2026'
+  const fmtDay = (iso) => { const [y, m, d] = iso.split('-'); return `${d}.${m}.${y}`; };
+
+  async function loadStats() {
+    try {
+      const res = await fetch(`/api/players/${encodeURIComponent(playerId)}/stats`);
+      if (!res.ok) return;
+      const { days, best, achievements } = await res.json();
+      bump('stat-days', days);
+      if (best) {
+        $('stat-best').textContent = best.total;
+        $('stat-best-label').textContent = `Bestes Ergebnis (${fmtDay(best.day)})`;
+      }
+      $('badge-first').classList.toggle('earned', achievements.firstDrinker);
+      $('badge-midnight').classList.toggle('earned', achievements.midnightBeer);
+      $('badge-hour').classList.toggle('earned', achievements.threeInHour);
+      $('badge-mix').classList.toggle('earned', achievements.mixMaster);
+    } catch { /* Offline-Moment: nächster State-Broadcast versucht es erneut */ }
+  }
+
+  // Verteilungsbalken aus den All-Time-Zählern
+  function updateDistribution(me) {
+    const total = me.beers + me.shots + me.mixes;
+    const pct = (n) => (total > 0 ? Math.round((n / total) * 100) : 0);
+    $('dist-beer').style.width = total ? `${(me.beers / total) * 100}%` : '0';
+    $('dist-shot').style.width = total ? `${(me.shots / total) * 100}%` : '0';
+    $('dist-mix').style.width = total ? `${(me.mixes / total) * 100}%` : '0';
+    $('pct-beer').textContent = `${pct(me.beers)}%`;
+    $('pct-shot').textContent = `${pct(me.shots)}%`;
+    $('pct-mix').textContent = `${pct(me.mixes)}%`;
+  }
+
+  let lastLogSum = null; // Getränke-Summe des Abends aller Spieler (für „Erster Trinker")
+
   const ws = connectState({
     onState({ players }) {
       const me = players.find((p) => p.id === playerId);
@@ -147,7 +249,13 @@ if (!token || !playerId) {
       bump('shots-total', me.shots);
       bump('mixes-today', me.mixesToday);
       bump('mixes-total', me.mixes);
+      updateDistribution(me);
       document.title = `SV Partykeller – ${me.name}`;
+
+      // Statistik nachladen, wenn heute irgendwo etwas dazukam (Achievements
+      // wie „Erster Trinker" hängen auch von den anderen ab) oder beim Start.
+      const logSum = players.reduce((s, p) => s + p.beersToday + p.shotsToday + p.mixesToday, 0);
+      if (logSum !== lastLogSum) { lastLogSum = logSum; loadStats(); }
     },
     onError: showError,
   });
@@ -164,5 +272,6 @@ $('logout').addEventListener('click', (e) => {
   location.href = '/';
 });
 </script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
 </body>
 </html>

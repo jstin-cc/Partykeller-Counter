@@ -80,10 +80,15 @@ nichts geändert, hilft `git reset --hard origin/main` — das lässt `data/` un
 
 | Route | Screen |
 |---|---|
-| `/` | Nutzer-Login (Name wählen/anlegen + PIN) |
-| `/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt, Rang |
-| `/tv` | TV-Scoreboard: umschaltbar All-Time / Heute (animiert), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste, Live-Fun-Facts (Tages-Bestleistungen) |
-| `/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, im TV ein-/ausblenden, TV-Ansicht umschalten, QR-Adresse setzen, Komplett-Reset (mit Passwort) |
+| `/` | Nutzer-Login (Name wählen/anlegen + PIN, rate-limitiert) |
+| `/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt, Rang, persönliche Statistik (Abende, bestes Ergebnis, Verteilung) und Achievement-Badges |
+| `/tv` | TV-Scoreboard: umschaltbar All-Time / Heute (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen |
+| `/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht & Rotationstempo einstellen, eigene Fun-Facts pflegen, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort) |
+| `/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen |
+
+Die App ist als **PWA installierbar**: Seite am Handy öffnen → „Zum
+Startbildschirm hinzufügen" — dann liegt der Counter als App-Icon auf dem
+Home-Screen (funktioniert komplett offline im WLAN, es wird nichts gecacht).
 
 ## Stack
 

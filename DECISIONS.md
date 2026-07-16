@@ -271,3 +271,54 @@ nur manuell (Admin) – ein Auto-Wechsel kann später ergänzt werden.
 **Begründung:** Alles vom Nutzer angefordert. Keine neuen Dependencies, offline
 (D-007), Persistenz gewahrt (D-006). `getRecords()` läuft pro State-Broadcast über
 das Log – bei Party-Größe vernachlässigbar; bei Bedarf später cachebar.
+
+## 2026-07-16 · D-015: TV-Rotation einstellbar, eigene Fun-Facts, Heute-Filter, Abend-Archiv, persönliche Statistik + Achievements, PWA, Login-Rate-Limit
+
+**Entscheidung (auf Nutzerwunsch):**
+
+- **Rotationsgeschwindigkeit der TV-Rangliste im Admin einstellbar.** Neuer
+  Settings-Key `scroll_seconds` (Verweildauer pro Scroll-Schritt, Default 3,2 s),
+  WS-Handler `setScrollSpeed` (Admin, 1–30 s), Regler in der TV-Anzeige-Leiste
+  des Admin-Dashboards. Der TV übernimmt Änderungen live (laufender Takt wird
+  neu gestartet). Zeilenhöhe richtet sich jetzt immer am 5er-Raster aus, damit
+  wenige Zeilen (Heute-Ansicht) nicht gestreckt werden.
+- **Eigene Fun-Facts/Meldungen** (Titel + Text) in neuer Tabelle `facts`
+  (`CREATE TABLE IF NOT EXISTS` → migrationssicher). WS-Handler `addFact` /
+  `deleteFact` (Admin; Titel 1–30, Text 1–160 Zeichen, max. 50 Meldungen),
+  Pflege im Admin-Dashboard. Das TV-Band zeigt jetzt je Eintrag Titel + Text;
+  eigene Meldungen rotieren mit den berechneten Facts.
+- **„Heute"-Ansicht zeigt nur, wer heute geloggt hat.** Der Sichtbarkeits-Haken
+  im Admin gilt nur noch für die Gesamtansicht (All-Time); die Tagesliste
+  filtert automatisch auf Spieler mit mindestens einem Getränk am laufenden
+  Party-Tag (Kopfzeile: „N heute dabei").
+- **Abend-Archiv unter `/abende`** (`public/abende.html`, `GET /api/archive`,
+  serverseitig `getArchive()`): jeder Party-Tag als Karte mit Wochentag/Datum,
+  Sieger (👑 + Getränkezahl), Teilnehmerzahl und Gesamtmengen je Sorte.
+  Verlinkt von Login- und Dashboard-Fußzeile.
+- **Persönliche Statistik im Nutzer-Dashboard** (`GET /api/players/:id/stats`,
+  serverseitig `getPlayerStats()`): Anzahl eigener Abende, bestes Ergebnis
+  (mit Datum), Verteilungsbalken Bier/Shots/Mischen (aus den All-Time-Zählern).
+  Wird bei jedem neuen Log-Ereignis nachgeladen (State-Broadcast als Trigger).
+- **Achievements als Badges** (auf den laufenden Party-Tag bezogen, im selben
+  Endpoint): 🥇 Erster Trinker (erstes Log des Abends), 🌙 Mitternachtsbier
+  (Bier zwischen 00:00 und 00:59), ⚡ Drei in einer Stunde (drei Logs binnen
+  60 min), 🍹 Mischmeister (≥ 3 Mischen heute). Verdiente Badges leuchten gold,
+  offene sind gedimmt.
+- **PWA:** `manifest.webmanifest` (Name, Standalone, `#010f05` als Theme-Farbe
+  = exakter sRGB-Wert von `--bg`), Icons 192/512 px aus dem Logo gerendert
+  (`assets/icon-192/512.png`, maskable-tauglich), `theme-color`/
+  `apple-touch-icon` auf allen Seiten. Dazu ein **bewusst cache-freier**
+  Mini-Service-Worker (`sw.js`, fetch-Handler ohne `respondWith`): macht die
+  App auch auf älteren Android-Chromes installierbar, liefert aber nie
+  veraltete Dateien aus (wichtig für Updates auf dem Pi, D-006).
+- **Rate-Limit auf Logins** (`server/ratelimit.js`, ohne neue Dependency):
+  pro IP werden Fehlversuche gezählt; nach 5 Fehlversuchen binnen 1 min sind
+  `POST /api/login` und `POST /api/admin/login` für 5 min gesperrt (HTTP 429
+  mit Restzeit). Erfolgreicher Login setzt zurück. In-Memory reicht (ein
+  Prozess, LAN); ein Neustart hebt Sperren auf.
+
+**Begründung:** Alles vom Nutzer angefordert. Keine neuen npm-Dependencies,
+offline-fähig (D-007: Icons/Manifest liegen in `public/`), Persistenz gewahrt
+(D-006: nur additive Schema-Änderung per `CREATE TABLE IF NOT EXISTS`).
+Rate-Limit schützt die 4-stelligen PINs (10 000 Kombinationen) gegen
+Durchprobieren, ohne legitime Gäste zu stören.

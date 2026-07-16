@@ -20,6 +20,13 @@ Und (D-014): **Animationen auch in der Rangliste** (Pop/Aufleuchten bei neuem
 Getränk, FLIP bei Platzwechsel), **Fun-Facts mit Tagesrekorden** (schön formuliert),
 **eigenes Lösch-Passwort** (`RESET_PASSWORD`, getrennt vom Admin), **Admin-Liste
 alphabetisch**, Glassmorphism-Kasten um den TV-QR-Code.
+Seit 2026-07-16 (D-015): **TV-Rotationstempo im Admin einstellbar**, **eigene
+Fun-Facts** (Titel + Text, Admin-Pflege, rotieren im TV-Band mit), **„Heute"-
+Ansicht zeigt nur Spieler mit Getränk am laufenden Party-Tag** (Haken gilt nur
+All-Time), **Abend-Archiv `/abende`** (Karten je Party-Tag: Sieger, Teilnehmer,
+Mengen), **persönliche Statistik + Achievement-Badges** im Nutzer-Dashboard,
+**PWA-installierbar** (Manifest + Icons + cache-freier Mini-Service-Worker),
+**Rate-Limit auf beide Logins** (5 Fehlversuche/min → 5 min Sperre).
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅
@@ -93,6 +100,18 @@ alphabetisch**, Glassmorphism-Kasten um den TV-QR-Code.
 - [x] README finalisiert (Schnellstart, Screens, Pi-Verweis)
 - [x] Server-Neustart ohne Datenverlust verifiziert (8 Nutzer vor/nach Neustart)
 - [ ] Echter Testlauf auf dem Pi: 2 Handys + TV im WLAN
+
+## Verifikation (2026-07-16, D-015)
+
+Server-Tests: Rate-Limit blockt nach 5 Fehlversuchen beide Logins mit 429 und
+Restzeit; `setScrollSpeed`/`addFact`/`deleteFact` nur als Admin, Wertebereiche
+geprüft; `scroll_seconds`, Facts und Board-Modus überleben den Neustart.
+Browser-Tests (Chromium): Heute-Ansicht zeigt nur die 6 Spieler mit Log heute
+(„6 heute dabei"), Zeilenhöhe bleibt im 5er-Raster; Admin-Regler stellt das
+Tempo live um; eigene Meldung erscheint mit Titel im TV-Band; Dashboard zeigt
+Statistik (3 Abende, bestes Ergebnis 13 am 25.09.2025) und 3 verdiente Badges;
+`/abende` listet 3 Party-Tage mit Siegern; Manifest + `sw.js` liefern 200.
+Keine Konsolenfehler.
 
 ## Verifikation (2026-07-14)
 

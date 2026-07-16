@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SV Partykeller – Abend-Archiv</title>
+<link rel="icon" href="assets/cones-flat.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#010f05">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  .archive-watermark {
+    position: absolute;
+    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .night-card {
+    background: var(--surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-edge);
+    border-top: 3px solid var(--green);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .night-date {
+    font-family: 'Bitter', serif;
+    font-weight: 800;
+    font-size: 21px;
+    color: var(--creme);
+  }
+  .night-weekday {
+    font-size: 13px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .night-winner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  .night-winner .name { font-family:'Bitter',serif; font-weight:700; font-size:17px; color:var(--gold); flex:1; }
+  .night-winner .count { font-family:'Bitter',serif; font-weight:700; font-size:15px; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
+  .night-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .night-stats .cell { text-align: center; flex: 1; }
+  .night-stats .value { font-family:'Bitter',serif; font-weight:800; font-size:22px; }
+  .night-stats .label { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .night-meta { font-size: 13px; color: var(--ink-muted); display:flex; justify-content:space-between; }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+  <div class="archive-watermark" style="right:-200px;top:-160px;width:700px;height:700px;opacity:0.16;transform:rotate(20deg);"></div>
+
+  <div style="max-width:1100px;margin:0 auto;width:100%;padding:28px 20px 0 20px;position:relative;z-index:1;flex:1;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <img src="assets/logo.png" alt="SV Partykeller" style="height:56px;width:auto;object-fit:contain;">
+        <div>
+          <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0;">Abend-Archiv</h1>
+          <div style="font-size:14px;color:var(--ink-muted);">Jeder Party-Tag auf einen Blick.</div>
+        </div>
+      </div>
+      <a href="/" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
+    </div>
+
+    <div id="empty" hidden style="text-align:center;margin-top:60px;color:var(--ink-muted);font-size:16px;">
+      Noch keine Abende aufgezeichnet – der erste Schluck legt los.
+    </div>
+    <div id="cards" class="cards"></div>
+  </div>
+
+  <img src="assets/footer-woods.png" alt="" class="footer-woods" style="margin-top:24px;">
+</div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+
+const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+// '2026-09-25' -> { date: '25.09.2026', weekday: 'Freitag' }
+function fmtDay(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return {
+    date: `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`,
+    weekday: WEEKDAYS[new Date(y, m - 1, d).getDay()],
+  };
+}
+
+function statCell(value, label, color) {
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  const v = document.createElement('div');
+  v.className = 'value';
+  v.style.color = color;
+  v.textContent = value;
+  const l = document.createElement('div');
+  l.className = 'label';
+  l.textContent = label;
+  cell.append(v, l);
+  return cell;
+}
+
+function buildCard(night) {
+  const { date, weekday } = fmtDay(night.day);
+  const card = document.createElement('div');
+  card.className = 'night-card';
+
+  const head = document.createElement('div');
+  const wd = document.createElement('div');
+  wd.className = 'night-weekday';
+  wd.textContent = weekday;
+  const dt = document.createElement('div');
+  dt.className = 'night-date';
+  dt.textContent = date;
+  head.append(wd, dt);
+
+  const winner = document.createElement('div');
+  winner.className = 'night-winner';
+  if (night.winner) {
+    const crown = document.createElement('span');
+    crown.textContent = '👑';
+    const name = document.createElement('span');
+    name.className = 'name';
+    name.textContent = night.winner.name;
+    const count = document.createElement('span');
+    count.className = 'count';
+    count.textContent = `${night.winner.total} Getränke`;
+    winner.append(crown, name, count);
+  } else {
+    winner.textContent = '—';
+  }
+
+  const stats = document.createElement('div');
+  stats.className = 'night-stats';
+  stats.append(
+    statCell(night.beers, 'Bier', 'var(--amber)'),
+    statCell(night.shots, 'Shots', 'var(--brick)'),
+    statCell(night.mixes, 'Mischen', 'var(--mix)'),
+    statCell(night.total, 'Gesamt', 'var(--gold)'),
+  );
+
+  const meta = document.createElement('div');
+  meta.className = 'night-meta';
+  const part = document.createElement('span');
+  part.textContent = night.participants === 1 ? '1 Teilnehmer:in' : `${night.participants} Teilnehmer:innen`;
+  meta.append(part);
+
+  card.append(head, winner, stats, meta);
+  return card;
+}
+
+async function load() {
+  const res = await fetch('/api/archive');
+  const { days } = await res.json();
+  const box = $('cards');
+  box.textContent = '';
+  $('empty').hidden = days.length > 0;
+  for (const night of days) box.appendChild(buildCard(night));
+}
+
+load();
+</script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+</body>
+</html>
