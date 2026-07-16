@@ -84,9 +84,9 @@ a:hover { color: var(--gold); }
   z-index: 1;
 }
 
-/* Zapfen-Wasserzeichen rechts unten */
+/* Zapfen-Wasserzeichen rechts unten – fest im Viewport (bleibt beim Scrollen stehen) */
 .watermark {
-  position: absolute;
+  position: fixed;
   right: -150px;
   bottom: 60px;
   width: 480px;
