@@ -42,7 +42,7 @@ Ein Node.js-Prozess serviert alles:
 CREATE TABLE players (
   id         TEXT PRIMARY KEY,            -- z. B. nanoid/uuid
   name       TEXT NOT NULL UNIQUE COLLATE NOCASE,
-  pin_hash   TEXT NOT NULL,               -- PIN ist Pflicht (scrypt-Hash, node:crypto)
+  pin_hash   TEXT NOT NULL,               -- scrypt-Hash (node:crypto); leer '' = keine PIN (D-018)
   beers      INTEGER NOT NULL DEFAULT 0,  -- All-Time-Zähler
   shots      INTEGER NOT NULL DEFAULT 0,
   mixes      INTEGER NOT NULL DEFAULT 0,  -- „Mischen" (D-012)
@@ -85,10 +85,11 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
 
 ## 4. Auth
 
-- **Nutzer**: Account = Name + Pflicht-PIN (4-stellig). Login gibt ein
-  HMAC-signiertes Token zurück (Secret aus `.env`, stateless → übersteht
-  Server-Neustarts). Token liegt im `localStorage` des Handys, Re-Login nur
-  bei Gerätewechsel nötig.
+- **Nutzer**: Account = Name + optionale PIN (4-stellig, D-018 – ersetzt die
+  frühere Pflicht aus D-002). Ohne PIN meldet ein Antippen des Namens direkt an;
+  mit PIN wird sie abgefragt. Login gibt ein HMAC-signiertes Token zurück
+  (Secret aus `.env`, stateless → übersteht Server-Neustarts). Token liegt im
+  `localStorage` des Handys, Re-Login nur bei Gerätewechsel nötig.
 - **Admin**: Passwort aus `.env` (`ADMIN_PASSWORD`), Login gibt ein Admin-Token
   (gleicher Mechanismus, Rolle im Token).
 - PINs werden nur gehasht gespeichert (scrypt aus `node:crypto`, keine Extra-Dependency).
@@ -233,7 +234,7 @@ Abhakbare Detail-Schritte stehen in [PROGRESS.md](PROGRESS.md).
 - **M1 – Server-Fundament**: config, DB-Schema, Express + Statics, WS-Broadcast, `GET /api/state`, Seeds für Dev.
 - **M2 – Design-Basis**: Assets & Fonts vendoren, `theme.css`, shared WS-Client mit Auto-Reconnect.
 - **M3 – Nutzer-Dashboard** (erster Screen, nach Freigabe): `/dashboard` nach v3-Design, increment über WS, live Rang/Heute/Gesamt.
-- **M4 – Nutzer-Login**: Name wählen/anlegen + Pflicht-PIN, Token-Handling.
+- **M4 – Nutzer-Login**: Name wählen/anlegen + optionale PIN (D-018), Token-Handling.
 - **M5 – TV-Scoreboard**: Rangliste, Podest Top 3, QR-Code, live.
 - **M6 – Admin**: Login, Nutzer-Verwaltung, Zähler-Bearbeitung, geschützter Reset.
 - **M7 – Betrieb**: systemd-Unit, mDNS-/Kiosk-Doku, README-Finale, Testlauf-Checkliste.

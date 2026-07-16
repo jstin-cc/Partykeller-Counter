@@ -366,3 +366,35 @@ Dependencies, In-Memory (ein Prozess, LAN), Persistenz unberührt. Verifiziert:
 7. Konto in einer Minute → 429; 20 schnelle Spieler-Increments → nur 5 durch,
 Rest gedrosselt; Neu-Verbinden setzt den Bucket nicht zurück; Admin
 ungedrosselt; Bucket füllt sich über die Zeit nach.
+
+## 2026-07-16 · D-018: PIN wieder optional pro Nutzer (ersetzt D-002)
+
+**Entscheidung (auf Nutzerwunsch):** Die 4-stellige Nutzer-PIN ist wieder
+**optional** – pro Konto. Das kehrt die frühere Verpflichtung aus **D-002**
+bewusst um und entspricht wieder dem ursprünglichen Design-Prototyp
+(„PIN (optional)"). D-002 bleibt als historischer Eintrag stehen und gilt ab
+hier als überholt.
+
+**Umsetzung:**
+- Beim Anlegen (Login-Seite und Admin) ist das PIN-Feld optional. Leer =
+  Konto ohne PIN. In der DB wird dafür `pin_hash = ''` gespeichert (leerer
+  String als „keine PIN"); **keine Schema-Migration nötig**, die Spalte bleibt
+  `NOT NULL`. Bestehende Konten mit PIN sind unberührt.
+- Login: Konten **ohne** PIN werden durch Antippen des Namens **direkt**
+  angemeldet (kein Eingabefeld). Konten **mit** PIN verlangen sie wie bisher;
+  falsche/fehlende PIN → 401. Das Login-Rate-Limit (D-015) bleibt aktiv.
+- Der State liefert pro Spieler `hasPin` (nur der Boolean, **nie** der Hash),
+  damit die Login-Seite direkt-anmelden vs. abfragen unterscheiden kann und der
+  Admin PIN-lose Konten markiert („ohne PIN").
+- Admin kann per PIN-Modal eine PIN setzen **oder entfernen** (leeres Feld).
+
+**Sicherheits-Hinweis (bewusst akzeptiert):** Ein Konto **ohne** PIN ist nicht
+geschützt – wer den Namen antippt, ist als diese Person angemeldet und kann
+deren Zähler erhöhen / das Dashboard sehen. Für eine lockere Partyrunde
+gewollt; wer Schutz will, vergibt eine PIN. Admin-Login, Lösch-Passwort und
+alle Server-seitigen Rollenprüfungen (D-004) sind davon **nicht** betroffen.
+
+**Begründung:** Vom Nutzer gewünscht, entspricht dem Original-Design. Keine
+neuen Dependencies, keine Migration, Persistenz gewahrt (D-006). Verifiziert:
+Anlegen/Login ohne PIN klappt, PIN-Konten und Bestandsnutzer bleiben geschützt,
+Admin kann PIN setzen/entfernen, kein Konsolenfehler.

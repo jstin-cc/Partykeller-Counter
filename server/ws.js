@@ -55,9 +55,11 @@ const handlers = {
   addPlayer(auth, { name, pin }) {
     requireAdmin(auth);
     if (!validName(name)) throw new Error('Ungültiger Name (1-24 Zeichen)');
-    if (!validPin(pin)) throw new Error('PIN muss 4 Ziffern haben');
+    // PIN optional (D-018): leer => Konto ohne PIN
+    const hasPin = pin != null && pin !== '';
+    if (hasPin && !validPin(pin)) throw new Error('PIN muss 4 Ziffern haben');
     if (db.getPlayerByName(name.trim())) throw new Error('Name ist schon vergeben');
-    db.createPlayer(name.trim(), hashPin(pin));
+    db.createPlayer(name.trim(), hasPin ? hashPin(pin) : '');
   },
 
   renamePlayer(auth, { id, name }) {
@@ -70,8 +72,10 @@ const handlers = {
 
   setPin(auth, { id, pin }) {
     requireAdmin(auth);
-    if (!validPin(pin)) throw new Error('PIN muss 4 Ziffern haben');
-    if (!db.setPinHash(id, hashPin(pin))) throw new Error('Nutzer nicht gefunden');
+    // leer => PIN entfernen (Konto danach ohne PIN, D-018); sonst 4 Ziffern
+    const hasPin = pin != null && pin !== '';
+    if (hasPin && !validPin(pin)) throw new Error('PIN muss 4 Ziffern haben');
+    if (!db.setPinHash(id, hasPin ? hashPin(pin) : '')) throw new Error('Nutzer nicht gefunden');
   },
 
   setCounter(auth, { id, drink, value }) {

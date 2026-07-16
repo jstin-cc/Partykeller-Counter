@@ -80,7 +80,7 @@ nichts geändert, hilft `git reset --hard origin/main` — das lässt `data/` un
 
 | Route | Screen |
 |---|---|
-| `/` | Nutzer-Login (Name wählen/anlegen + PIN, rate-limitiert) |
+| `/` | Nutzer-Login (Name wählen/anlegen; PIN optional, rate-limitiert) |
 | `/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt, Rang, persönliche Statistik (Abende, bestes Ergebnis, Verteilung) und Achievement-Badges |
 | `/tv` | TV-Scoreboard: umschaltbar All-Time / Heute (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen |
 | `/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht & Rotationstempo einstellen, eigene Fun-Facts pflegen, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort) |

@@ -56,13 +56,15 @@ app.post('/api/players', (req, res) => {
   }
   const { name, pin } = req.body ?? {};
   if (!validName(name)) return res.status(400).json({ error: 'Ungültiger Name (1-24 Zeichen)' });
-  if (!validPin(pin)) return res.status(400).json({ error: 'PIN muss 4 Ziffern haben' });
+  // PIN ist optional (D-018): leer => Konto ohne PIN; sonst müssen es 4 Ziffern sein
+  const hasPin = pin !== undefined && pin !== null && pin !== '';
+  if (hasPin && !validPin(pin)) return res.status(400).json({ error: 'PIN muss 4 Ziffern haben' });
   if (db.getPlayerByName(name.trim())) return res.status(409).json({ error: 'Name ist schon vergeben' });
   if (db.countPlayers() >= MAX_PLAYERS) {
     return res.status(429).json({ error: 'Maximale Teilnehmerzahl erreicht.' });
   }
 
-  const player = db.createPlayer(name.trim(), hashPin(pin));
+  const player = db.createPlayer(name.trim(), hasPin ? hashPin(pin) : '');
   broadcastState();
   res.status(201).json({
     player: { id: player.id, name: player.name },
@@ -74,9 +76,16 @@ app.post('/api/login', (req, res) => {
   if (rateLimited(req, res)) return;
   const { playerId, pin } = req.body ?? {};
   const player = playerId ? db.getPlayer(playerId) : null;
-  if (!player || !validPin(pin) || !verifyPin(pin, player.pin_hash)) {
+  if (!player) {
     loginLimiter.fail(req.ip);
     return res.status(401).json({ error: 'Name oder PIN falsch' });
+  }
+  // Konto ohne PIN (D-018): direkt anmelden. Sonst muss die PIN stimmen.
+  if (player.pin_hash) {
+    if (!validPin(pin) || !verifyPin(pin, player.pin_hash)) {
+      loginLimiter.fail(req.ip);
+      return res.status(401).json({ error: 'Name oder PIN falsch' });
+    }
   }
   loginLimiter.clear(req.ip);
   res.json({
