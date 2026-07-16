@@ -338,3 +338,31 @@ entfällt.
 umgesetzt. Keine neuen Dependencies, offline-fähig, Persistenz gewahrt (Setting
 überlebt den Neustart). 30 s als Untergrenze verhindert hektisches Flackern,
 5 min als Obergrenze lässt eine Meldung lange stehen.
+
+## 2026-07-16 · D-017: Missbrauchsschutz – Kontoerstellung-Limit und Increment-Throttle
+
+**Entscheidung (nach Security-Review):** Zwei Missbrauchspunkte der offenen
+Party-App gehärtet, ohne echte Gäste zu stören:
+
+- **Kontoerstellung gedrosselt und gedeckelt.** `POST /api/players` ist bewusst
+  ohne Login (Gäste melden sich selbst an, D-002), war aber unbegrenzt. Jetzt:
+  max. 6 neue Konten pro Minute und IP (`createRateLimiter` in
+  `server/ratelimit.js`, zählt jeden Versuch im gleitenden Fenster → HTTP 429)
+  plus harter Gesamt-Deckel `MAX_PLAYERS = 200`. Verhindert Massen-Anlage/
+  DB-Spam durch ein Skript.
+- **Spieler-Increments gedrosselt.** Ein Spieler durfte sein „+1" beliebig
+  schnell senden (Zähler-/Log-Flut, Broadcast-Sturm zu allen TVs). Jetzt
+  Token-Bucket **pro Spieler** (`auth.sub`, nicht pro Verbindung – Neu-Verbinden
+  hebelt den Schutz nicht aus): im Schnitt ~1 Getränk/Sekunde, kurzer Burst bis
+  5. Admins bleiben ungedrosselt (Korrekturen, D-004).
+
+**Bewusst NICHT geändert (Design-Kompromisse der LAN-App):** 4-stellige PINs
+und die öffentliche `/api/state` (fürs Scoreboard) bleiben – das Rate-Limit auf
+den Logins (D-015, 5 Fehlversuche/min → 60 s Sperre) bremst PIN-Raten
+ausreichend; Klartext-HTTP im WLAN bleibt (kein TLS auf dem Kiosk-Pi).
+
+**Begründung:** Beides vom Nutzer nach dem Review gewünscht. Keine neuen
+Dependencies, In-Memory (ein Prozess, LAN), Persistenz unberührt. Verifiziert:
+7. Konto in einer Minute → 429; 20 schnelle Spieler-Increments → nur 5 durch,
+Rest gedrosselt; Neu-Verbinden setzt den Bucket nicht zurück; Admin
+ungedrosselt; Bucket füllt sich über die Zeit nach.

@@ -6,7 +6,7 @@ import * as db from './db.js';
 import { hashPin, verifyPin, playerToken, adminToken, checkAdminPassword } from './auth.js';
 import { setupWs, broadcastState } from './ws.js';
 import { validName, validPin } from './validate.js';
-import { createLoginLimiter } from './ratelimit.js';
+import { createLoginLimiter, createRateLimiter } from './ratelimit.js';
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
@@ -43,12 +43,24 @@ function rateLimited(req, res) {
   return true;
 }
 
+// Missbrauchsschutz für die offene Kontoerstellung: max. 6 neue Konten pro
+// Minute und IP, und ein harter Gesamt-Deckel (verhindert Massen-Anlage/DB-Spam
+// durch ein Skript; für echte Gäste unmerklich).
+const createLimiter = createRateLimiter({ max: 6, windowMs: 60_000 });
+const MAX_PLAYERS = 200;
+
 // Nutzer legen sich selbst an (Name + Pflicht-PIN, D-002)
 app.post('/api/players', (req, res) => {
+  if (!createLimiter.take(req.ip)) {
+    return res.status(429).json({ error: 'Zu viele neue Konten – bitte kurz warten.' });
+  }
   const { name, pin } = req.body ?? {};
   if (!validName(name)) return res.status(400).json({ error: 'Ungültiger Name (1-24 Zeichen)' });
   if (!validPin(pin)) return res.status(400).json({ error: 'PIN muss 4 Ziffern haben' });
   if (db.getPlayerByName(name.trim())) return res.status(409).json({ error: 'Name ist schon vergeben' });
+  if (db.countPlayers() >= MAX_PLAYERS) {
+    return res.status(429).json({ error: 'Maximale Teilnehmerzahl erreicht.' });
+  }
 
   const player = db.createPlayer(name.trim(), hashPin(pin));
   broadcastState();

@@ -18,6 +18,21 @@ function requireAdmin(auth) {
   if (auth?.role !== 'admin') throw new Error('Nur für Admins erlaubt');
 }
 
+// Increment-Throttle pro SPIELER (nicht pro Verbindung), damit Neu-Verbinden den
+// Schutz nicht aushebelt: Token-Bucket mit im Schnitt ~1 Getränk/Sekunde und
+// kurzem Burst bis 5. Map ist durch die Teilnehmerzahl begrenzt (Deckel 200).
+const incBuckets = new Map(); // playerId -> { tokens, last }
+function allowPlayerIncrement(playerId) {
+  const now = Date.now();
+  let b = incBuckets.get(playerId);
+  if (!b) { b = { tokens: 5, last: now }; incBuckets.set(playerId, b); }
+  b.tokens = Math.min(5, b.tokens + (now - b.last) / 1000);
+  b.last = now;
+  if (b.tokens < 1) return false;
+  b.tokens -= 1;
+  return true;
+}
+
 // Nachrichten-Contract siehe PLAN.md §5; Server validiert alles.
 const handlers = {
   increment(auth, { playerId, drink, delta }) {
@@ -152,6 +167,12 @@ export function setupWs(server) {
       const auth = verifyToken(msg.token);
       if (!auth) {
         ws.send(JSON.stringify({ type: 'error', message: 'Nicht angemeldet oder Token ungültig' }));
+        return;
+      }
+
+      // Spieler-Increments drosseln (pro Spieler; Admins bleiben ungedrosselt)
+      if (msg.type === 'increment' && auth.role === 'player' && !allowPlayerIncrement(auth.sub)) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Immer mit der Ruhe – gleich geht’s weiter. 🍺' }));
         return;
       }
 
