@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Scoreboard</title>
 <link rel="icon" href="assets/cones-flat.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#010f05">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
 <script src="js/vendor/qrcode.js"></script>
 <style>
@@ -165,7 +168,7 @@
 
     <!-- Fun-Facts (live): kompaktes Band direkt über den Bäumen, verdeckt sie nicht -->
     <div id="funfacts" class="glass" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:9px 24px;background:var(--surface-alt);border-top:3px solid var(--gold);border-radius:var(--radius-lg);">
-      <span style="font-family:'Bitter',serif;font-weight:800;font-size:15px;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;flex-shrink:0;">Fun Fact</span>
+      <span id="funfact-title" style="font-family:'Bitter',serif;font-weight:800;font-size:15px;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;flex-shrink:0;transition:opacity 0.4s;">Fun Fact</span>
       <span id="funfact-text" style="font-size:18px;color:var(--creme);font-family:'Bitter',serif;font-weight:600;transition:opacity 0.4s;">Bald gibt's hier Statistiken.</span>
     </div>
 
@@ -223,9 +226,11 @@ function fillPodium(el, p, slot) {
 // (kein endloses Durchlaufen).
 const WINDOW = 5;
 const GAP = 8;            // px zwischen den Zeilen (muss zu .rest-track passen)
-const STEP_MS = 3200;     // Verweildauer pro Schritt
 const SCROLL_MS = 650;    // sanft eine Zeile weiter
 const RESET_MS = 900;     // schnell zurück nach oben
+
+// Verweildauer pro Schritt: im Admin einstellbar (setScrollSpeed), kommt im State
+let stepMs = 3200;
 
 let others = [];          // Spieler ab Platz 4 (aktuellster State)
 let prevOthers = [];      // vorheriger 4+-Stand (Diff: Umsortierung erkennen)
@@ -327,10 +332,11 @@ function rebuildRest(animate) {
   for (const p of others) track.appendChild(buildRow(p, modeSwitching ? null : prevVals[p.id]));
   viewport.appendChild(track);
 
-  // Zeilenhöhe so wählen, dass genau WINDOW Zeilen (inkl. Lücken) das Fenster füllen
+  // Zeilenhöhe immer am 5er-Raster ausrichten, damit Zeilen bei weniger
+  // Einträgen (z. B. Heute-Ansicht) nicht ins Riesige gestreckt werden
   const visible = Math.min(WINDOW, others.length);
   const vh = viewport.clientHeight;
-  rowH = (vh - (visible - 1) * GAP) / visible;
+  rowH = (vh - (WINDOW - 1) * GAP) / WINDOW;
   for (const r of track.children) r.style.height = `${rowH}px`;
   track.style.transition = 'none';
   track.style.transform = 'translateY(0)';
@@ -356,7 +362,18 @@ function rebuildRest(animate) {
   }
 
   maxPos = others.length - visible;
-  if (maxPos > 0) scrollTimer = setInterval(scrollStep, STEP_MS);
+  if (maxPos > 0) scrollTimer = setInterval(scrollStep, stepMs);
+}
+
+// Geschwindigkeit geändert (Admin): laufende Rotation mit neuem Takt fortsetzen
+function applyScrollSpeed(seconds) {
+  const ms = Math.round((Number(seconds) || 3.2) * 1000);
+  if (ms === stepMs) return;
+  stepMs = ms;
+  if (scrollTimer) {
+    clearInterval(scrollTimer);
+    scrollTimer = setInterval(scrollStep, stepMs);
+  }
 }
 
 // Einstieg: In-Place-Update bei gleicher Reihenfolge, sonst Neuaufbau mit FLIP.
@@ -381,11 +398,13 @@ function metricsFor(p, mode) {
     : { beers: p.beers, shots: p.shots, mixes: p.mixes, total: p.total };
 }
 
-// Nur sichtbare Spieler, nach dem gewählten Modus sortiert und neu gerankt
+// Modus bestimmt, wer auf dem Board steht:
+//  - alltime: alle mit Haken im Admin (der Haken gilt nur für die Gesamtansicht)
+//  - today:   alle, die heute mindestens ein Getränk geloggt haben
 function boardRows(players, mode) {
   const rows = players
-    .filter((p) => !p.hidden)
-    .map((p) => ({ id: p.id, name: p.name, ...metricsFor(p, mode) }));
+    .map((p) => ({ id: p.id, name: p.name, hidden: p.hidden, ...metricsFor(p, mode) }))
+    .filter((r) => (mode === 'today' ? r.total > 0 : !r.hidden));
   rows.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'de'));
   rows.forEach((r, i) => { r.rank = i + 1; });
   return rows;
@@ -393,10 +412,11 @@ function boardRows(players, mode) {
 
 function applyState(state, mode) {
   const rows = boardRows(state.players, mode);
-  const visibleCount = state.players.filter((p) => !p.hidden).length;
 
   $('board-subtitle').textContent = mode === 'today' ? 'Rangliste heute' : 'All-Time Rangliste';
-  $('participant-count').textContent = `${visibleCount} Teilnehmer`;
+  $('participant-count').textContent = mode === 'today'
+    ? `${rows.length} heute dabei`
+    : `${rows.length} Teilnehmer`;
   const beers = rows.reduce((s, r) => s + r.beers, 0);
   const shots = rows.reduce((s, r) => s + r.shots, 0);
   const mixes = rows.reduce((s, r) => s + r.mixes, 0);
@@ -408,7 +428,7 @@ function applyState(state, mode) {
   fillPodium($('pod-3'), rows[2], 3);
 
   updateRest(rows.slice(3));
-  updateFacts(state.players.filter((p) => !p.hidden), state.records);
+  updateFacts(state.players.filter((p) => !p.hidden), state.records, state.customFacts);
 }
 
 // Moduswechsel: das ganze Board fährt raus und das neue fährt wieder ein
@@ -434,6 +454,7 @@ connectState({
   onState(state) {
     const { joinUrl, boardMode } = state;
     renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + '/'));
+    applyScrollSpeed(state.scrollSeconds);
     const mode = boardMode === 'today' ? 'today' : 'alltime';
 
     if (currentMode !== null && mode !== currentMode) {
@@ -446,13 +467,14 @@ connectState({
 });
 
 // --- Fun-Facts (live) ---
-// Tages-Bestleistungen direkt aus dem aktuellen State: Top-Trinker heute je
-// Getränk (Bier / Shots / Mischen) plus die fleißigste Person insgesamt.
+// Jeder Eintrag ist { title, text }: berechnete Facts (Rekorde, Tages-
+// Bestleistungen) plus die vom Admin gepflegten eigenen Meldungen.
 // „Heute" = Party-Tag 06:00–05:59 (kommt schon aggregiert vom Server).
-const FUNFACT_FALLBACK = 'Heute noch nichts getrunken – auf geht’s!';
+const FUNFACT_FALLBACK = { title: 'Fun Fact', text: 'Heute noch nichts getrunken – auf geht’s!' };
 let facts = [];
 let factIdx = 0;
 const factEl = $('funfact-text');
+const factTitleEl = $('funfact-title');
 
 function leaderBy(players, key) {
   let best = null;
@@ -470,29 +492,33 @@ function fmtDay(iso) {
   return `${d}.${m}.${y}`;
 }
 
-function computeFacts(players, records) {
+function computeFacts(players, records, customFacts) {
   const out = [];
+  const fact = (text) => out.push({ title: 'Fun Fact', text });
 
   // All-Time-Rekorde: meiste Getränke an einem einzelnen Abend, schön formuliert
   if (records) {
-    if (records.beer) out.push(`Bier-Rekord: Die meisten Biere an einem Abend hat ${records.beer.name} am ${fmtDay(records.beer.day)} geschafft – ganze ${records.beer.n} Stück.`);
-    if (records.shot) out.push(`Shot-Rekord: ${records.shot.name} kippte am ${fmtDay(records.shot.day)} sagenhafte ${records.shot.n} Shots an einem Abend.`);
-    if (records.mix) out.push(`Mische-Rekord: ${records.mix.name} mixte am ${fmtDay(records.mix.day)} ${records.mix.n} Mischgetränke an einem Abend.`);
+    if (records.beer) fact(`Bier-Rekord: Die meisten Biere an einem Abend hat ${records.beer.name} am ${fmtDay(records.beer.day)} geschafft – ganze ${records.beer.n} Stück.`);
+    if (records.shot) fact(`Shot-Rekord: ${records.shot.name} kippte am ${fmtDay(records.shot.day)} sagenhafte ${records.shot.n} Shots an einem Abend.`);
+    if (records.mix) fact(`Mische-Rekord: ${records.mix.name} mixte am ${fmtDay(records.mix.day)} ${records.mix.n} Mischgetränke an einem Abend.`);
   }
+
+  // Eigene Meldungen aus dem Admin (mit eigenem Titel)
+  for (const f of customFacts ?? []) out.push({ title: f.title, text: f.text });
 
   // Tages-Bestleistungen (heute)
   const b = leaderBy(players, 'beersToday');
-  if (b) out.push(`Bier-König des Abends: ${b.name} mit ${b.beersToday} Bier.`);
+  if (b) fact(`Bier-König des Abends: ${b.name} mit ${b.beersToday} Bier.`);
   const s = leaderBy(players, 'shotsToday');
-  if (s) out.push(`Shot-Meister des Abends: ${s.name} mit ${s.shotsToday} Shots.`);
+  if (s) fact(`Shot-Meister des Abends: ${s.name} mit ${s.shotsToday} Shots.`);
   const m = leaderBy(players, 'mixesToday');
-  if (m) out.push(`Misch-Meister des Abends: ${m.name} mit ${m.mixesToday} Mischen.`);
+  if (m) fact(`Misch-Meister des Abends: ${m.name} mit ${m.mixesToday} Mischen.`);
   let top = null, topN = 0;
   for (const p of players) {
     const n = (p.beersToday || 0) + (p.shotsToday || 0) + (p.mixesToday || 0);
     if (n > topN) { topN = n; top = p; }
   }
-  if (top) out.push(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken.`);
+  if (top) fact(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken.`);
   return out;
 }
 
@@ -500,20 +526,27 @@ function currentFactList() {
   return facts.length ? facts : [FUNFACT_FALLBACK];
 }
 
-function updateFacts(players, records) {
-  facts = computeFacts(players, records);
+function showFact(f) {
+  factTitleEl.textContent = f.title;
+  factEl.textContent = f.text;
+}
+
+function updateFacts(players, records, customFacts) {
+  facts = computeFacts(players, records, customFacts);
   const list = currentFactList();
   factIdx %= list.length;
-  factEl.textContent = list[factIdx];
+  showFact(list[factIdx]);
 }
 
 setInterval(() => {
   const list = currentFactList();
   factIdx = (factIdx + 1) % list.length;
   factEl.style.opacity = '0';
+  factTitleEl.style.opacity = '0';
   setTimeout(() => {
-    factEl.textContent = list[factIdx];
+    showFact(list[factIdx]);
     factEl.style.opacity = '1';
+    factTitleEl.style.opacity = '1';
   }, 400);
 }, 7000);
 </script>

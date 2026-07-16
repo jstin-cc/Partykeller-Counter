@@ -34,6 +34,13 @@ db.exec(`
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS facts (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    title      TEXT NOT NULL,
+    text       TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 // Migrationen für bestehende Datenbanken (D-006: Neustart/Update darf keine
@@ -109,8 +116,31 @@ const stmts = {
      FROM drink_log
      GROUP BY drink, player_id, day`
   ),
+  // Abend-Archiv: Getränke je Party-Tag, Spieler und Sorte (Party-Tag ab 06:00)
+  archiveCounts: db.prepare(
+    `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
+            player_id, drink, COUNT(*) AS n
+     FROM drink_log
+     GROUP BY day, player_id, drink`
+  ),
+  // Persönliche Statistik: Getränke des Spielers je Party-Tag
+  playerDays: db.prepare(
+    `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day, COUNT(*) AS n
+     FROM drink_log WHERE player_id = ?
+     GROUP BY day ORDER BY day`
+  ),
+  firstLogToday: db.prepare(
+    'SELECT player_id FROM drink_log WHERE ts >= ? ORDER BY ts, id LIMIT 1'
+  ),
+  playerLogsToday: db.prepare(
+    'SELECT drink, ts FROM drink_log WHERE player_id = ? AND ts >= ? ORDER BY ts'
+  ),
   resetCounters: db.prepare('UPDATE players SET beers = 0, shots = 0, mixes = 0'),
   clearLog: db.prepare('DELETE FROM drink_log'),
+  listFacts: db.prepare('SELECT id, title, text FROM facts ORDER BY id'),
+  insertFact: db.prepare('INSERT INTO facts (title, text) VALUES (?, ?)'),
+  deleteFact: db.prepare('DELETE FROM facts WHERE id = ?'),
+  countFacts: db.prepare('SELECT COUNT(*) AS n FROM facts'),
   getSetting: db.prepare('SELECT value FROM settings WHERE key = ?'),
   setSetting: db.prepare(
     'INSERT INTO settings (key, value) VALUES (?, ?) ' +
@@ -194,6 +224,96 @@ export function getRecords() {
   return best;
 }
 
+// --- Eigene Fun-Facts / Meldungen (Admin) ---
+export function listFacts() {
+  return stmts.listFacts.all();
+}
+
+export function addFact(title, text) {
+  if (stmts.countFacts.get().n >= 50) throw new Error('Zu viele Meldungen (max. 50)');
+  stmts.insertFact.run(title, text);
+}
+
+export function deleteFact(id) {
+  return stmts.deleteFact.run(id).changes > 0;
+}
+
+// --- Abend-Archiv: jeder Party-Tag mit Sieger, Teilnehmern und Gesamtmengen ---
+export function getArchive() {
+  const days = new Map(); // day -> { totals, perPlayer: Map }
+  for (const row of stmts.archiveCounts.all()) {
+    let d = days.get(row.day);
+    if (!d) {
+      d = { day: row.day, beers: 0, shots: 0, mixes: 0, perPlayer: new Map() };
+      days.set(row.day, d);
+    }
+    if (row.drink === 'beer') d.beers += row.n;
+    else if (row.drink === 'shot') d.shots += row.n;
+    else d.mixes += row.n;
+    d.perPlayer.set(row.player_id, (d.perPlayer.get(row.player_id) ?? 0) + row.n);
+  }
+
+  const names = new Map(stmts.listPlayers.all().map((p) => [p.id, p.name]));
+  return [...days.values()]
+    .map((d) => {
+      let winnerId = null;
+      let winnerN = 0;
+      for (const [pid, n] of d.perPlayer) {
+        if (n > winnerN) { winnerId = pid; winnerN = n; }
+      }
+      return {
+        day: d.day,
+        beers: d.beers,
+        shots: d.shots,
+        mixes: d.mixes,
+        total: d.beers + d.shots + d.mixes,
+        participants: d.perPlayer.size,
+        winner: winnerId ? { name: names.get(winnerId) ?? '—', total: winnerN } : null,
+      };
+    })
+    .sort((a, b) => b.day.localeCompare(a.day));
+}
+
+// --- Persönliche Statistik + Achievements (für das Nutzer-Dashboard) ---
+// Achievements beziehen sich auf den laufenden Party-Tag:
+//  - firstDrinker:  erstes geloggtes Getränk des Abends kam von diesem Spieler
+//  - midnightBeer:  ein Bier zwischen 00:00 und 00:59 geloggt
+//  - threeInHour:   drei Getränke innerhalb von 60 Minuten
+//  - mixMaster:     mindestens 3 Mischgetränke heute
+export function getPlayerStats(id) {
+  const rows = stmts.playerDays.all(id);
+  let best = null;
+  for (const r of rows) {
+    if (!best || r.n > best.total) best = { day: r.day, total: r.n };
+  }
+
+  const dayStart = partyDayStartMs();
+  const first = stmts.firstLogToday.get(dayStart);
+  const logs = stmts.playerLogsToday.all(id, dayStart);
+
+  let midnightBeer = false;
+  let mixesToday = 0;
+  for (const l of logs) {
+    if (l.drink === 'mix') mixesToday += 1;
+    if (l.drink === 'beer' && new Date(l.ts).getHours() === 0) midnightBeer = true;
+  }
+  let threeInHour = false;
+  for (let i = 0; i + 2 < logs.length; i++) {
+    if (logs[i + 2].ts - logs[i].ts <= 60 * 60 * 1000) { threeInHour = true; break; }
+  }
+
+  return {
+    days: rows.length,
+    best,
+    achievements: {
+      firstDrinker: !!first && first.player_id === id,
+      midnightBeer,
+      threeInHour,
+      mixMaster: mixesToday >= 3,
+    },
+  };
+}
+
 export function setPinHash(id, pinHash) {
   return stmts.setPinHash.run(pinHash, id).changes > 0;
 }
@@ -240,10 +360,14 @@ export function getState() {
   // joinUrl: vom Admin gesetzte Beitritts-Adresse für den TV-QR-Code
   // (leer => TV nutzt die eigene Server-Adresse als Fallback)
   // boardMode: vom Admin gewählte TV-Ansicht ('alltime' | 'today')
+  // scrollSeconds: Verweildauer pro Ranglisten-Schritt (TV-Rotation)
+  // customFacts: vom Admin gepflegte eigene Meldungen fürs Fun-Fact-Band
   return {
     players,
     joinUrl: getSetting('join_url', ''),
     boardMode: getSetting('board_mode', 'alltime'),
+    scrollSeconds: Number(getSetting('scroll_seconds', '3.2')),
+    customFacts: listFacts(),
     records: getRecords(),
   };
 }

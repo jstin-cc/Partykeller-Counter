@@ -57,6 +57,13 @@ CREATE TABLE drink_log (
   ts        INTEGER NOT NULL              -- Unix-Millis
 );
 CREATE INDEX idx_drink_log_player_ts ON drink_log(player_id, ts);
+
+CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  title      TEXT NOT NULL,                -- kurzer Titel (z. B. „Ansage")
+  text       TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 ```
 
 - `beers`/`shots`/`mixes` bleiben die schnelle All-Time-Wahrheit (wie in Prompt.md).
@@ -67,7 +74,8 @@ CREATE INDEX idx_drink_log_player_ts ON drink_log(player_id, ts);
 - Bestehende DBs werden beim Start migriert (mixes-/hidden-Spalte, erweiterte CHECK),
   ohne Datenverlust (D-006/D-012/D-013).
 - `settings` (Schlüssel/Wert) hält Laufzeit-Einstellungen: `join_url` (TV-QR-Ziel,
-  D-010) und `board_mode` (`alltime`|`today`, TV-Ansicht, D-013).
+  D-010), `board_mode` (`alltime`|`today`, TV-Ansicht, D-013) und
+  `scroll_seconds` (Verweildauer pro Ranglisten-Scroll-Schritt am TV, D-015).
 - `getState().records` liefert je Sorte den All-Time-Tagesrekord (Spieler, Datum,
   Anzahl) für die Fun-Facts (D-014); der destruktive Reset ist mit einem eigenen
   Passwort `RESET_PASSWORD` abgesichert (getrennt von `ADMIN_PASSWORD`, D-013/D-014).
@@ -94,7 +102,12 @@ CREATE INDEX idx_drink_log_player_ts ON drink_log(player_id, ts);
 | `POST /api/login` | `{playerId, pin}` | `{player, token}` |
 | `POST /api/admin/login` | `{password}` | `{token}` |
 | `GET /api/state` | – | kompletter State (Initial-Load/Fallback) |
+| `GET /api/archive` | – | `{days: […]}` — Abend-Archiv: je Party-Tag Sieger, Teilnehmer, Mengen (D-015) |
+| `GET /api/players/:id/stats` | – | persönliche Statistik + Achievements fürs Dashboard (D-015) |
 | `GET /health` | – | `{ok: true}` |
+
+Die Login-Endpunkte sind rate-limitiert (D-015): nach 5 Fehlversuchen binnen
+1 min pro IP → 5 min Sperre (HTTP 429); erfolgreicher Login setzt zurück.
 
 ### WebSocket `/ws`
 
@@ -122,6 +135,11 @@ CREATE INDEX idx_drink_log_player_ts ON drink_log(player_id, ts);
 | `setCounter(id, drink, value)` | Admin | Zähler direkt setzen (Admin-Dashboard) |
 | `deletePlayer(id)` | Admin | inkl. Log (CASCADE) |
 | `reset(confirm)` | Admin | Komplett-Reset, nur mit `confirm: "RESET"` |
+| `setHidden(id, hidden)` | Admin | Sichtbarkeit in der All-Time-Ansicht (D-013/D-015) |
+| `setBoardMode(mode)` | Admin | TV-Ansicht `alltime`\|`today` (D-013) |
+| `setScrollSpeed(seconds)` | Admin | Ranglisten-Rotation am TV, 1–30 s (D-015) |
+| `addFact(title, text)` / `deleteFact(id)` | Admin | eigene Fun-Facts fürs TV-Band (D-015) |
+| `setJoinUrl(url)` | Admin | Ziel des TV-QR-Codes (D-010) |
 
 Der Server validiert jede Nachricht serverseitig (Token, Rolle, Wertebereiche) —
 Clients sind nicht vertrauenswürdig.
@@ -134,6 +152,7 @@ Clients sind nicht vertrauenswürdig.
 | `/dashboard` | **Nutzer-Dashboard (erster Screen)** | `User Dashboard v3.dc.html` | Handy, hoch |
 | `/tv` | TV-Scoreboard: All-Time-Rangliste, Podest Top 3, QR-Code zum Beitritt | `TV Scoreboard v3.dc.html` | TV, quer |
 | `/admin` | Admin-Login → Admin-Dashboard (Nutzer + Zähler verwalten, Reset) | `Admin Login/Dashboard v3.dc.html` | Handy/Desktop |
+| `/abende` | Abend-Archiv: jeder Party-Tag als Karte (Sieger, Teilnehmer, Mengen) | eigenes Layout im Theme (D-015) | Handy/Desktop |
 
 QR-Code auf dem Scoreboard zeigt auf `http://partykeller.local:<PORT>/`
 (Generierung client-seitig mit vendored `qrcode`-Lib, offline-fähig).

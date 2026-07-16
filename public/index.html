@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Anmeldung</title>
 <link rel="icon" href="assets/cones-flat.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#010f05">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
 <style>
   .login-watermark {
@@ -113,7 +116,10 @@
       <button class="btn-green" style="padding:15px;font-size:16px;margin-top:4px;">Konto erstellen &amp; los</button>
     </form>
 
-    <a href="/admin" style="text-align:center;font-size:13px;text-decoration:none;margin-top:auto;padding-top:12px;">Admin-Zugang</a>
+    <div style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
+      <a href="/abende" style="font-size:13px;text-decoration:none;">Abend-Archiv</a>
+      <a href="/admin" style="font-size:13px;text-decoration:none;">Admin-Zugang</a>
+    </div>
   </div>
 
   <img src="assets/footer-woods.png" alt="" class="footer-woods">
@@ -218,5 +224,6 @@ fetchState()
   .then(({ players }) => renderUsers(players))
   .catch(() => showError('Server nicht erreichbar.'));
 </script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
 </body>
 </html>
