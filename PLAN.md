@@ -109,6 +109,9 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
 
 Die Login-Endpunkte sind rate-limitiert (D-015): nach 5 Fehlversuchen binnen
 1 min pro IP → 60 s Sperre (HTTP 429); erfolgreicher Login setzt zurück.
+Missbrauchsschutz (D-017): `POST /api/players` ist auf 6 neue Konten pro Minute
+und IP begrenzt (plus Gesamt-Deckel 200); Spieler-`increment` über WS ist pro
+Spieler gedrosselt (Token-Bucket ~1/s, Burst 5), Admins ungedrosselt.
 
 ### WebSocket `/ws`
 

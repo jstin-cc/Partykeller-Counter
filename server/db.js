@@ -94,6 +94,7 @@ const stmts = {
   getPlayer: db.prepare('SELECT * FROM players WHERE id = ?'),
   getPlayerByName: db.prepare('SELECT * FROM players WHERE name = ? COLLATE NOCASE'),
   listPlayers: db.prepare('SELECT * FROM players'),
+  countPlayers: db.prepare('SELECT COUNT(*) AS n FROM players'),
   increment: db.prepare(
     'UPDATE players SET beers = MAX(0, beers + ?), shots = MAX(0, shots + ?), mixes = MAX(0, mixes + ?) WHERE id = ?'
   ),
@@ -169,6 +170,10 @@ export function getPlayer(id) {
 
 export function getPlayerByName(name) {
   return stmts.getPlayerByName.get(name) ?? null;
+}
+
+export function countPlayers() {
+  return stmts.countPlayers.get().n;
 }
 
 export function incrementDrink(id, drink, delta) {

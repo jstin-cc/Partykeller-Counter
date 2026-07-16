@@ -42,3 +42,26 @@ export function createLoginLimiter({ maxFails = 5, windowMs = 60_000, blockMs = 
     },
   };
 }
+
+// Zählt JEDEN Versuch pro Schlüssel (nicht nur Fehlversuche) und lässt in einem
+// gleitenden Fenster höchstens `max` zu. Für Aktionen, die auch bei Erfolg nicht
+// beliebig oft passieren sollen (z. B. neue Konten anlegen). In-Memory, ein Prozess.
+export function createRateLimiter({ max = 6, windowMs = 60_000 } = {}) {
+  const hits = new Map(); // key -> number[] (Zeitstempel im Fenster)
+  return {
+    // true = erlaubt (und gezählt), false = Limit im Fenster erreicht
+    take(key, now = Date.now()) {
+      const arr = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
+      if (arr.length >= max) { hits.set(key, arr); return false; }
+      arr.push(now);
+      hits.set(key, arr);
+      if (hits.size > 1000) {
+        for (const [k, v] of hits) {
+          if (v.every((t) => now - t >= windowMs)) hits.delete(k);
+          if (hits.size <= 500) break;
+        }
+      }
+      return true;
+    },
+  };
+}

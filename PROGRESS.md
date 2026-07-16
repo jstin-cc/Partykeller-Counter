@@ -31,6 +31,9 @@ Kleinere Politur: Der Zapfen-Hintergrund ist jetzt `position: fixed` und
 bleibt beim Scrollen fest im Viewport (Login, Dashboard, Admin, Abend-Archiv).
 Und (D-016): **Fun-Fact-Wechseltakt im Admin einstellbar** (Regler 30 s – 5 min,
 `funfact_seconds`, TV übernimmt live).
+Und (D-017, nach Security-Review): **Kontoerstellung gedrosselt** (6/min/IP +
+Deckel 200) und **Spieler-Increments pro Spieler gedrosselt** (Token-Bucket
+~1/s, Burst 5; Admins ungedrosselt) – gegen Skript-Spam.
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅
