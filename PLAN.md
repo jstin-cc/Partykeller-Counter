@@ -75,7 +75,8 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
   ohne Datenverlust (D-006/D-012/D-013).
 - `settings` (Schlüssel/Wert) hält Laufzeit-Einstellungen: `join_url` (TV-QR-Ziel,
   D-010), `board_mode` (`alltime`|`today`, TV-Ansicht, D-013) und
-  `scroll_seconds` (Verweildauer pro Ranglisten-Scroll-Schritt am TV, D-015).
+  `scroll_seconds` (Verweildauer pro Ranglisten-Scroll-Schritt am TV, D-015)
+  und `funfact_seconds` (Wechseltakt des Fun-Fact-Bands, 30–300 s, D-016).
 - `getState().records` liefert je Sorte den All-Time-Tagesrekord (Spieler, Datum,
   Anzahl) für die Fun-Facts (D-014); der destruktive Reset ist mit einem eigenen
   Passwort `RESET_PASSWORD` abgesichert (getrennt von `ADMIN_PASSWORD`, D-013/D-014).
@@ -138,6 +139,7 @@ Die Login-Endpunkte sind rate-limitiert (D-015): nach 5 Fehlversuchen binnen
 | `setHidden(id, hidden)` | Admin | Sichtbarkeit in der All-Time-Ansicht (D-013/D-015) |
 | `setBoardMode(mode)` | Admin | TV-Ansicht `alltime`\|`today` (D-013) |
 | `setScrollSpeed(seconds)` | Admin | Ranglisten-Rotation am TV, 1–30 s (D-015) |
+| `setFunfactSpeed(seconds)` | Admin | Wechseltakt des Fun-Fact-Bands, 30–300 s (D-016) |
 | `addFact(title, text)` / `deleteFact(id)` | Admin | eigene Fun-Facts fürs TV-Band (D-015) |
 | `setJoinUrl(url)` | Admin | Ziel des TV-QR-Codes (D-010) |
 

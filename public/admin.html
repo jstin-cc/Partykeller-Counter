@@ -130,6 +130,11 @@
         <input id="speed-slider" type="range" min="1.5" max="10" step="0.5" value="3" style="width:130px;accent-color:var(--green);cursor:pointer;">
         <span id="speed-value" class="num" style="font-size:13px;color:var(--creme);min-width:64px;">3,0 s/Zeile</span>
       </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:13px;color:var(--ink-muted);">Fun-Fact-Takt</span>
+        <input id="funfact-slider" type="range" min="30" max="300" step="15" value="30" style="width:130px;accent-color:var(--green);cursor:pointer;">
+        <span id="funfact-value" class="num" style="font-size:13px;color:var(--creme);min-width:70px;">alle 30 s</span>
+      </div>
       <div style="font-size:13px;color:var(--ink-muted);">Haken in der Liste gilt nur für die Gesamtansicht – „Heute" zeigt automatisch alle, die heute etwas geloggt haben.</div>
     </div>
 
@@ -270,6 +275,7 @@ function enterDashboard() {
       updateJoinField(state.joinUrl ?? '');
       updateBoardMode(state.boardMode ?? 'alltime');
       updateSpeed(state.scrollSeconds ?? 3.2);
+      updateFunfact(state.funfactSeconds ?? 30);
       renderFacts(state.customFacts ?? []);
       // Ein State-Broadcast nach dem Reset = Erfolg (Passwort war korrekt)
       if (pendingReset) {
@@ -310,6 +316,30 @@ $('speed-slider').addEventListener('input', () => {
 $('speed-slider').addEventListener('change', () => {
   send({ type: 'setScrollSpeed', seconds: Number($('speed-slider').value) });
   $('speed-slider').blur();
+});
+
+// --- Fun-Fact-Wechseltakt (30 s – 5 min) ---
+// unter 60 s in Sekunden, darüber in Minuten (halbe Schritte)
+function fmtFunfact(sec) {
+  const s = Number(sec);
+  if (s < 60) return `alle ${s} s`;
+  const min = s / 60;
+  return `alle ${min.toLocaleString('de-DE', { maximumFractionDigits: 2 })} min`;
+}
+
+function updateFunfact(seconds) {
+  const slider = $('funfact-slider');
+  if (document.activeElement === slider) return;
+  slider.value = seconds;
+  $('funfact-value').textContent = fmtFunfact(seconds);
+}
+
+$('funfact-slider').addEventListener('input', () => {
+  $('funfact-value').textContent = fmtFunfact($('funfact-slider').value);
+});
+$('funfact-slider').addEventListener('change', () => {
+  send({ type: 'setFunfactSpeed', seconds: Number($('funfact-slider').value) });
+  $('funfact-slider').blur();
 });
 
 // --- Eigene Fun-Facts (Titel + Text), rotieren im TV-Band mit ---

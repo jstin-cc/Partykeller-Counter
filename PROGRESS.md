@@ -29,6 +29,8 @@ Mengen), **persönliche Statistik + Achievement-Badges** im Nutzer-Dashboard,
 **Rate-Limit auf beide Logins** (5 Fehlversuche/min → 60 s Sperre).
 Kleinere Politur: Der Zapfen-Hintergrund ist jetzt `position: fixed` und
 bleibt beim Scrollen fest im Viewport (Login, Dashboard, Admin, Abend-Archiv).
+Und (D-016): **Fun-Fact-Wechseltakt im Admin einstellbar** (Regler 30 s – 5 min,
+`funfact_seconds`, TV übernimmt live).
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅
