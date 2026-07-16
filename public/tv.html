@@ -455,6 +455,7 @@ connectState({
     const { joinUrl, boardMode } = state;
     renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + '/'));
     applyScrollSpeed(state.scrollSeconds);
+    applyFunfactSpeed(state.funfactSeconds);
     const mode = boardMode === 'today' ? 'today' : 'alltime';
 
     if (currentMode !== null && mode !== currentMode) {
@@ -538,7 +539,11 @@ function updateFacts(players, records, customFacts) {
   showFact(list[factIdx]);
 }
 
-setInterval(() => {
+// Wechseltakt des Fun-Fact-Bands, im Admin einstellbar (30–300 s)
+let funfactMs = 30000;
+let funfactTimer = null;
+
+function rotateFact() {
   const list = currentFactList();
   factIdx = (factIdx + 1) % list.length;
   factEl.style.opacity = '0';
@@ -548,7 +553,17 @@ setInterval(() => {
     factEl.style.opacity = '1';
     factTitleEl.style.opacity = '1';
   }, 400);
-}, 7000);
+}
+
+function applyFunfactSpeed(seconds) {
+  const ms = Math.round((Number(seconds) || 30) * 1000);
+  if (ms === funfactMs && funfactTimer) return;
+  funfactMs = ms;
+  if (funfactTimer) clearInterval(funfactTimer);
+  funfactTimer = setInterval(rotateFact, funfactMs);
+}
+
+applyFunfactSpeed(30);
 </script>
 </body>
 </html>

@@ -361,12 +361,14 @@ export function getState() {
   // (leer => TV nutzt die eigene Server-Adresse als Fallback)
   // boardMode: vom Admin gewählte TV-Ansicht ('alltime' | 'today')
   // scrollSeconds: Verweildauer pro Ranglisten-Schritt (TV-Rotation)
+  // funfactSeconds: Wechseltakt des Fun-Fact-Bands (30–300 s, im Admin einstellbar)
   // customFacts: vom Admin gepflegte eigene Meldungen fürs Fun-Fact-Band
   return {
     players,
     joinUrl: getSetting('join_url', ''),
     boardMode: getSetting('board_mode', 'alltime'),
     scrollSeconds: Number(getSetting('scroll_seconds', '3.2')),
+    funfactSeconds: Number(getSetting('funfact_seconds', '30')),
     customFacts: listFacts(),
     records: getRecords(),
   };

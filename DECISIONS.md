@@ -322,3 +322,19 @@ offline-fähig (D-007: Icons/Manifest liegen in `public/`), Persistenz gewahrt
 (D-006: nur additive Schema-Änderung per `CREATE TABLE IF NOT EXISTS`).
 Rate-Limit schützt die 4-stelligen PINs (10 000 Kombinationen) gegen
 Durchprobieren, ohne legitime Gäste zu stören.
+
+## 2026-07-16 · D-016: Fun-Fact-Wechseltakt im Admin einstellbar
+
+**Entscheidung (auf Nutzerwunsch):** Der Wechseltakt des Fun-Fact-Bands am TV
+ist jetzt im Admin-Dashboard einstellbar – kürzeste Stufe **30 Sekunden**,
+längste **5 Minuten (300 s)**. Neuer Settings-Key `funfact_seconds` (Default
+30 s), WS-Handler `setFunfactSpeed` (Admin, 30–300 s, serverseitig geprüft),
+zweiter Regler in der TV-Anzeige-Leiste neben dem Ranglisten-Tempo. Der TV
+liest `funfactSeconds` aus dem State und startet den Rotations-Timer bei
+Änderung neu (übernimmt also live). Das bisherige feste 7-Sekunden-Intervall
+entfällt.
+
+**Begründung:** Vom Nutzer angefordert; analog zu D-015 (`scroll_seconds`)
+umgesetzt. Keine neuen Dependencies, offline-fähig, Persistenz gewahrt (Setting
+überlebt den Neustart). 30 s als Untergrenze verhindert hektisches Flackern,
+5 min als Obergrenze lässt eine Meldung lange stehen.

@@ -87,6 +87,15 @@ const handlers = {
     db.setSetting('scroll_seconds', String(seconds));
   },
 
+  // Wechseltakt des Fun-Fact-Bands: 30 s (kürzeste) bis 300 s = 5 min (längste)
+  setFunfactSpeed(auth, { seconds }) {
+    requireAdmin(auth);
+    if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds < 30 || seconds > 300) {
+      throw new Error('Fun-Fact-Takt muss zwischen 30 und 300 Sekunden liegen');
+    }
+    db.setSetting('funfact_seconds', String(seconds));
+  },
+
   addFact(auth, { title, text }) {
     requireAdmin(auth);
     if (!validFactTitle(title)) throw new Error('Titel: 1-30 Zeichen');
