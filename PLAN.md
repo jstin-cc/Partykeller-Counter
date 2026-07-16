@@ -107,7 +107,7 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
 | `GET /health` | – | `{ok: true}` |
 
 Die Login-Endpunkte sind rate-limitiert (D-015): nach 5 Fehlversuchen binnen
-1 min pro IP → 5 min Sperre (HTTP 429); erfolgreicher Login setzt zurück.
+1 min pro IP → 60 s Sperre (HTTP 429); erfolgreicher Login setzt zurück.
 
 ### WebSocket `/ws`
 

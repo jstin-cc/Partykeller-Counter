@@ -26,7 +26,7 @@ Ansicht zeigt nur Spieler mit Getränk am laufenden Party-Tag** (Haken gilt nur
 All-Time), **Abend-Archiv `/abende`** (Karten je Party-Tag: Sieger, Teilnehmer,
 Mengen), **persönliche Statistik + Achievement-Badges** im Nutzer-Dashboard,
 **PWA-installierbar** (Manifest + Icons + cache-freier Mini-Service-Worker),
-**Rate-Limit auf beide Logins** (5 Fehlversuche/min → 5 min Sperre).
+**Rate-Limit auf beide Logins** (5 Fehlversuche/min → 60 s Sperre).
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅

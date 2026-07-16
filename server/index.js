@@ -33,7 +33,7 @@ app.get('/api/players/:id/stats', (req, res) => {
 });
 
 // Rate-Limit gegen PIN-Raten: max. 5 Fehlversuche pro Minute und IP,
-// danach 5 Minuten Sperre. Erfolgreicher Login setzt zurück.
+// danach 60 Sekunden Sperre. Erfolgreicher Login setzt zurück.
 const loginLimiter = createLoginLimiter();
 
 function rateLimited(req, res) {

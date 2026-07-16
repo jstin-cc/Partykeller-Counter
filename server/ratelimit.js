@@ -3,7 +3,7 @@
 // nach `maxFails` Fehlversuchen innerhalb `windowMs` wird der Schlüssel für
 // `blockMs` gesperrt. Ein erfolgreicher Login setzt den Zähler zurück.
 // In-Memory reicht: ein Prozess, lokales WLAN; Neustart hebt Sperren auf.
-export function createLoginLimiter({ maxFails = 5, windowMs = 60_000, blockMs = 5 * 60_000 } = {}) {
+export function createLoginLimiter({ maxFails = 5, windowMs = 60_000, blockMs = 60_000 } = {}) {
   const entries = new Map(); // key -> { fails: number[], blockedUntil: number }
 
   function prune(entry, now) {
