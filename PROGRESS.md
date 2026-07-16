@@ -27,6 +27,8 @@ All-Time), **Abend-Archiv `/abende`** (Karten je Party-Tag: Sieger, Teilnehmer,
 Mengen), **persönliche Statistik + Achievement-Badges** im Nutzer-Dashboard,
 **PWA-installierbar** (Manifest + Icons + cache-freier Mini-Service-Worker),
 **Rate-Limit auf beide Logins** (5 Fehlversuche/min → 60 s Sperre).
+Kleinere Politur: Der Zapfen-Hintergrund ist jetzt `position: fixed` und
+bleibt beim Scrollen fest im Viewport (Login, Dashboard, Admin, Abend-Archiv).
 **Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
 
 ## M0 — Planung & Projekt-Gerüst ✅
