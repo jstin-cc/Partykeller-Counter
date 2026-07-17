@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Anmeldung</title>
+<script>document.documentElement.dataset.area = location.pathname.startsWith('/youngstars') ? 'youngstars' : 'partykeller';</script>
 <link rel="icon" href="assets/cones-flat.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#010f05">
@@ -89,7 +90,10 @@
   <div class="screen-inner" style="padding:32px 24px;gap:22px;">
 
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
-      <img src="assets/logo.png" alt="SV Partykeller" style="height:76px;width:auto;object-fit:contain;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <img src="assets/logo.png" alt="SV Partykeller" style="height:76px;width:auto;object-fit:contain;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:46px;width:auto;object-fit:contain;">
+      </div>
       <div>
         <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:30px;color:var(--creme);margin:0 0 4px 0;">Wer bist du?</h1>
         <p style="font-size:15px;color:var(--ink-muted);margin:0;">Wähle deinen Account oder starte neu.</p>
@@ -117,8 +121,9 @@
     </form>
 
     <div style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
-      <a href="/abende" style="font-size:13px;text-decoration:none;">Abend-Archiv</a>
-      <a href="/admin" style="font-size:13px;text-decoration:none;">Admin-Zugang</a>
+      <a href="/" style="font-size:13px;text-decoration:none;color:var(--ink-muted);">‹ Bereich</a>
+      <a href="abende" style="font-size:13px;text-decoration:none;">Abend-Archiv</a>
+      <a href="admin" style="font-size:13px;text-decoration:none;">Admin-Zugang</a>
     </div>
   </div>
 
@@ -172,7 +177,7 @@ function renderUsers(players) {
         try {
           const { token, player } = await post('/api/login', { playerId: p.id });
           setSession(token, player.id);
-          location.href = '/dashboard';
+          location.href = 'dashboard';
         } catch (err) {
           showError(err.message);
         }
@@ -207,7 +212,7 @@ function renderUsers(players) {
         try {
           const { token, player } = await post('/api/login', { playerId: p.id, pin: pin.value });
           setSession(token, player.id);
-          location.href = '/dashboard';
+          location.href = 'dashboard';
         } catch (err) {
           showError(err.message === 'Name oder PIN falsch' ? 'Falsche PIN.' : err.message);
         }
@@ -225,7 +230,7 @@ $('create-form').addEventListener('submit', async (e) => {
   try {
     const { token, player } = await post('/api/players', { name: $('create-name').value, pin: $('create-pin').value });
     setSession(token, player.id);
-    location.href = '/dashboard';
+    location.href = 'dashboard';
   } catch (err) {
     showError(err.message);
   }
@@ -235,6 +240,6 @@ fetchState()
   .then(({ players }) => renderUsers(players))
   .catch(() => showError('Server nicht erreichbar.'));
 </script>
-<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>

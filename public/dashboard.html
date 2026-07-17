@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Dein Zähler</title>
+<script>document.documentElement.dataset.area = location.pathname.startsWith('/youngstars') ? 'youngstars' : 'partykeller';</script>
 <link rel="icon" href="assets/cones-flat.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#010f05">
@@ -39,8 +40,11 @@
 
   <div class="screen-inner">
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <a href="/" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
-      <img src="assets/logo.png" alt="SV Partykeller" style="height:80px;width:auto;object-fit:contain;">
+      <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <img src="assets/logo.png" alt="SV Partykeller" style="height:80px;width:auto;object-fit:contain;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:38px;width:auto;object-fit:contain;">
+      </div>
       <div id="rank-pill" class="pill num" hidden></div>
     </div>
 
@@ -57,7 +61,7 @@
         </div>
       </div>
 
-      <div class="card card--amber" style="display:flex;flex-direction:column;gap:14px;">
+      <div id="card-beer" class="card card--amber" style="display:flex;flex-direction:column;gap:14px;">
         <div class="card-title" style="color:var(--amber);">Bier</div>
         <button id="add-beer" class="btn-big" style="background:var(--amber);">+ Bier hinzufügen</button>
         <div class="split">
@@ -89,7 +93,7 @@
         </div>
       </div>
 
-      <div class="card" style="--edge:var(--mix);display:flex;flex-direction:column;gap:14px;">
+      <div id="card-mix" class="card" style="--edge:var(--mix);display:flex;flex-direction:column;gap:14px;">
         <div class="card-title" style="color:var(--mix);">Mischen</div>
         <button id="add-mix" class="btn-big" style="background:var(--mix);">+ Mische hinzufügen</button>
         <div class="split">
@@ -152,7 +156,7 @@
     </div>
 
     <div style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
-      <a href="/abende" style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abend-Archiv</a>
+      <a href="abende" style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abend-Archiv</a>
       <a href="#" id="logout" style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abmelden</a>
     </div>
   </div>
@@ -161,11 +165,15 @@
 </div>
 
 <script type="module">
+import { AREA } from './js/area.js';
 import { getSession, clearSession } from './js/api.js';
 import { connectState } from './js/ws-client.js';
 
 const { token, playerId } = getSession();
 const $ = (id) => document.getElementById(id);
+
+// Youngstars: Bier steht in der Auswahl ganz unten (Shots, Mischen, Bier)
+if (AREA.id === 'youngstars') $('card-mix').after($('card-beer'));
 
 if (!token || !playerId) {
   $('no-user-view').hidden = false;
@@ -200,7 +208,7 @@ if (!token || !playerId) {
 
   async function loadStats() {
     try {
-      const res = await fetch(`/api/players/${encodeURIComponent(playerId)}/stats`);
+      const res = await fetch(`${AREA.base}/api/players/${encodeURIComponent(playerId)}/stats`);
       if (!res.ok) return;
       const { days, best, achievements } = await res.json();
       bump('stat-days', days);
@@ -235,7 +243,7 @@ if (!token || !playerId) {
       if (!me) {
         // Account wurde (vom Admin) gelöscht
         clearSession();
-        location.href = '/';
+        location.href = './';
         return;
       }
       $('player-name').textContent = me.name;
@@ -250,7 +258,7 @@ if (!token || !playerId) {
       bump('mixes-today', me.mixesToday);
       bump('mixes-total', me.mixes);
       updateDistribution(me);
-      document.title = `SV Partykeller – ${me.name}`;
+      document.title = `${AREA.id === 'youngstars' ? 'Youngstars' : 'SV Partykeller'} – ${me.name}`;
 
       // Statistik nachladen, wenn heute irgendwo etwas dazukam (Achievements
       // wie „Erster Trinker" hängen auch von den anderen ab) oder beim Start.
@@ -269,9 +277,9 @@ if (!token || !playerId) {
 $('logout').addEventListener('click', (e) => {
   e.preventDefault();
   clearSession();
-  location.href = '/';
+  location.href = './';
 });
 </script>
-<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>

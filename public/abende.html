@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Abend-Archiv</title>
+<script>document.documentElement.dataset.area = location.pathname.startsWith('/youngstars') ? 'youngstars' : 'partykeller';</script>
 <link rel="icon" href="assets/cones-flat.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#010f05">
@@ -76,12 +77,13 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px;">
       <div style="display:flex;align-items:center;gap:16px;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:56px;width:auto;object-fit:contain;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:34px;width:auto;object-fit:contain;">
         <div>
           <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0;">Abend-Archiv</h1>
           <div style="font-size:14px;color:var(--ink-muted);">Jeder Party-Tag auf einen Blick.</div>
         </div>
       </div>
-      <a href="/" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
+      <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
     </div>
 
     <div id="empty" hidden style="text-align:center;margin-top:60px;color:var(--ink-muted);font-size:16px;">
@@ -94,6 +96,8 @@
 </div>
 
 <script type="module">
+import { AREA } from './js/area.js';
+
 const $ = (id) => document.getElementById(id);
 
 const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -171,7 +175,7 @@ function buildCard(night) {
 }
 
 async function load() {
-  const res = await fetch('/api/archive');
+  const res = await fetch(`${AREA.base}/api/archive`);
   const { days } = await res.json();
   const box = $('cards');
   box.textContent = '';
@@ -181,6 +185,6 @@ async function load() {
 
 load();
 </script>
-<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>

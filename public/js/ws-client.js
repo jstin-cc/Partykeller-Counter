@@ -1,4 +1,7 @@
+import { AREA } from './area.js';
+
 // WS-Client mit Auto-Reconnect: onState wird bei jedem State-Broadcast gerufen.
+// Verbindet sich mit dem WS-Endpunkt des eigenen Bereichs (D-019).
 export function connectState({ onState, onError } = {}) {
   let ws = null;
   let retryMs = 500;
@@ -6,7 +9,7 @@ export function connectState({ onState, onError } = {}) {
 
   function open() {
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${proto}//${location.host}/ws`);
+    ws = new WebSocket(`${proto}//${location.host}${AREA.base}/ws`);
 
     ws.onopen = () => { retryMs = 500; };
 

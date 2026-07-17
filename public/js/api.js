@@ -1,5 +1,10 @@
-const TOKEN_KEY = 'pk_token';
-const PLAYER_KEY = 'pk_player_id';
+import { AREA } from './area.js';
+
+// Storage-Keys pro Bereich: 'pk_*' (Partykeller, unverändert zu vorher — Logins
+// überleben das Update) bzw. 'ys_*' (Youngstars). So kann dasselbe Handy in
+// beiden Bereichen getrennt angemeldet sein.
+const TOKEN_KEY = `${AREA.keyPrefix}_token`;
+const PLAYER_KEY = `${AREA.keyPrefix}_player_id`;
 
 export function getSession() {
   return {
@@ -19,7 +24,7 @@ export function clearSession() {
 }
 
 export async function post(path, body) {
-  const res = await fetch(path, {
+  const res = await fetch(AREA.base + path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -29,8 +34,12 @@ export async function post(path, body) {
   return data;
 }
 
+export async function get(path) {
+  return fetch(AREA.base + path);
+}
+
 export async function fetchState() {
-  const res = await fetch('/api/state');
+  const res = await get('/api/state');
   if (!res.ok) throw new Error('State konnte nicht geladen werden');
   return res.json();
 }

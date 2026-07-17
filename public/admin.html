@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Admin</title>
+<script>document.documentElement.dataset.area = location.pathname.startsWith('/youngstars') ? 'youngstars' : 'partykeller';</script>
 <link rel="icon" href="assets/cones-flat.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#010f05">
@@ -87,13 +88,14 @@
     <form id="login-form" class="glass" style="width:100%;max-width:400px;background:var(--surface);border-top:4px solid var(--green);border-radius:var(--radius-lg);padding:36px 28px;display:flex;flex-direction:column;gap:18px;">
       <div style="text-align:center;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:64px;width:auto;object-fit:contain;margin-bottom:14px;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:36px;width:auto;object-fit:contain;margin:-6px auto 14px auto;">
         <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0 0 6px 0;">Admin-Zugang</h1>
         <p style="font-size:14px;color:var(--ink-muted);margin:0;">Nur für die Kellermeister.</p>
       </div>
       <div id="login-error" class="error-banner" hidden></div>
       <input id="login-pw" class="input-flat" type="password" placeholder="Passwort" autocomplete="current-password" required>
       <button class="btn-green" style="padding:15px;font-size:16px;">Anmelden</button>
-      <a href="/" style="text-align:center;font-size:13px;text-decoration:none;">Zurück zur Nutzeranmeldung</a>
+      <a href="./" style="text-align:center;font-size:13px;text-decoration:none;">Zurück zur Nutzeranmeldung</a>
     </form>
   </div>
   <img src="assets/footer-woods.png" alt="" class="footer-woods">
@@ -108,6 +110,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
       <div style="display:flex;align-items:center;gap:18px;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:56px;width:auto;object-fit:contain;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:36px;width:auto;object-fit:contain;">
         <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:32px;color:var(--creme);margin:0;">Admin-Dashboard</h1>
       </div>
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
@@ -215,11 +218,13 @@
 </div>
 
 <script type="module">
+import { AREA } from './js/area.js';
 import { post } from './js/api.js';
 import { connectState } from './js/ws-client.js';
 
 const $ = (id) => document.getElementById(id);
-const ADMIN_TOKEN_KEY = 'pk_admin_token';
+// Getrennte Admin-Sessions pro Bereich (pk_/ys_-Präfix, D-019)
+const ADMIN_TOKEN_KEY = `${AREA.keyPrefix}_admin_token`;
 let token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
 let ws = null;
 let players = [];
