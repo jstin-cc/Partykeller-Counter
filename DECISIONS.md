@@ -398,3 +398,47 @@ alle Server-seitigen Rollenprüfungen (D-004) sind davon **nicht** betroffen.
 neuen Dependencies, keine Migration, Persistenz gewahrt (D-006). Verifiziert:
 Anlegen/Login ohne PIN klappt, PIN-Konten und Bestandsnutzer bleiben geschützt,
 Admin kann PIN setzen/entfernen, kein Konsolenfehler.
+
+## D-019 (2026-07-17): Zweiter Bereich „Partykeller Youngstars" — getrennte Daten, eigenes Theme
+
+**Entscheidung:** Die App bekommt einen zweiten, eigenständigen Bereich für die
+Partykeller **Youngstars** — gleiche Funktionen, aber komplett getrennte Daten,
+eigener Admin-Zugang und eigenes Farbkonzept. Ein Node.js-Prozess bedient beide.
+
+**Umsetzung:**
+- **URL-Bereiche:** `/partykeller/*` und `/youngstars/*`; `/` ist eine
+  vorgeschaltete **Auswahlseite** mit beiden Logos (`start.html`). Alt-Pfade
+  (`/tv`, `/dashboard`, `/admin`, `/abende`) leiten auf den Partykeller um,
+  `/api/*` und `/ws` bleiben als Partykeller-Alias — nichts Bestehendes bricht.
+- **Datentrennung:** `server/db.js` ist jetzt eine Factory (`createDb`); je
+  Bereich eine eigene SQLite-Datei (`data/partykeller.db`, `data/youngstars.db`)
+  mit identischem Schema. Nutzer, Logs, Settings, Fun-Facts und Archiv können
+  sich nie vermischen.
+- **Auth:** Tokens tragen einen **Bereichs-Stempel** (`area`); ein
+  Partykeller-Token gilt nicht im Youngstars-Bereich und umgekehrt (auch für
+  Admins). Alt-Tokens ohne Stempel gelten als Partykeller (niemand fliegt beim
+  Update raus). Youngstars-Admin: **`YOUNGSTARS_ADMIN_PASSWORD`** (Pflicht in
+  der .env). Das **Lösch-Passwort bleibt gemeinsam** (`RESET_PASSWORD`), der
+  Reset löscht aber immer nur den Bereich, in dem er ausgelöst wurde.
+- **Frontend:** Dieselben HTML-Dateien bedienen beide Bereiche.
+  `public/js/area.js` erkennt den Bereich am URL-Präfix und steuert API-/WS-
+  Präfix, getrennte Storage-Keys (`pk_*`/`ys_*`) und das Theme über
+  `html[data-area]`. WS-Endpunkte: `/partykeller/ws`, `/youngstars/ws`.
+- **Getränke:** unverändert Bier/Shots/Mischen — aber im Youngstars-Dashboard
+  steht **Bier ganz unten** (Reihenfolge Shots, Mischen, Bier). Kein Aperol
+  (zunächst angedacht, vom Nutzer wieder verworfen).
+- **Theme Youngstars:** dunkles **Navyblau** statt Dunkelgrün, Akzente in
+  **Orange** (am Neon-Logo orientiert), Shots in einem **Pinkton** aus den
+  Glut-Tönen des Logos; Zapfen-Hintergrund als hellere Navy-Variante
+  (`zapfen-bg-navy.svg`); **kein Baum-Footer**. Neben dem Partykeller-Logo
+  steht das Youngstars-Neon-PNG (`assets/youngstars-logo.png`; aktuell eine
+  programmatisch freigestellte Übergangsversion, wird durch die Original-Datei
+  des Nutzers ersetzt).
+- **PWA:** eigenes Manifest (`manifest-youngstars.webmanifest`, start_url
+  `/youngstars/`) mit eigenen Orange-Icons; das Partykeller-Manifest zeigt
+  jetzt auf `/partykeller/` — beide Apps können nebeneinander installiert sein.
+
+**Begründung:** Youngstars brauchen eine eigene Rangliste ohne Datenvermischung
+mit dem Partykeller. Ein Prozess + zwei DB-Dateien hält den Pi-Betrieb simpel
+(keine zweite Instanz, kein zweiter Port) und erfüllt die harte
+Ein-Prozess-Regel; gemeinsame HTML/JS-Dateien vermeiden doppelte Pflege.

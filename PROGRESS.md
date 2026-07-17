@@ -37,7 +37,18 @@ Deckel 200) und **Spieler-Increments pro Spieler gedrosselt** (Token-Bucket
 Und (D-018): **PIN wieder optional pro Nutzer** (ersetzt die Pflicht aus D-002).
 Ohne PIN meldet ein Antippen direkt an; PIN-Konten bleiben geschützt. Admin
 kann PINs setzen/entfernen, PIN-lose Nutzer sind in der Admin-Liste markiert.
-**Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt).
+Seit 2026-07-17 (D-019): **zweiter Bereich „Youngstars"** — `/` ist jetzt eine
+Auswahlseite, darunter `/partykeller/*` (unverändert grün) und `/youngstars/*`
+(Navy + Orange/Pink, Youngstars-Neon-Logo neben dem Partykeller-Logo, Navy-
+Zapfen, kein Baum-Footer, Bier in der Auswahl zuunterst). Komplett getrennte
+Daten (eigene SQLite-Datei), bereichsgestempelte Tokens, eigener Admin-Zugang
+(`YOUNGSTARS_ADMIN_PASSWORD`, **neu in der .env nötig!**), gemeinsames
+Lösch-Passwort (Reset löscht nur den eigenen Bereich), eigenes PWA-Manifest
+mit Orange-Icons. Alt-Pfade (`/tv`, `/api`, `/ws`, …) leiten auf den
+Partykeller bzw. dienen ihm als Alias.
+**Offen:** echter Testlauf auf dem Pi mit 2 Handys + TV (M7, letzter Punkt);
+Youngstars-Logo durch die Original-PNG des Nutzers ersetzen, sobald sie im
+Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 
 ## M0 — Planung & Projekt-Gerüst ✅
 
@@ -110,6 +121,17 @@ kann PINs setzen/entfernen, PIN-lose Nutzer sind in der Admin-Liste markiert.
 - [x] README finalisiert (Schnellstart, Screens, Pi-Verweis)
 - [x] Server-Neustart ohne Datenverlust verifiziert (8 Nutzer vor/nach Neustart)
 - [ ] Echter Testlauf auf dem Pi: 2 Handys + TV im WLAN
+
+## Verifikation (2026-07-17, D-019)
+
+Server-Tests: Youngstars-Nutzer erscheinen nicht im Partykeller-State (und
+umgekehrt), `/api`+`/ws` == Partykeller; Admin-Passwörter wirken nur im eigenen
+Bereich; Partykeller-Tokens werden am Youngstars-WS abgelehnt (und umgekehrt);
+Reset nullt nur den auslösenden Bereich; Settings unabhängig. Browser-Tests
+(Chromium): Auswahlseite mit beiden Karten; Youngstars-Login in Navy mit beiden
+Logos und ohne Baum-Footer; Dashboard-Reihenfolge Shots/Mischen/Bier; eigener
+Admin (test-Passwort) mit Orange-Theme; TV in Navy ohne Footer; Partykeller-
+Screens unverändert grün. Keine Konsolenfehler.
 
 ## Verifikation (2026-07-16, D-015)
 

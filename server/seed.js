@@ -1,7 +1,11 @@
 // Dev-Seed: legt Testnutzer mit PIN 1111 an (nur für lokale Entwicklung).
-// Aufruf: npm run seed
-import * as db from './db.js';
+// Aufruf: npm run seed            (Partykeller-DB)
+//         npm run seed:youngstars (Youngstars-DB)
+import { config } from './config.js';
+import { createDb } from './db.js';
 import { hashPin } from './auth.js';
+
+const db = createDb(process.argv.includes('--youngstars') ? config.youngstarsDbPath : config.dbPath);
 
 const demo = [
   { name: 'Basti', beers: 14, shots: 6, mixes: 4 },

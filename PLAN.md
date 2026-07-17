@@ -152,15 +152,27 @@ Clients sind nicht vertrauenswürdig.
 
 ## 6. Routen & Screens
 
-| Route | Screen | Design-Datei | Format |
-|---|---|---|---|
-| `/` | Nutzer-Login (Name wählen/anlegen + PIN) | `User Login v3.dc.html` | Handy, hoch |
-| `/dashboard` | **Nutzer-Dashboard (erster Screen)** | `User Dashboard v3.dc.html` | Handy, hoch |
-| `/tv` | TV-Scoreboard: All-Time-Rangliste, Podest Top 3, QR-Code zum Beitritt | `TV Scoreboard v3.dc.html` | TV, quer |
-| `/admin` | Admin-Login → Admin-Dashboard (Nutzer + Zähler verwalten, Reset) | `Admin Login/Dashboard v3.dc.html` | Handy/Desktop |
-| `/abende` | Abend-Archiv: jeder Party-Tag als Karte (Sieger, Teilnehmer, Mengen) | eigenes Layout im Theme (D-015) | Handy/Desktop |
+Seit D-019 gibt es **zwei Bereiche** mit identischen Screens und komplett
+getrennten Daten: **Partykeller** (`/partykeller/*`, Dunkelgrün) und
+**Youngstars** (`/youngstars/*`, Navy/Orange). `/` ist die Auswahlseite.
+Dieselben HTML-Dateien bedienen beide Bereiche; `public/js/area.js` erkennt
+den Bereich am URL-Präfix (API-/WS-Präfix, Storage-Keys, Theme via
+`html[data-area]`).
 
-QR-Code auf dem Scoreboard zeigt auf `http://partykeller.local:<PORT>/`
+| Route (je Bereich unter `/partykeller` bzw. `/youngstars`) | Screen | Design-Datei | Format |
+|---|---|---|---|
+| `/` | Auswahlseite: Partykeller oder Youngstars (`start.html`) | eigenes Layout im Theme (D-019) | Handy/Desktop |
+| `<bereich>/` | Nutzer-Login (Name wählen/anlegen, PIN optional) | `User Login v3.dc.html` | Handy, hoch |
+| `<bereich>/dashboard` | **Nutzer-Dashboard** (Youngstars: Bier zuunterst) | `User Dashboard v3.dc.html` | Handy, hoch |
+| `<bereich>/tv` | TV-Scoreboard: Rangliste, Podest Top 3, QR-Code zum Beitritt | `TV Scoreboard v3.dc.html` | TV, quer |
+| `<bereich>/admin` | Admin-Login → Admin-Dashboard (eigenes Passwort je Bereich) | `Admin Login/Dashboard v3.dc.html` | Handy/Desktop |
+| `<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte (Sieger, Teilnehmer, Mengen) | eigenes Layout im Theme (D-015) | Handy/Desktop |
+
+Alt-Pfade (`/dashboard`, `/tv`, `/admin`, `/abende`, `/api/*`, `/ws`) leiten
+auf den Partykeller-Bereich bzw. dienen ihm als Alias — gespeicherte QR-Codes,
+Lesezeichen und der Pi-Kiosk funktionieren weiter.
+
+QR-Code auf dem Scoreboard zeigt auf `http://partykeller.local:<PORT>/<bereich>/`
 (Generierung client-seitig mit vendored `qrcode`-Lib, offline-fähig).
 
 ## 7. Ordnerstruktur

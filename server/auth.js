@@ -38,16 +38,24 @@ export function verifyToken(token) {
   }
 }
 
-export function playerToken(playerId) {
-  return signToken({ sub: playerId, role: 'player', iat: Date.now() });
+// Tokens tragen seit D-019 einen Bereichs-Stempel: ein Partykeller-Token gilt
+// nicht im Youngstars-Bereich (und umgekehrt), auch nicht für Admins.
+export function playerToken(playerId, areaId) {
+  return signToken({ sub: playerId, role: 'player', area: areaId, iat: Date.now() });
 }
 
-export function adminToken() {
-  return signToken({ role: 'admin', iat: Date.now() });
+export function adminToken(areaId) {
+  return signToken({ role: 'admin', area: areaId, iat: Date.now() });
 }
 
-export function checkAdminPassword(password) {
+// Alt-Tokens (vor D-019) haben keinen Bereichs-Stempel — sie gelten als
+// Partykeller, damit angemeldete Handys beim Update angemeldet bleiben.
+export function tokenArea(auth) {
+  return auth?.area ?? 'partykeller';
+}
+
+export function checkPassword(password, expected) {
   const a = Buffer.from(String(password ?? ''));
-  const b = Buffer.from(config.adminPassword);
+  const b = Buffer.from(expected);
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }

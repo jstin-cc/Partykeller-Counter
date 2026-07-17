@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SV Partykeller – Scoreboard</title>
+<script>document.documentElement.dataset.area = location.pathname.startsWith('/youngstars') ? 'youngstars' : 'partykeller';</script>
 <link rel="icon" href="assets/cones-flat.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#010f05">
@@ -108,6 +109,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:22px;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:80px;width:auto;object-fit:contain;flex-shrink:0;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:52px;width:auto;object-fit:contain;flex-shrink:0;">
         <div>
           <div style="font-family:'Bitter',serif;font-weight:800;font-size:36px;color:var(--creme);line-height:1.1;">Getränke-Counter</div>
           <div id="board-subtitle" style="font-family:'Bitter',serif;font-weight:600;font-size:16px;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;transition:color 0.3s ease;">All-Time Rangliste</div>
@@ -172,11 +174,12 @@
       <span id="funfact-text" style="font-size:18px;color:var(--creme);font-family:'Bitter',serif;font-weight:600;transition:opacity 0.4s;">Bald gibt's hier Statistiken.</span>
     </div>
 
-    <img src="assets/footer-woods.png" alt="" style="width:calc(100% + 128px);margin-left:-64px;height:96px;object-fit:cover;object-position:center 30%;display:block;flex-shrink:0;filter:brightness(0.85) saturate(1);">
+    <img src="assets/footer-woods.png" alt="" class="footer-woods" style="width:calc(100% + 128px);margin-left:-64px;height:96px;object-fit:cover;object-position:center 30%;display:block;flex-shrink:0;filter:brightness(0.85) saturate(1);">
   </div>
 </div>
 
 <script type="module">
+import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
 
 const $ = (id) => document.getElementById(id);
@@ -453,7 +456,7 @@ function slideSwap(rebuild) {
 connectState({
   onState(state) {
     const { joinUrl, boardMode } = state;
-    renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + '/'));
+    renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + AREA.base + '/'));
     applyScrollSpeed(state.scrollSeconds);
     applyFunfactSpeed(state.funfactSeconds);
     const mode = boardMode === 'today' ? 'today' : 'alltime';

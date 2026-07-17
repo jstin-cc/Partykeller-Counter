@@ -4,7 +4,10 @@
 
 Getränke-Counter für einen Partykeller: Gäste zählen Biere/Shots/Mischen am
 Handy, ein TV zeigt die All-Time-Rangliste. Läuft als **ein Node.js-Prozess** auf
-einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Vollständiger Plan in
+einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Es gibt **zwei Bereiche**
+mit getrennten Daten und eigenem Theme (D-019): **Partykeller**
+(`/partykeller/*`, grün) und **Youngstars** (`/youngstars/*`, Navy/Orange);
+`/` ist die Auswahlseite. Vollständiger Plan in
 [PLAN.md](PLAN.md), Entscheidungen in [DECISIONS.md](DECISIONS.md), Stand in
 [PROGRESS.md](PROGRESS.md).
 
@@ -12,7 +15,8 @@ einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Vollständiger Plan in
 
 - Node.js, Express (Statics + REST), `ws` (WebSockets), `better-sqlite3`, `dotenv`
 - Frontend: statisches HTML/CSS/Vanilla-JS (ES-Module), **kein Build-Step, kein Framework**
-- DB: SQLite in `data/partykeller.db` (WAL), Schema in PLAN.md §3
+- DB: SQLite (WAL), **eine Datei je Bereich** — `data/partykeller.db` und
+  `data/youngstars.db` (gleiches Schema, D-019); Schema in PLAN.md §3
 
 ## Harte Regeln
 
@@ -24,11 +28,12 @@ einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Vollständiger Plan in
 3. README.md und CLAUDE.md bei relevanten Änderungen sofort mitziehen.
 4. **Keine CDN-/Internet-Ressourcen im Frontend** — alles wird in `public/`
    vendored (Fonts, Libs). Die App muss offline im WLAN funktionieren.
-5. Keine Secrets im Repo: `ADMIN_PASSWORD`, `RESET_PASSWORD` und `TOKEN_SECRET`
-   nur über `.env` (Vorlage: `.env.example`). Der Design-Prototyp-Wert
-   `keller2026` wird nie übernommen.
+5. Keine Secrets im Repo: `ADMIN_PASSWORD`, `YOUNGSTARS_ADMIN_PASSWORD`,
+   `RESET_PASSWORD` und `TOKEN_SECRET` nur über `.env` (Vorlage:
+   `.env.example`). Der Design-Prototyp-Wert `keller2026` wird nie übernommen.
 6. Server validiert jede Mutation (Token, Rolle, Wertebereiche); Nutzer dürfen
    nur den eigenen Zähler um +1 erhöhen, alles andere ist Admin (D-004).
+   Tokens sind bereichsgestempelt — sie gelten nur im eigenen Bereich (D-019).
 7. Persistenz ist zwingend: Ein Server-Neustart darf keine Daten und keine
    Logins verlieren (D-006).
 

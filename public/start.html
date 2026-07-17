@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partykeller – Bereich wählen</title>
+<link rel="icon" href="assets/cones-flat.png">
+<meta name="theme-color" content="#04070d">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  /* Neutraler dunkler Auftakt zwischen beiden Welten */
+  body { background: oklch(0.13 0.015 220); }
+  .choice-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    padding: 28px 20px;
+  }
+  .choice-title {
+    font-family: 'Bitter', serif;
+    font-weight: 800;
+    font-size: 26px;
+    color: oklch(0.92 0.02 90);
+    text-align: center;
+    margin: 0;
+  }
+  .choice-sub { font-size: 14px; color: oklch(0.68 0.02 220); text-align: center; margin: 0; }
+  .choice-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 760px;
+  }
+  .choice-card {
+    flex: 1 1 280px;
+    max-width: 360px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+    border: 1px solid oklch(0.92 0.02 220 / 0.14);
+    padding: 28px 22px;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+  }
+  .choice-card:active { transform: scale(0.98); }
+  .choice-card:hover { transform: translateY(-3px); }
+  .choice-card .name {
+    font-family: 'Bitter', serif;
+    font-weight: 800;
+    font-size: 20px;
+  }
+  .choice-card .hint { font-size: 13px; opacity: 0.75; }
+  .card-pk {
+    background: linear-gradient(180deg, oklch(0.21 0.04 155), oklch(0.15 0.035 155));
+    color: oklch(0.92 0.035 88);
+  }
+  .card-pk:hover { border-color: oklch(0.64 0.15 152 / 0.6); box-shadow: 0 10px 34px oklch(0.64 0.15 152 / 0.22); color: oklch(0.92 0.035 88); }
+  .card-ys {
+    background: linear-gradient(180deg, oklch(0.21 0.05 260), oklch(0.15 0.045 260));
+    color: oklch(0.93 0.02 75);
+  }
+  .card-ys:hover { border-color: oklch(0.72 0.17 55 / 0.6); box-shadow: 0 10px 34px oklch(0.72 0.17 55 / 0.22); color: oklch(0.93 0.02 75); }
+  .card-pk .name { color: oklch(0.80 0.15 83); }
+  .card-ys .name { color: oklch(0.75 0.16 55); }
+</style>
+</head>
+<body>
+<div class="choice-wrap">
+  <div>
+    <h1 class="choice-title">Wo wird heute gezählt?</h1>
+    <p class="choice-sub">Wähle deinen Bereich – beide haben eigene Listen und Logins.</p>
+  </div>
+  <div class="choice-cards">
+    <a class="choice-card card-pk" href="/partykeller/">
+      <img src="assets/logo.png" alt="SV Partykeller" style="height:96px;width:auto;object-fit:contain;">
+      <div class="name">Partykeller</div>
+      <div class="hint">Zur Anmeldung ›</div>
+    </a>
+    <a class="choice-card card-ys" href="/youngstars/">
+      <img src="assets/youngstars-logo.png" alt="Youngstars" style="height:72px;width:auto;object-fit:contain;filter:drop-shadow(0 0 16px oklch(0.70 0.19 40 / 0.4));">
+      <div class="name">Youngstars</div>
+      <div class="hint">Zur Anmeldung ›</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

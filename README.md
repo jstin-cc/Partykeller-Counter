@@ -4,6 +4,13 @@ Gäste zählen ihre Biere und Shots über das Handy, ein Fernseher zeigt die
 dauerhafte All-Time-Rangliste. Läuft komplett im lokalen WLAN auf einem
 Raspberry Pi — keine Internet-Abhängigkeit.
 
+Es gibt **zwei Bereiche** mit gleichen Funktionen und komplett getrennten
+Daten: **Partykeller** (`/partykeller`, dunkelgrün) und **Youngstars**
+(`/youngstars`, Navy mit Orange und eigenem Neon-Logo, ohne Baum-Footer).
+Die Startseite `/` fragt zuerst, wo gezählt wird. Jeder Bereich hat eigene
+Nutzer, Rangliste, Fun-Facts, Archiv, TV-Einstellungen und einen eigenen
+Admin-Zugang (Youngstars: `YOUNGSTARS_ADMIN_PASSWORD`).
+
 **Status:** Funktional komplett (M0–M7) — Login, Nutzer-Dashboard,
 TV-Scoreboard mit QR-Code und Admin-Bereich laufen live über WebSocket.
 Offene Restpunkte in [PROGRESS.md](PROGRESS.md).
@@ -39,9 +46,9 @@ npm run seed                  # optional: Testnutzer (PIN 1111)
 npm start                     # http://localhost:3000
 ```
 
-> Die `.env` muss `ADMIN_PASSWORD` und `TOKEN_SECRET` enthalten (Vorlage:
-> `.env.example`), sonst startet der Server bewusst nicht. Ein sicheres
-> `TOKEN_SECRET` erzeugst du z. B. mit
+> Die `.env` muss `ADMIN_PASSWORD`, `YOUNGSTARS_ADMIN_PASSWORD` und
+> `TOKEN_SECRET` enthalten (Vorlage: `.env.example`), sonst startet der Server
+> bewusst nicht. Ein sicheres `TOKEN_SECRET` erzeugst du z. B. mit
 > `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
 
 ## Auf neue Version aktualisieren / Neustart
@@ -71,24 +78,37 @@ npm install
 npm start
 ```
 
-Deine Daten (`data/partykeller.db`) und die `.env` sind gitignored und bleiben
+Deine Daten (`data/*.db`) und die `.env` sind gitignored und bleiben
 beim Update erhalten. Meldet `git pull` „local changes" und du hast am Code
 nichts geändert, hilft `git reset --hard origin/main` — das lässt `data/` und
 `.env` unangetastet.
 
+> **Update auf die Youngstars-Version (D-019):** Einmalig
+> `YOUNGSTARS_ADMIN_PASSWORD=<eigenes Passwort>` in die `.env` eintragen —
+> ohne diese Zeile startet der Server nicht (die Fehlermeldung sagt es dir).
+> Alles andere läuft weiter wie bisher; alte Links/QR-Codes leiten automatisch
+> in den Partykeller-Bereich.
+
 ## Screens
+
+Jede Route gibt es einmal pro Bereich — unter `/partykeller/…` und
+`/youngstars/…`. Alte Links ohne Präfix (z. B. `/tv`) leiten in den
+Partykeller-Bereich.
 
 | Route | Screen |
 |---|---|
-| `/` | Nutzer-Login (Name wählen/anlegen; PIN optional, rate-limitiert) |
-| `/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt, Rang, persönliche Statistik (Abende, bestes Ergebnis, Verteilung) und Achievement-Badges |
-| `/tv` | TV-Scoreboard: umschaltbar All-Time / Heute (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen |
-| `/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht & Rotationstempo einstellen, eigene Fun-Facts pflegen, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort) |
-| `/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen |
+| `/` | Auswahlseite: Partykeller oder Youngstars? |
+| `/<bereich>/` | Nutzer-Login (Name wählen/anlegen; PIN optional, rate-limitiert) |
+| `/<bereich>/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt, Rang, persönliche Statistik (Abende, bestes Ergebnis, Verteilung) und Achievement-Badges. Youngstars: Bier steht zuunterst |
+| `/<bereich>/tv` | TV-Scoreboard: umschaltbar All-Time / Heute (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen |
+| `/<bereich>/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht & Rotationstempo einstellen, eigene Fun-Facts pflegen, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort, löscht nur den eigenen Bereich) |
+| `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen |
 
 Die App ist als **PWA installierbar**: Seite am Handy öffnen → „Zum
 Startbildschirm hinzufügen" — dann liegt der Counter als App-Icon auf dem
 Home-Screen (funktioniert komplett offline im WLAN, es wird nichts gecacht).
+Partykeller und Youngstars haben eigene Manifeste und Icons und können als
+zwei getrennte Apps nebeneinander installiert werden.
 
 ## Stack
 

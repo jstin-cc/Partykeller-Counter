@@ -40,6 +40,45 @@
   --radius-lg: 18px;   /* Karten und große Flächen */
 }
 
+/* --- Youngstars-Bereich (D-019): dunkles Navy statt Dunkelgrün, Akzente in
+   Orange (am Neon-Logo orientiert) plus ein Pinkton aus dessen Glut-Tönen.
+   Das Inline-Skript im <head> jeder Seite setzt html[data-area] anhand des
+   URL-Präfixes, bevor gerendert wird. --- */
+html[data-area="youngstars"] {
+  --green: oklch(0.72 0.17 55);        /* Primär-Akzent: Neon-Orange */
+  --gold: oklch(0.80 0.14 75);          /* Gold leicht Richtung Orange gezogen */
+  --amber: oklch(0.74 0.13 60);         /* Bier */
+  --brick: oklch(0.64 0.19 15);         /* Shots: Pinkton aus dem Logo-Glühen */
+  --mix: oklch(0.70 0.14 310);          /* Mischen: kühleres Violett zum Navy */
+  --bg: oklch(0.15 0.045 260);
+  --bg-hi: oklch(0.19 0.045 260);
+  --surface: oklch(0.23 0.025 260 / 0.54);
+  --surface-alt: oklch(0.19 0.022 260 / 0.47);
+  --surface-2: oklch(0.29 0.028 260 / 0.60);
+  --glass-edge: oklch(0.92 0.02 260 / 0.12);
+}
+
+/* Zapfen-Wasserzeichen in Navy (gleiche Form, hellere Navy-Füllung) */
+html[data-area="youngstars"] .watermark,
+html[data-area="youngstars"] .login-watermark,
+html[data-area="youngstars"] .admin-watermark,
+html[data-area="youngstars"] .archive-watermark,
+html[data-area="youngstars"] .tv-mark {
+  background-image: url('../assets/zapfen-bg-navy.svg');
+}
+
+/* Baum-Footer gehört zum Partykeller-Look — im Youngstars-Bereich weglassen
+   (!important: das TV-Bild setzt display:block inline) */
+html[data-area="youngstars"] .footer-woods { display: none !important; }
+
+/* Youngstars-Neon-Logo: nur im Youngstars-Bereich sichtbar, direkt neben bzw.
+   unter dem Partykeller-Logo (beide Logos bilden die Kopfzeile). */
+.ys-logo { display: none; }
+html[data-area="youngstars"] .ys-logo {
+  display: block;
+  filter: drop-shadow(0 0 14px oklch(0.70 0.19 40 / 0.35));
+}
+
 /* Wiederverwendbare Glas-Behandlung */
 .glass {
   backdrop-filter: blur(var(--glass-blur));
