@@ -368,6 +368,30 @@ function rebuildRest(animate) {
   if (maxPos > 0) scrollTimer = setInterval(scrollStep, stepMs);
 }
 
+// Absicherung gegen späten Font-Swap (theme.css lädt Bitter/Work Sans mit
+// font-display: swap): Wenn die eigene Schrift erst NACH dem Zeilenaufbau
+// eintrifft, verschiebt sich die Höhe von Header/Podium noch minimal, und
+// die einmal fest eingefrorene Zeilenhöhe passt nicht mehr zum tatsächlich
+// verfügbaren Platz — die letzte Zeile würde sonst dauerhaft abgeschnitten,
+// weil bei vollständig sichtbarer Liste kein Scroll-Timer läuft, der es
+// korrigieren könnte. Bei jeder Größenänderung des Viewports (Font-Swap,
+// Fenster-Resize) Zeilenhöhe und Scrollposition daher neu ausrichten.
+function resyncRowHeight() {
+  if (!track || others.length === 0) return;
+  const vh = $('rest').clientHeight;
+  const newRowH = (vh - (WINDOW - 1) * GAP) / WINDOW;
+  if (!Number.isFinite(newRowH) || Math.abs(newRowH - rowH) < 0.5) return;
+  rowH = newRowH;
+  for (const r of track.children) r.style.height = `${rowH}px`;
+  const prevTransition = track.style.transition;
+  track.style.transition = 'none';
+  track.style.transform = `translateY(${-pos * (rowH + GAP)}px)`;
+  void track.offsetWidth;
+  track.style.transition = prevTransition;
+}
+
+new ResizeObserver(resyncRowHeight).observe($('rest'));
+
 // Geschwindigkeit geändert (Admin): laufende Rotation mit neuem Takt fortsetzen
 function applyScrollSpeed(seconds) {
   const ms = Math.round((Number(seconds) || 3.2) * 1000);
