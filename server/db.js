@@ -136,6 +136,12 @@ export function createDb(dbPath) {
     firstLogToday: db.prepare(
       'SELECT player_id FROM drink_log WHERE ts >= ? ORDER BY ts, id LIMIT 1'
     ),
+    // Zeitpunkt des jeweils letzten Getränks: Tiebreak bei Punktegleichstand
+    // (wer zuerst auf den Stand kam, steht in der Rangliste vorne)
+    lastLogTs: db.prepare('SELECT player_id, MAX(ts) AS ts FROM drink_log GROUP BY player_id'),
+    lastLogTsToday: db.prepare(
+      'SELECT player_id, MAX(ts) AS ts FROM drink_log WHERE ts >= ? GROUP BY player_id'
+    ),
     playerLogsToday: db.prepare(
       'SELECT drink, ts FROM drink_log WHERE player_id = ? AND ts >= ? ORDER BY ts'
     ),
@@ -344,6 +350,11 @@ export function createDb(dbPath) {
       today.set(row.player_id, entry);
     }
 
+    const lastTs = new Map();
+    for (const row of stmts.lastLogTs.all()) lastTs.set(row.player_id, row.ts);
+    const lastTsToday = new Map();
+    for (const row of stmts.lastLogTsToday.all(partyDayStartMs())) lastTsToday.set(row.player_id, row.ts);
+
     const players = stmts.listPlayers
       .all()
       .map((p) => {
@@ -361,9 +372,19 @@ export function createDb(dbPath) {
           hidden: !!p.hidden,
           hasPin: !!p.pin_hash,   // ob eine PIN gesetzt ist (D-018); der Hash selbst bleibt geheim
           createdAt: p.created_at,
+          // Zeitpunkt des letzten Getränks (all-time / heute) für den Tiebreak
+          lastDrinkTs: lastTs.get(p.id) ?? null,
+          lastDrinkTsToday: lastTsToday.get(p.id) ?? null,
         };
       })
-      .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'de'));
+      // Tiebreak bei Punktegleichstand: zuerst nach Uhrzeit (wer zuerst auf dem
+      // Stand war), erst wenn auch die unbekannt ist (z. B. reine Admin-Korrektur
+      // ohne Log-Eintrag), alphabetisch als letzter Fallback.
+      .sort((a, b) =>
+        b.total - a.total ||
+        (a.lastDrinkTs ?? Infinity) - (b.lastDrinkTs ?? Infinity) ||
+        a.name.localeCompare(b.name, 'de')
+      );
 
     players.forEach((p, i) => { p.rank = i + 1; });
     // joinUrl: vom Admin gesetzte Beitritts-Adresse für den TV-QR-Code

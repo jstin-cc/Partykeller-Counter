@@ -421,8 +421,8 @@ let currentMode = null;
 function metricsFor(p, mode) {
   return mode === 'today'
     ? { beers: p.beersToday, shots: p.shotsToday, mixes: p.mixesToday,
-        total: p.beersToday + p.shotsToday + p.mixesToday }
-    : { beers: p.beers, shots: p.shots, mixes: p.mixes, total: p.total };
+        total: p.beersToday + p.shotsToday + p.mixesToday, ts: p.lastDrinkTsToday }
+    : { beers: p.beers, shots: p.shots, mixes: p.mixes, total: p.total, ts: p.lastDrinkTs };
 }
 
 // Modus bestimmt, wer auf dem Board steht:
@@ -432,7 +432,13 @@ function boardRows(players, mode) {
   const rows = players
     .map((p) => ({ id: p.id, name: p.name, hidden: p.hidden, ...metricsFor(p, mode) }))
     .filter((r) => (mode === 'today' ? r.total > 0 : !r.hidden));
-  rows.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'de'));
+  // Tiebreak bei Punktegleichstand: zuerst nach Uhrzeit (wer zuerst auf dem
+  // Stand war), Name nur noch als letzter Fallback (z. B. beide 0 Getränke).
+  rows.sort((a, b) =>
+    b.total - a.total ||
+    (a.ts ?? Infinity) - (b.ts ?? Infinity) ||
+    a.name.localeCompare(b.name, 'de')
+  );
   rows.forEach((r, i) => { r.rank = i + 1; });
   return rows;
 }

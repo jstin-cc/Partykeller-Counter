@@ -442,3 +442,20 @@ eigener Admin-Zugang und eigenes Farbkonzept. Ein Node.js-Prozess bedient beide.
 mit dem Partykeller. Ein Prozess + zwei DB-Dateien hält den Pi-Betrieb simpel
 (keine zweite Instanz, kein zweiter Port) und erfüllt die harte
 Ein-Prozess-Regel; gemeinsame HTML/JS-Dateien vermeiden doppelte Pflege.
+
+## D-020 (2026-08-16): Tiebreak bei Punktegleichstand = Uhrzeit statt Name
+
+**Entscheidung:** Stehen zwei Spieler:innen beim Gesamtwert (Bier+Shots+Mischen)
+gleichauf, entscheidet künftig, wer **zuerst** auf diesen Stand kam (Zeitpunkt
+des jeweils letzten geloggten Getränks, aufsteigend). Alphabetisch nach Name
+ist nur noch der letzte Fallback, falls auch dazu kein Log-Eintrag existiert
+(z. B. reine Admin-Korrektur ohne organischen Trink-Eintrag). Betrifft die
+Rangliste server-seitig (`getState()` in `server/db.js`, u. a. für die
+Rang-Anzeige im Nutzer-Dashboard) sowie das TV-Board (`public/tv.html`, beide
+Modi All-Time/Heute). Dafür neue Abfragen `lastLogTs`/`lastLogTsToday`
+(`MAX(ts)` je Spieler:in aus `drink_log`), keine Schemaänderung.
+
+**Begründung:** Vom Nutzer gewünscht. Passt zum Charakter eines
+Trinkspiel-Wettbewerbs ("wer war zuerst dran"); Namensalphabet als Tiebreak
+wirkte willkürlich. Keine neuen Dependencies, `drink_log` trug die nötigen
+Zeitstempel bereits.
