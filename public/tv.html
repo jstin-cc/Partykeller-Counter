@@ -113,6 +113,29 @@
   .col-shot { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--brick); font-variant-numeric:tabular-nums; }
   .col-mix { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--mix); font-variant-numeric:tabular-nums; }
   .col-total { width:140px; text-align:right; font-family:'Bitter',serif; font-weight:800; font-size:34px; color:var(--gold); text-shadow:0 0 10px oklch(0.80 0.15 83 / 0.25); font-variant-numeric:tabular-nums; }
+  /* Rekordkurs (Bier-Pace): glüht auf, wenn der Abend schneller läuft als der
+     Rekord-Abend zur gleichen Uhrzeit */
+  .pace-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    border: 1px solid oklch(0.80 0.15 83 / 0.55);
+    background: oklch(0.80 0.15 83 / 0.12);
+    color: var(--gold);
+    font-family: 'Bitter', serif;
+    font-weight: 800;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    animation: pk-paceglow 2.4s ease-in-out infinite;
+  }
+  @keyframes pk-paceglow {
+    0%, 100% { box-shadow: 0 0 4px oklch(0.80 0.15 83 / 0.15); }
+    50%      { box-shadow: 0 0 18px oklch(0.80 0.15 83 / 0.45); }
+  }
+  @media (prefers-reduced-motion: reduce) { .pace-pill { animation: none; } }
 </style>
 </head>
 <body>
@@ -138,6 +161,7 @@
       <div style="text-align:center;">
         <div id="participant-count" class="num" style="font-size:22px;color:var(--creme);font-weight:700;">0 Teilnehmer</div>
         <div id="totals" style="font-size:14px;color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums;">0 Bier · 0 Shots gesamt</div>
+        <div id="pace-pill" class="pace-pill" hidden>🔥 Auf Rekordkurs!</div>
       </div>
       <div class="glass" style="display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface-alt);border-radius:var(--radius-lg);">
         <div style="font-size:14px;color:var(--creme);text-align:right;line-height:1.4;font-family:'Bitter',serif;font-weight:600;">Scan zum<br>Beitreten</div>
@@ -506,7 +530,29 @@ function applyState(state, mode) {
 
   updateRest(rows.slice(3));
   updateFacts(state.players.filter((p) => !p.hidden), state.records, state.customFacts, state.funStats);
+  updatePace(state.funStats?.pace, mode);
 }
+
+// --- Rekordkurs (Bier-Pace): Pill im Kopf, sobald der Abend vor dem besten
+// bisherigen Abend liegt (ab 3 Getränken, nicht im Archiv-Modus). Zwischen
+// zwei Getränken „altert" der Vergleich — deshalb unten der 5-Minuten-Refresh.
+function updatePace(pace, mode) {
+  const el = $('pace-pill');
+  const show = mode !== 'archive' && !!pace && pace.onPace && pace.todayTotal >= 3;
+  el.hidden = !show;
+  if (show) {
+    el.textContent = `🔥 Auf Rekordkurs! ${pace.todayTotal} : ${pace.recordAtSameTime} vs. ${fmtDay(pace.recordDay)}`;
+  }
+}
+
+setInterval(async () => {
+  try {
+    const res = await fetch(`${AREA.base}/api/state`);
+    if (!res.ok) return;
+    const s = await res.json();
+    updatePace(s.funStats?.pace, currentMode);
+  } catch { /* nächster Broadcast/Refresh richtet es */ }
+}, 5 * 60 * 1000);
 
 // Moduswechsel: das ganze Board fährt raus und das neue fährt wieder ein
 function slideSwap(rebuild) {
@@ -617,6 +663,9 @@ function computeFacts(players, records, customFacts, funStats) {
   }
   if (fs.recordNight && fs.nights >= 2) {
     fact(`Rekord-Abend: Am ${fmtDay(fs.recordNight.day)} flossen zusammen ${fs.recordNight.total} Getränke.`);
+  }
+  if (fs.pace && fs.pace.onPace && fs.pace.todayTotal >= 3) {
+    fact(`Rekordkurs: Schon ${fs.pace.todayTotal} Getränke heute – der Rekord-Abend vom ${fmtDay(fs.pace.recordDay)} stand um diese Uhrzeit erst bei ${fs.pace.recordAtSameTime}.`);
   }
   if (fs.regular && fs.regular.nights >= 3) {
     fact(`Stammgast: ${fs.regular.name} war schon an ${fs.regular.nights} Abenden dabei.`);

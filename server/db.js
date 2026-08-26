@@ -195,6 +195,13 @@ export function createDb(dbPath) {
        FROM drink_log WHERE ts >= ?
        GROUP BY hour ORDER BY n DESC, hour LIMIT 1`
     ),
+    // Getränke (sichtbarer Spieler) in einem Zeitfenster — für den Rekordkurs-
+    // Vergleich „Rekord-Abend zum gleichen Zeitpunkt"
+    countLogsRange: db.prepare(
+      `SELECT COUNT(*) AS n FROM drink_log dl
+       JOIN players p ON p.id = dl.player_id
+       WHERE p.hidden = 0 AND dl.ts >= ? AND dl.ts < ?`
+    ),
     // Zeitpunkt des jeweils letzten Getränks: Tiebreak bei Punktegleichstand
     // (wer zuerst auf den Stand kam, steht in der Rangliste vorne)
     lastLogTs: db.prepare('SELECT player_id, MAX(ts) AS ts FROM drink_log GROUP BY player_id'),
@@ -608,11 +615,36 @@ export function createDb(dbPath) {
     const first = stmts.firstLogToday.get(dayStart);
     const topHour = stmts.topHourToday.get(dayStart);
 
+    // Rekordkurs (Bier-Pace): läuft der laufende Abend schneller als der beste
+    // BISHERIGE Abend? Vergleich: Getränke heute gesamt vs. Getränke des
+    // Rekord-Abends bis zur gleichen Uhrzeit (gleiche Zeit seit 06:00-Start).
+    const today = partyDayString();
+    let bestPrev = null;
+    for (const [day, total] of dayTotals) {
+      if (day === today) continue;
+      if (!bestPrev || total > bestPrev.total) bestPrev = { day, total };
+    }
+    const todayTotal = dayTotals.get(today) ?? 0;
+    let pace = null;
+    if (bestPrev && todayTotal > 0) {
+      const [recStart] = partyDayRangeMs(bestPrev.day);
+      const elapsed = Math.max(0, Date.now() - dayStart);
+      const recordAtSameTime = stmts.countLogsRange.get(recStart, recStart + elapsed).n;
+      pace = {
+        todayTotal,
+        recordDay: bestPrev.day,
+        recordTotal: bestPrev.total,
+        recordAtSameTime,
+        onPace: todayTotal > recordAtSameTime,
+      };
+    }
+
     return {
       nights: dayTotals.size,
       recordNight,
       regular,
       topWinner,
+      pace,
       firstToday: first && !hiddenIds.has(first.player_id)
         ? { name: names.get(first.player_id) ?? '—', ts: first.ts }
         : null,

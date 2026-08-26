@@ -153,6 +153,8 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Abzeichen mit Zähler über alle Abende + neues Abzeichen 👑 Tagessieger
 - [x] Sechs neue Statistik-Fun-Facts (Rekord-Abend, Stammgast, Seriensieger,
       Frühstart, durstigste Stunde, Gesamtbilanz)
+- [x] Rekordkurs (Bier-Pace) live auf dem TV: glühende Pill + Fun-Fact, wenn
+      der Abend vor dem besten bisherigen Abend liegt (D-024)
 - [x] D-020-Tiebreak auch für Archiv-Sieger/Tagessieger
 
 ## Verifikation (2026-08-26, M8)

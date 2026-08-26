@@ -530,3 +530,21 @@ auf eine eigene Profil-Seite, mehr Kontext („wer ist vor/hinter mir"),
 sichtbare Abzeichen-Historie, ein Abzeichen für den Tagessieg und mehr
 abwechslungsreiche Fun-Facts aus echten Daten. Alles aus `drink_log`
 berechenbar — keine Schemaänderung, keine neuen Dependencies.
+
+## D-024 (2026-08-26): Rekordkurs (Bier-Pace) live auf dem TV
+
+**Entscheidung:** Der State enthält `funStats.pace`: Getränke des laufenden
+Abends (sichtbare Spieler) im Vergleich zum besten **bisherigen** Abend zum
+**gleichen Zeitpunkt** (gleiche Zeitspanne seit dem 06:00-Start, gezählt über
+`drink_log`). Liegt der Abend vorn (`onPace`, ab 3 Getränken), zeigt das TV
+eine glühende Pill im Kopfbereich („🔥 Auf Rekordkurs! 34 : 28 vs. 22.08.2026")
+plus einen Fun-Fact; im Archiv-Modus ist sie ausgeblendet. Da der Vergleich
+zwischen zwei Getränken altert (der Rekord-Abend „zieht weiter"), holt sich
+das TV den Pace-Stand zusätzlich alle 5 Minuten per REST — der übrige State
+läuft unverändert über die WS-Broadcasts.
+
+**Begründung:** Nutzerwunsch (aus den Vorschlägen bestätigt): Live-Spannung
+auf dem Board, ob der Abend den Rekord knackt. Der laufende Abend wird bewusst
+gegen den besten *vergangenen* Abend verglichen (sonst wäre der Rekord-Abend
+irgendwann er selbst und die Anzeige sinnlos). Keine Schemaänderung, eine
+zusätzliche COUNT-Abfrage.
