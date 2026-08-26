@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 import { config } from './config.js';
 import { verifyToken, tokenArea, hashPin } from './auth.js';
 import { validName, validPin, validFactTitle, validFactText, normalizeJoinUrl } from './validate.js';
+import { validDayString } from './db.js';
 
 // Nachrichten-Contract siehe PLAN.md §5; Server validiert alles.
 // Ein Handler-Satz pro Bereich (D-019): db und Increment-Buckets hängen am
@@ -66,9 +67,14 @@ function createHandlers(area) {
       if (!db.setHidden(id, hidden)) throw new Error('Nutzer nicht gefunden');
     },
 
-    setBoardMode(auth, { mode }) {
+    // 'archive' zeigt einen vergangenen Party-Tag auf dem TV (day Pflicht)
+    setBoardMode(auth, { mode, day }) {
       requireAdmin(auth);
-      if (!['alltime', 'today'].includes(mode)) throw new Error('Unbekannter Anzeigemodus');
+      if (!['alltime', 'today', 'archive'].includes(mode)) throw new Error('Unbekannter Anzeigemodus');
+      if (mode === 'archive') {
+        if (!validDayString(day)) throw new Error('Ungültiger Archiv-Tag');
+        db.setSetting('board_day', day);
+      }
       db.setSetting('board_mode', mode);
     },
 
@@ -97,10 +103,28 @@ function createHandlers(area) {
       db.addFact(title.trim(), text.trim());
     },
 
+    updateFact(auth, { id, title, text }) {
+      requireAdmin(auth);
+      if (!Number.isInteger(id)) throw new Error('Ungültige Meldung');
+      if (!validFactTitle(title)) throw new Error('Titel: 1-30 Zeichen');
+      if (!validFactText(text)) throw new Error('Text: 1-160 Zeichen');
+      if (!db.updateFact(id, title.trim(), text.trim())) throw new Error('Meldung nicht gefunden');
+    },
+
     deleteFact(auth, { id }) {
       requireAdmin(auth);
       if (!Number.isInteger(id)) throw new Error('Ungültige Meldung');
       if (!db.deleteFact(id)) throw new Error('Meldung nicht gefunden');
+    },
+
+    // Archiv-Korrektur: ±1 Getränk eines Spielers an einem vergangenen Party-Tag
+    // (wirkt auf Log UND All-Time-Zähler, siehe db.adjustArchiveDrink)
+    adjustArchive(auth, { day, playerId, drink, delta }) {
+      requireAdmin(auth);
+      if (!validDayString(day)) throw new Error('Ungültiger Archiv-Tag');
+      if (!['beer', 'shot', 'mix'].includes(drink)) throw new Error('Unbekanntes Getränk');
+      if (delta !== 1 && delta !== -1) throw new Error('delta muss +1 oder -1 sein');
+      db.adjustArchiveDrink(playerId, day, drink, delta);
     },
 
     deletePlayer(auth, { id }) {
