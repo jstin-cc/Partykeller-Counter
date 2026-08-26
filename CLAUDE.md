@@ -4,7 +4,7 @@
 
 Getränke-Counter für einen Partykeller: Gäste zählen Biere/Shots/Mischen am
 Handy, ein TV zeigt die All-Time-Rangliste. Läuft als **ein Node.js-Prozess** auf
-einem Raspberry Pi im lokalen WLAN, **ohne Internet**. Es gibt **zwei Bereiche**
+einem Laptop oder Raspberry Pi im lokalen WLAN, **ohne Internet**. Es gibt **zwei Bereiche**
 mit getrennten Daten und eigenem Theme (D-019): **Partykeller**
 (`/partykeller/*`, grün) und **Youngstars** (`/youngstars/*`, Navy/Orange);
 `/` ist die Auswahlseite. Vollständiger Plan in
@@ -53,6 +53,6 @@ mit getrennten Daten und eigenem Theme (D-019): **Partykeller**
 
 ## Status
 
-Alle Meilensteine (M0–M7) sind umgesetzt, die App ist funktional komplett.
+Alle Meilensteine (M0–M8) sind umgesetzt, die App ist funktional komplett.
 Aktueller Stand und offene Restpunkte stehen immer in PROGRESS.md — vor
 jeder Arbeit dort nachsehen.

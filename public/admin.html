@@ -124,9 +124,11 @@
 
     <div class="glass" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
       <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">TV-Anzeige</div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <button id="mode-alltime" class="mode-btn" data-mode="alltime">All-Time</button>
         <button id="mode-today" class="mode-btn" data-mode="today">Heute</button>
+        <button id="mode-archive" class="mode-btn" data-mode="archive">Archiv-Abend</button>
+        <select id="archive-day" class="input-flat" hidden style="padding:8px 12px;font-size:14px;cursor:pointer;"></select>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:13px;color:var(--ink-muted);">Rotation</span>
@@ -274,12 +276,13 @@ function send(msg) {
 function enterDashboard() {
   $('login-view').hidden = true;
   $('dash-view').hidden = false;
+  loadArchiveDays();
   ws = connectState({
     onState(state) {
       players = state.players;
       renderRows();
       updateJoinField(state.joinUrl ?? '');
-      updateBoardMode(state.boardMode ?? 'alltime');
+      updateBoardMode(state.boardMode ?? 'alltime', state.boardDay);
       updateSpeed(state.scrollSeconds ?? 3.2);
       updateFunfact(state.funfactSeconds ?? 30);
       renderFacts(state.customFacts ?? []);
@@ -295,15 +298,52 @@ function enterDashboard() {
   });
 }
 
-// --- TV-Anzeige umschalten (All-Time / Heute) ---
-function updateBoardMode(mode) {
+// --- TV-Anzeige umschalten (All-Time / Heute / Archiv-Abend) ---
+function updateBoardMode(mode, day) {
   for (const b of document.querySelectorAll('.mode-btn')) {
     b.classList.toggle('active', b.dataset.mode === mode);
   }
+  const sel = $('archive-day');
+  sel.hidden = mode !== 'archive';
+  if (mode === 'archive' && day && document.activeElement !== sel) sel.value = day;
 }
+
+// Auswahl der Archiv-Abende füllen (neueste zuerst, wie /abende)
+async function loadArchiveDays() {
+  try {
+    const res = await fetch(`${AREA.base}/api/archive`);
+    if (!res.ok) return;
+    const { days } = await res.json();
+    const sel = $('archive-day');
+    const current = sel.value;
+    sel.textContent = '';
+    for (const night of days) {
+      const opt = document.createElement('option');
+      opt.value = night.day;
+      const [y, m, d] = night.day.split('-');
+      opt.textContent = `${d}.${m}.${y} (${night.total} Getränke)`;
+      sel.appendChild(opt);
+    }
+    if (current && [...sel.options].some((o) => o.value === current)) sel.value = current;
+  } catch { /* nächster Versuch beim Öffnen des Menüs */ }
+}
+
 document.querySelectorAll('.mode-btn').forEach((b) => {
-  b.addEventListener('click', () => send({ type: 'setBoardMode', mode: b.dataset.mode }));
+  b.addEventListener('click', () => {
+    if (b.dataset.mode === 'archive') {
+      const day = $('archive-day').value;
+      if (!day) { showError('Noch kein Abend im Archiv.'); return; }
+      send({ type: 'setBoardMode', mode: 'archive', day });
+    } else {
+      send({ type: 'setBoardMode', mode: b.dataset.mode });
+    }
+  });
 });
+$('archive-day').addEventListener('change', () => {
+  send({ type: 'setBoardMode', mode: 'archive', day: $('archive-day').value });
+  $('archive-day').blur();
+});
+$('archive-day').addEventListener('mousedown', loadArchiveDays);
 
 // --- Rotationsgeschwindigkeit der TV-Rangliste ---
 const fmtSpeed = (s) => `${Number(s).toLocaleString('de-DE', { minimumFractionDigits: 1 })} s/Zeile`;
@@ -348,25 +388,70 @@ $('funfact-slider').addEventListener('change', () => {
   $('funfact-slider').blur();
 });
 
-// --- Eigene Fun-Facts (Titel + Text), rotieren im TV-Band mit ---
+// --- Eigene Fun-Facts (Titel + Text), rotieren im TV-Band mit;
+//     Bearbeiten öffnet ein Inline-Formular in der Zeile ---
+let factEditId = null;
+let lastFacts = [];
+
 function renderFacts(facts) {
+  lastFacts = facts;
   const box = $('fact-list');
   box.textContent = '';
   for (const f of facts) {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);border:1px solid var(--glass-edge);border-radius:var(--radius);';
-    const title = document.createElement('span');
-    title.style.cssText = "font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0;";
-    title.textContent = f.title;
-    const text = document.createElement('span');
-    text.style.cssText = 'flex:1;font-size:14px;color:var(--ink);';
-    text.textContent = f.text;
-    const del = document.createElement('button');
-    del.className = 'link-btn';
-    del.style.color = 'var(--brick)';
-    del.textContent = 'Löschen';
-    del.addEventListener('click', () => send({ type: 'deleteFact', id: f.id }));
-    row.append(title, text, del);
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);border:1px solid var(--glass-edge);border-radius:var(--radius);flex-wrap:wrap;';
+
+    if (factEditId === f.id) {
+      const form = document.createElement('form');
+      form.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;flex:1;align-items:center;';
+      const titleIn = document.createElement('input');
+      titleIn.className = 'input-flat';
+      titleIn.maxLength = 30;
+      titleIn.required = true;
+      titleIn.value = f.title;
+      titleIn.style.cssText = 'width:180px;padding:8px 10px;font-size:14px;';
+      const textIn = document.createElement('input');
+      textIn.className = 'input-flat';
+      textIn.maxLength = 160;
+      textIn.required = true;
+      textIn.value = f.text;
+      textIn.style.cssText = 'flex:1;min-width:220px;padding:8px 10px;font-size:14px;';
+      const save = document.createElement('button');
+      save.className = 'btn-green';
+      save.style.cssText = 'padding:8px 14px;font-size:13px;';
+      save.textContent = 'Speichern';
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'btn-flat';
+      cancel.style.cssText = 'padding:8px 14px;font-size:13px;';
+      cancel.textContent = 'Abbrechen';
+      cancel.addEventListener('click', () => { factEditId = null; renderFacts(lastFacts); });
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        send({ type: 'updateFact', id: f.id, title: titleIn.value, text: textIn.value });
+        factEditId = null;
+      });
+      form.append(titleIn, textIn, save, cancel);
+      row.appendChild(form);
+      queueMicrotask(() => titleIn.focus());
+    } else {
+      const title = document.createElement('span');
+      title.style.cssText = "font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0;";
+      title.textContent = f.title;
+      const text = document.createElement('span');
+      text.style.cssText = 'flex:1;font-size:14px;color:var(--ink);';
+      text.textContent = f.text;
+      const edit = document.createElement('button');
+      edit.className = 'link-btn';
+      edit.textContent = 'Bearbeiten';
+      edit.addEventListener('click', () => { factEditId = f.id; renderFacts(lastFacts); });
+      const del = document.createElement('button');
+      del.className = 'link-btn';
+      del.style.color = 'var(--brick)';
+      del.textContent = 'Löschen';
+      del.addEventListener('click', () => send({ type: 'deleteFact', id: f.id }));
+      row.append(title, text, edit, del);
+    }
     box.appendChild(row);
   }
 }

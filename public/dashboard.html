@@ -32,6 +32,38 @@
   }
   .dist-bar > div { transition: width 0.5s ease; }
   .dist-legend { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; }
+
+  /* Zwei Ansichten: Zählen (Eingabe) und Profil (Statistik) */
+  .tabs {
+    display: flex; gap: 6px; padding: 5px;
+    background: var(--surface-alt); border: 1px solid var(--glass-edge);
+    border-radius: 999px;
+  }
+  .tab-btn {
+    flex: 1; padding: 10px; border: none; border-radius: 999px; cursor: pointer;
+    background: transparent; color: var(--ink-muted);
+    font-family: 'Bitter', serif; font-weight: 700; font-size: 15px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .tab-btn.active { background: var(--green); color: var(--bg); }
+
+  /* Anzahl-Pill am Abzeichen: wie oft schon erreicht */
+  .badge-count {
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface); border: 1px solid var(--glass-edge);
+    border-radius: 999px; padding: 1px 7px;
+  }
+  .badge.earned .badge-count { color: var(--gold); border-color: oklch(0.80 0.15 83 / 0.4); }
+
+  /* Nachbarn in der Rangliste: wer ist vor/hinter mir */
+  .rival {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    border-radius: var(--radius); padding: 10px 14px; font-size: 14px;
+  }
+  .rival .who { font-family: 'Bitter', serif; font-weight: 700; flex: 1; }
+  .rival .gap { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -52,6 +84,14 @@
       <div style="text-align:center;">
         <div id="player-name" style="font-family:'Bitter',serif;font-weight:800;font-size:32px;color:var(--creme);"></div>
       </div>
+
+      <!-- Umschalter: Zählen (Eingabe) / Profil (Statistik & Abzeichen) -->
+      <div class="tabs" role="tablist">
+        <button id="tab-btn-count" class="tab-btn active" type="button">Zählen</button>
+        <button id="tab-btn-profile" class="tab-btn" type="button">Profil</button>
+      </div>
+
+      <div id="tab-count" style="display:flex;flex-direction:column;gap:18px;">
 
       <div class="card card--green" style="text-align:center;padding:18px;">
         <div class="eyebrow">Getränke heute</div>
@@ -109,43 +149,93 @@
         </div>
       </div>
 
-      <!-- Persönliche Statistik: eigene Abende, bestes Ergebnis, Verteilung -->
-      <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:16px;">
-        <div class="card-title" style="color:var(--gold);">Deine Statistik</div>
-        <div class="split">
-          <div class="cell">
-            <div id="stat-days" class="num value" style="font-size:34px;">0</div>
-            <div class="label" style="font-size:12px;color:var(--ink-muted);">Abende</div>
+      </div><!-- /#tab-count -->
+
+      <!-- Profil: Statistik, Ranglisten-Umfeld und Abzeichen -->
+      <div id="tab-profile" hidden style="display:flex;flex-direction:column;gap:18px;">
+
+        <!-- Heute: Stand des laufenden Abends + wer direkt vor/hinter mir liegt -->
+        <div class="card card--green" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="card-title" style="color:var(--green);">Heute Abend</div>
+          <div class="split">
+            <div class="cell">
+              <div id="prof-today-total" class="num value" style="font-size:34px;color:var(--green);">0</div>
+              <div class="label">Getränke</div>
+            </div>
+            <div class="sep"></div>
+            <div class="cell">
+              <div id="prof-today-rank" class="num value value--gold" style="font-size:34px;">–</div>
+              <div id="prof-today-rank-label" class="label">Platz heute</div>
+            </div>
           </div>
-          <div class="sep"></div>
-          <div class="cell">
-            <div id="stat-best" class="num value value--gold" style="font-size:34px;color:var(--gold);">–</div>
-            <div id="stat-best-label" class="label" style="font-size:12px;color:var(--ink-muted);">Bestes Ergebnis</div>
+          <div id="prof-today-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- All-Time: Gesamtstand + Umfeld -->
+        <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:12px;">
+          <div class="card-title" style="color:var(--gold);">All-Time</div>
+          <div class="split">
+            <div class="cell">
+              <div id="prof-alltime-total" class="num value value--gold" style="font-size:34px;">0</div>
+              <div class="label">Getränke</div>
+            </div>
+            <div class="sep"></div>
+            <div class="cell">
+              <div id="prof-alltime-rank" class="num value" style="font-size:34px;">–</div>
+              <div id="prof-alltime-rank-label" class="label">Platz</div>
+            </div>
+          </div>
+          <div id="prof-alltime-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung -->
+        <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:16px;">
+          <div class="card-title" style="color:var(--gold);">Deine Statistik</div>
+          <div class="split">
+            <div class="cell">
+              <div id="stat-days" class="num value" style="font-size:30px;">0</div>
+              <div class="label" style="font-size:12px;color:var(--ink-muted);">Abende</div>
+            </div>
+            <div class="sep"></div>
+            <div class="cell">
+              <div id="stat-best" class="num value value--gold" style="font-size:30px;color:var(--gold);">–</div>
+              <div id="stat-best-label" class="label" style="font-size:12px;color:var(--ink-muted);">Bestes Ergebnis</div>
+            </div>
+            <div class="sep"></div>
+            <div class="cell">
+              <div id="stat-avg" class="num value" style="font-size:30px;">–</div>
+              <div class="label" style="font-size:12px;color:var(--ink-muted);">Ø pro Abend</div>
+            </div>
+          </div>
+          <div>
+            <div class="eyebrow" style="margin-bottom:8px;">Deine Mischung</div>
+            <div class="dist-bar">
+              <div id="dist-beer" style="background:var(--amber);width:0;"></div>
+              <div id="dist-shot" style="background:var(--brick);width:0;"></div>
+              <div id="dist-mix" style="background:var(--mix);width:0;"></div>
+            </div>
+            <div class="dist-legend">
+              <span style="color:var(--amber);">Bier <span id="pct-beer" class="num">0%</span></span>
+              <span style="color:var(--brick);">Shots <span id="pct-shot" class="num">0%</span></span>
+              <span style="color:var(--mix);">Mischen <span id="pct-mix" class="num">0%</span></span>
+            </div>
           </div>
         </div>
-        <div>
-          <div class="eyebrow" style="margin-bottom:8px;">Deine Mischung</div>
-          <div class="dist-bar">
-            <div id="dist-beer" style="background:var(--amber);width:0;"></div>
-            <div id="dist-shot" style="background:var(--brick);width:0;"></div>
-            <div id="dist-mix" style="background:var(--mix);width:0;"></div>
-          </div>
-          <div class="dist-legend">
-            <span style="color:var(--amber);">Bier <span id="pct-beer" class="num">0%</span></span>
-            <span style="color:var(--brick);">Shots <span id="pct-shot" class="num">0%</span></span>
-            <span style="color:var(--mix);">Mischen <span id="pct-mix" class="num">0%</span></span>
-          </div>
-        </div>
-        <div>
-          <div class="eyebrow" style="margin-bottom:8px;">Abzeichen heute</div>
+
+        <!-- Abzeichen: leuchtet, wenn heute erreicht; die Pill zählt alle Abende -->
+        <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:12px;">
+          <div class="card-title" style="color:var(--gold);">Abzeichen</div>
+          <div style="font-size:12px;color:var(--ink-muted);">Leuchtet, wenn heute geschafft – die Zahl zählt, an wie vielen Abenden insgesamt.</div>
           <div class="badges">
-            <div id="badge-first" class="badge" title="Das erste Getränk des Abends kam von dir">🥇 Erster Trinker</div>
-            <div id="badge-midnight" class="badge" title="Ein Bier zwischen 0 und 1 Uhr">🌙 Mitternachtsbier</div>
-            <div id="badge-hour" class="badge" title="Drei Getränke innerhalb einer Stunde">⚡ Drei in einer Stunde</div>
-            <div id="badge-mix" class="badge" title="Mindestens drei Mischgetränke heute">🍹 Mischmeister</div>
+            <div id="badge-winner" class="badge" title="Gesamt-Tagessieger des Abends">👑 Tagessieger <span class="badge-count">×0</span></div>
+            <div id="badge-first" class="badge" title="Das erste Getränk des Abends kam von dir">🥇 Erster Trinker <span class="badge-count">×0</span></div>
+            <div id="badge-midnight" class="badge" title="Ein Bier zwischen 0 und 1 Uhr">🌙 Mitternachtsbier <span class="badge-count">×0</span></div>
+            <div id="badge-hour" class="badge" title="Drei Getränke innerhalb einer Stunde">⚡ Drei in einer Stunde <span class="badge-count">×0</span></div>
+            <div id="badge-mix" class="badge" title="Mindestens drei Mischgetränke an einem Abend">🍹 Mischmeister <span class="badge-count">×0</span></div>
           </div>
         </div>
-      </div>
+
+      </div><!-- /#tab-profile -->
 
       <div id="ws-error" class="error-msg" style="text-align:center;"></div>
     </div>
@@ -180,6 +270,16 @@ if (!token || !playerId) {
 } else {
   $('user-view').hidden = false;
 
+  // Umschalter Zählen/Profil (bleibt über Reloads hinweg auf Zählen)
+  function showTab(profile) {
+    $('tab-count').hidden = profile;
+    $('tab-profile').hidden = !profile;
+    $('tab-btn-count').classList.toggle('active', !profile);
+    $('tab-btn-profile').classList.toggle('active', profile);
+  }
+  $('tab-btn-count').addEventListener('click', () => showTab(false));
+  $('tab-btn-profile').addEventListener('click', () => showTab(true));
+
   const errEl = $('ws-error');
   let errTimer;
   function showError(message) {
@@ -210,17 +310,98 @@ if (!token || !playerId) {
     try {
       const res = await fetch(`${AREA.base}/api/players/${encodeURIComponent(playerId)}/stats`);
       if (!res.ok) return;
-      const { days, best, achievements } = await res.json();
+      const { days, best, avgPerNight, achievements } = await res.json();
       bump('stat-days', days);
       if (best) {
         $('stat-best').textContent = best.total;
         $('stat-best-label').textContent = `Bestes Ergebnis (${fmtDay(best.day)})`;
       }
-      $('badge-first').classList.toggle('earned', achievements.firstDrinker);
-      $('badge-midnight').classList.toggle('earned', achievements.midnightBeer);
-      $('badge-hour').classList.toggle('earned', achievements.threeInHour);
-      $('badge-mix').classList.toggle('earned', achievements.mixMaster);
+      $('stat-avg').textContent = days
+        ? avgPerNight.toLocaleString('de-DE', { maximumFractionDigits: 1 })
+        : '–';
+      // Abzeichen: leuchtet bei „heute geschafft", Pill zählt alle Abende
+      for (const [id, key] of [
+        ['badge-winner', 'dayWinner'],
+        ['badge-first', 'firstDrinker'],
+        ['badge-midnight', 'midnightBeer'],
+        ['badge-hour', 'threeInHour'],
+        ['badge-mix', 'mixMaster'],
+      ]) {
+        const a = achievements[key] ?? { count: 0, today: false };
+        $(id).classList.toggle('earned', a.today);
+        $(id).querySelector('.badge-count').textContent = `×${a.count}`;
+      }
     } catch { /* Offline-Moment: nächster State-Broadcast versucht es erneut */ }
+  }
+
+  // --- Profil: Platz heute/all-time und wer direkt vor bzw. hinter mir liegt ---
+  const todayTotal = (p) => p.beersToday + p.shotsToday + p.mixesToday;
+
+  function rivalRow(icon, label, gapText) {
+    const row = document.createElement('div');
+    row.className = 'rival';
+    const ic = document.createElement('span');
+    ic.textContent = icon;
+    const who = document.createElement('span');
+    who.className = 'who';
+    who.textContent = label;
+    const gap = document.createElement('span');
+    gap.className = 'gap';
+    gap.textContent = gapText;
+    row.append(ic, who, gap);
+    return row;
+  }
+
+  const fmtDrinks = (n) => (n === 1 ? '1 Getränk' : `${n} Getränke`);
+
+  // ranking: absteigend sortierte Liste [{name,total,me}]; füllt Platz + Nachbarn
+  function renderRanking(ranking, meIdx, rankEl, rankLabelEl, rivalsEl, labelSuffix) {
+    const box = $(rivalsEl);
+    box.textContent = '';
+    if (meIdx < 0) {
+      $(rankEl).textContent = '–';
+      $(rankLabelEl).textContent = labelSuffix === 'heute' ? 'Heute noch nichts' : 'Platz';
+      if (labelSuffix === 'heute') {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size:13px;color:var(--ink-muted);text-align:center;';
+        hint.textContent = 'Heute noch nichts getrunken – das erste zählt doppelt schön. 🍺';
+        box.appendChild(hint);
+      }
+      return;
+    }
+    $(rankEl).textContent = `#${meIdx + 1}`;
+    $(rankLabelEl).textContent = `von ${ranking.length} ${labelSuffix}`;
+    const ahead = ranking[meIdx - 1];
+    const behind = ranking[meIdx + 1];
+    const me = ranking[meIdx];
+    // Bei Gleichstand entscheidet die Uhrzeit (D-020) – als „gleichauf" anzeigen
+    const gapUp = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} vor dir`);
+    const gapDown = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} zurück`);
+    if (!ahead) {
+      box.appendChild(rivalRow('👑', 'Du führst!', behind ? `${fmtDrinks(me.total - behind.total)} Vorsprung` : ''));
+    } else {
+      box.appendChild(rivalRow('▲', `Vor dir: ${ahead.name}`, gapUp(ahead.total - me.total)));
+    }
+    if (behind) {
+      box.appendChild(rivalRow('▼', `Hinter dir: ${behind.name}`, gapDown(me.total - behind.total)));
+    }
+  }
+
+  function updateProfile(players, me) {
+    // Heute: nur wer heute geloggt hat, Tiebreak wie auf dem TV (D-020)
+    const todayList = players
+      .filter((p) => todayTotal(p) > 0)
+      .map((p) => ({ id: p.id, name: p.name, total: todayTotal(p), ts: p.lastDrinkTsToday }))
+      .sort((a, b) => b.total - a.total || (a.ts ?? Infinity) - (b.ts ?? Infinity) || a.name.localeCompare(b.name, 'de'));
+    bump('prof-today-total', todayTotal(me));
+    renderRanking(todayList, todayList.findIndex((p) => p.id === me.id),
+      'prof-today-rank', 'prof-today-rank-label', 'prof-today-rivals', 'heute');
+
+    // All-Time: Reihenfolge kommt fertig sortiert vom Server (inkl. Tiebreak)
+    const allList = players.map((p) => ({ id: p.id, name: p.name, total: p.total }));
+    bump('prof-alltime-total', me.total);
+    renderRanking(allList, allList.findIndex((p) => p.id === me.id),
+      'prof-alltime-rank', 'prof-alltime-rank-label', 'prof-alltime-rivals', 'insgesamt');
   }
 
   // Verteilungsbalken aus den All-Time-Zählern
@@ -258,6 +439,7 @@ if (!token || !playerId) {
       bump('mixes-today', me.mixesToday);
       bump('mixes-total', me.mixes);
       updateDistribution(me);
+      updateProfile(players, me);
       document.title = `${AREA.id === 'youngstars' ? 'Youngstars' : 'SV Partykeller'} – ${me.name}`;
 
       // Statistik nachladen, wenn heute irgendwo etwas dazukam (Achievements

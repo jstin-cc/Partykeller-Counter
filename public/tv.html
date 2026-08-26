@@ -25,6 +25,19 @@
     overflow: hidden;
     position: relative;
   }
+  /* Design-Bühne: das Board ist auf 1080 Design-Pixel Höhe ausgelegt und wird
+     als Ganzes per transform auf die echte Fensterhöhe skaliert. So sieht das
+     Layout auf jeder Auflösung/Zoomstufe identisch aus (statt dass feste
+     Pixelgrößen bei kleinen Fenstern die Tabelle zerquetschen). Die Breite
+     bleibt fluid (min. 1440 Design-Pixel), Extra-Höhe bei schmalen Formaten
+     bekommt die Tabelle über flex. */
+  .stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    overflow: hidden;
+  }
   .tv-mark {
     position: absolute;
     background: url('assets/zapfen-bg.svg') no-repeat center / contain;
@@ -62,7 +75,13 @@
     overflow: hidden;
   }
   .rest-viewport { flex: 1; min-height: 0; overflow: hidden; position: relative; }
-  .rest-track { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; gap: 8px; }
+  /* Wenn rotiert wird, läuft unten eine angeschnittene Zeile mit — weich
+     ausblenden statt hart abschneiden */
+  .rest-viewport.scrollable {
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent);
+    mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent);
+  }
+  .rest-track { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; gap: 8px; will-change: transform; }
   .row {
     display: flex;
     align-items: center;
@@ -94,10 +113,34 @@
   .col-shot { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--brick); font-variant-numeric:tabular-nums; }
   .col-mix { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--mix); font-variant-numeric:tabular-nums; }
   .col-total { width:140px; text-align:right; font-family:'Bitter',serif; font-weight:800; font-size:34px; color:var(--gold); text-shadow:0 0 10px oklch(0.80 0.15 83 / 0.25); font-variant-numeric:tabular-nums; }
+  /* Rekordkurs (Bier-Pace): glüht auf, wenn der Abend schneller läuft als der
+     Rekord-Abend zur gleichen Uhrzeit */
+  .pace-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    border: 1px solid oklch(0.80 0.15 83 / 0.55);
+    background: oklch(0.80 0.15 83 / 0.12);
+    color: var(--gold);
+    font-family: 'Bitter', serif;
+    font-weight: 800;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    animation: pk-paceglow 2.4s ease-in-out infinite;
+  }
+  @keyframes pk-paceglow {
+    0%, 100% { box-shadow: 0 0 4px oklch(0.80 0.15 83 / 0.15); }
+    50%      { box-shadow: 0 0 18px oklch(0.80 0.15 83 / 0.45); }
+  }
+  @media (prefers-reduced-motion: reduce) { .pace-pill { animation: none; } }
 </style>
 </head>
 <body>
 <div class="tv">
+  <div class="stage" id="stage">
   <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;">
     <!-- Zapfen-Wasserzeichen rechts (wie zuvor bevorzugt), nicht mittig -->
     <div class="tv-mark" style="right:-220px;top:-180px;width:900px;height:900px;opacity:0.20;transform:rotate(-8deg);"></div>
@@ -118,6 +161,7 @@
       <div style="text-align:center;">
         <div id="participant-count" class="num" style="font-size:22px;color:var(--creme);font-weight:700;">0 Teilnehmer</div>
         <div id="totals" style="font-size:14px;color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums;">0 Bier · 0 Shots gesamt</div>
+        <div id="pace-pill" class="pace-pill" hidden>🔥 Auf Rekordkurs!</div>
       </div>
       <div class="glass" style="display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface-alt);border-radius:var(--radius-lg);">
         <div style="font-size:14px;color:var(--creme);text-align:right;line-height:1.4;font-family:'Bitter',serif;font-weight:600;">Scan zum<br>Beitreten</div>
@@ -176,6 +220,7 @@
 
     <img src="assets/footer-woods.png" alt="" class="footer-woods" style="width:calc(100% + 128px);margin-left:-64px;height:64px;object-fit:cover;object-position:center 30%;display:block;flex-shrink:0;filter:brightness(0.85) saturate(1);">
   </div>
+  </div><!-- /.stage -->
 </div>
 
 <script type="module">
@@ -183,6 +228,22 @@ import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
 
 const $ = (id) => document.getElementById(id);
+
+// --- Design-Bühne auf Fenstergröße skalieren (siehe CSS .stage) ---
+// Höhe fest 1080 Design-Pixel, Breite fluid ab 1440; bei schmaleren Formaten
+// (z. B. 4:3) wächst die Bühnenhöhe und die Rangliste zeigt mehr Zeilen.
+const DESIGN_H = 1080;
+const MIN_W = 1440;
+
+function fitStage() {
+  const scale = Math.min(window.innerHeight / DESIGN_H, window.innerWidth / MIN_W);
+  const stage = $('stage');
+  stage.style.width = `${window.innerWidth / scale}px`;
+  stage.style.height = `${window.innerHeight / scale}px`;
+  stage.style.transform = `scale(${scale})`;
+}
+fitStage();
+window.addEventListener('resize', fitStage);
 
 // --- QR-Code zum Beitreten ---
 // Zieladresse ist die vom Admin gesetzte joinUrl; ohne Vorgabe die
@@ -223,11 +284,12 @@ function fillPodium(el, p, slot) {
   prevPod[slot] = { id: p.id, total: p.total };
 }
 
-// --- Rangliste ab Platz 4: max. 5 gleichzeitig sichtbar ---
-// Bei mehr als 5 scrollt das Fenster Zeile für Zeile nach unten; unten
-// angekommen springt es schnell wieder ganz nach oben und beginnt von vorne
-// (kein endloses Durchlaufen).
-const WINDOW = 5;
+// --- Rangliste ab Platz 4 ---
+// Feste Zeilenhöhe im Design-Raster; wie viele Zeilen sichtbar sind, ergibt
+// sich aus dem verfügbaren Platz (füllt die Tabelle immer komplett). Passen
+// nicht alle rein, scrollt das Fenster Zeile für Zeile nach unten; unten
+// angekommen springt es schnell wieder ganz nach oben und beginnt von vorne.
+const ROW_H = 64;         // Zeilenhöhe in Design-Pixeln
 const GAP = 8;            // px zwischen den Zeilen (muss zu .rest-track passen)
 const SCROLL_MS = 650;    // sanft eine Zeile weiter
 const RESET_MS = 900;     // schnell zurück nach oben
@@ -239,11 +301,15 @@ let others = [];          // Spieler ab Platz 4 (aktuellster State)
 let prevOthers = [];      // vorheriger 4+-Stand (Diff: Umsortierung erkennen)
 let prevVals = {};        // id -> {beers,shots,mixes,total} (Pop bei Anstieg)
 let track = null;
-let rowH = 0;
 let pos = 0;
 let maxPos = 0;
 let scrollTimer = null;
 let modeSwitching = false; // beim Moduswechsel keine Zeilen-Animation (Slide übernimmt)
+
+// Wie viele Zeilen passen aktuell komplett ins Ranglisten-Fenster?
+function visibleRows() {
+  return Math.max(1, Math.floor(($('rest').clientHeight + GAP) / (ROW_H + GAP)));
+}
 
 function popEl(el) { el.classList.remove('pk-pop'); void el.offsetWidth; el.classList.add('pk-pop'); }
 function rowFlash(el) { el.classList.remove('pk-rowflash'); void el.offsetWidth; el.classList.add('pk-rowflash'); }
@@ -277,7 +343,7 @@ function stopScroll() {
 }
 
 function scrollStep() {
-  if (maxPos <= 0) return;
+  if (maxPos <= 0 || !track) return;
   if (pos >= maxPos) {
     // Ende erreicht: schnell zurück nach oben und von vorne
     track.style.transition = `transform ${RESET_MS}ms ease-in-out`;
@@ -286,7 +352,23 @@ function scrollStep() {
     track.style.transition = `transform ${SCROLL_MS}ms ease`;
     pos += 1;
   }
-  track.style.transform = `translateY(${-pos * (rowH + GAP)}px)`;
+  track.style.transform = `translateY(${-pos * (ROW_H + GAP)}px)`;
+}
+
+// Rotation passend zum aktuellen Stand (Zeilenzahl, Platz) starten/stoppen
+function syncScroll() {
+  maxPos = Math.max(0, others.length - visibleRows());
+  if (pos > maxPos) {
+    pos = Math.min(pos, maxPos);
+    if (track) {
+      track.style.transition = 'none';
+      track.style.transform = `translateY(${-pos * (ROW_H + GAP)}px)`;
+      void track.offsetWidth;
+    }
+  }
+  if (maxPos > 0 && !scrollTimer) scrollTimer = setInterval(scrollStep, stepMs);
+  if (maxPos <= 0) stopScroll();
+  $('rest').classList.toggle('scrollable', maxPos > 0);
 }
 
 function sameIds(a, b) {
@@ -335,12 +417,9 @@ function rebuildRest(animate) {
   for (const p of others) track.appendChild(buildRow(p, modeSwitching ? null : prevVals[p.id]));
   viewport.appendChild(track);
 
-  // Zeilenhöhe immer am 5er-Raster ausrichten, damit Zeilen bei weniger
-  // Einträgen (z. B. Heute-Ansicht) nicht ins Riesige gestreckt werden
-  const visible = Math.min(WINDOW, others.length);
-  const vh = viewport.clientHeight;
-  rowH = (vh - (WINDOW - 1) * GAP) / WINDOW;
-  for (const r of track.children) r.style.height = `${rowH}px`;
+  // feste Zeilenhöhe im Design-Raster: bleibt auf jeder Auflösung gleich,
+  // nur die Anzahl sichtbarer Zeilen variiert mit dem Platz
+  for (const r of track.children) r.style.height = `${ROW_H}px`;
   track.style.transition = 'none';
   track.style.transform = 'translateY(0)';
 
@@ -364,33 +443,13 @@ function rebuildRest(animate) {
     }
   }
 
-  maxPos = others.length - visible;
-  if (maxPos > 0) scrollTimer = setInterval(scrollStep, stepMs);
+  syncScroll();
 }
 
-// Absicherung gegen späten Font-Swap (theme.css lädt Bitter/Work Sans mit
-// font-display: swap): Wenn die eigene Schrift erst NACH dem Zeilenaufbau
-// eintrifft, verschiebt sich die Höhe von Header/Podium noch minimal, und
-// die einmal fest eingefrorene Zeilenhöhe passt nicht mehr zum tatsächlich
-// verfügbaren Platz — die letzte Zeile würde sonst dauerhaft abgeschnitten,
-// weil bei vollständig sichtbarer Liste kein Scroll-Timer läuft, der es
-// korrigieren könnte. Bei jeder Größenänderung des Viewports (Font-Swap,
-// Fenster-Resize) Zeilenhöhe und Scrollposition daher neu ausrichten.
-function resyncRowHeight() {
-  if (!track || others.length === 0) return;
-  const vh = $('rest').clientHeight;
-  const newRowH = (vh - (WINDOW - 1) * GAP) / WINDOW;
-  if (!Number.isFinite(newRowH) || Math.abs(newRowH - rowH) < 0.5) return;
-  rowH = newRowH;
-  for (const r of track.children) r.style.height = `${rowH}px`;
-  const prevTransition = track.style.transition;
-  track.style.transition = 'none';
-  track.style.transform = `translateY(${-pos * (rowH + GAP)}px)`;
-  void track.offsetWidth;
-  track.style.transition = prevTransition;
-}
-
-new ResizeObserver(resyncRowHeight).observe($('rest'));
+// Ändert sich der verfügbare Platz (Fenster-Resize, Font-Swap, anderes
+// Seitenformat), passt sich nur die Anzahl sichtbarer Zeilen an — Rotation
+// und Scrollposition werden dazu neu ausgerichtet.
+new ResizeObserver(() => { if (track) syncScroll(); }).observe($('rest'));
 
 // Geschwindigkeit geändert (Admin): laufende Rotation mit neuem Takt fortsetzen
 function applyScrollSpeed(seconds) {
@@ -415,8 +474,9 @@ function updateRest(newOthers) {
   prevOthers = newOthers;
 }
 
-// --- Board-Modus (All-Time / Heute), im Admin umschaltbar ---
+// --- Board-Modus (All-Time / Heute / Archiv-Abend), im Admin umschaltbar ---
 let currentMode = null;
+let currentDay = null;   // bei Modus 'archive': der gezeigte Party-Tag
 
 function metricsFor(p, mode) {
   return mode === 'today'
@@ -444,16 +504,24 @@ function boardRows(players, mode) {
 }
 
 function applyState(state, mode) {
-  const rows = boardRows(state.players, mode);
+  // Archiv-Modus: der Server liefert die Werte des gewählten Party-Tags fertig
+  // sortiert mit (archivePlayers); Live-Modi rechnen wie gehabt aus players.
+  const rows = mode === 'archive'
+    ? (state.archivePlayers ?? []).map((p, i) => ({ ...p, rank: i + 1 }))
+    : boardRows(state.players, mode);
 
-  $('board-subtitle').textContent = mode === 'today' ? 'Rangliste heute' : 'All-Time Rangliste';
-  $('participant-count').textContent = mode === 'today'
-    ? `${rows.length} heute dabei`
+  $('board-subtitle').textContent =
+    mode === 'today' ? 'Rangliste heute'
+    : mode === 'archive' ? `Abend vom ${fmtDay(state.boardDay)}`
+    : 'All-Time Rangliste';
+  $('participant-count').textContent =
+    mode === 'today' ? `${rows.length} heute dabei`
+    : mode === 'archive' ? `${rows.length} waren dabei`
     : `${rows.length} Teilnehmer`;
   const beers = rows.reduce((s, r) => s + r.beers, 0);
   const shots = rows.reduce((s, r) => s + r.shots, 0);
   const mixes = rows.reduce((s, r) => s + r.mixes, 0);
-  const suffix = mode === 'today' ? 'heute' : 'gesamt';
+  const suffix = mode === 'today' ? 'heute' : mode === 'archive' ? 'an dem Abend' : 'gesamt';
   $('totals').textContent = `${beers} Bier · ${shots} Shots · ${mixes} Mische ${suffix}`;
 
   fillPodium($('pod-1'), rows[0], 1);
@@ -461,8 +529,30 @@ function applyState(state, mode) {
   fillPodium($('pod-3'), rows[2], 3);
 
   updateRest(rows.slice(3));
-  updateFacts(state.players.filter((p) => !p.hidden), state.records, state.customFacts);
+  updateFacts(state.players.filter((p) => !p.hidden), state.records, state.customFacts, state.funStats);
+  updatePace(state.funStats?.pace, mode);
 }
+
+// --- Rekordkurs (Bier-Pace): Pill im Kopf, sobald der Abend vor dem besten
+// bisherigen Abend liegt (ab 3 Getränken, nicht im Archiv-Modus). Zwischen
+// zwei Getränken „altert" der Vergleich — deshalb unten der 5-Minuten-Refresh.
+function updatePace(pace, mode) {
+  const el = $('pace-pill');
+  const show = mode !== 'archive' && !!pace && pace.onPace && pace.todayTotal >= 3;
+  el.hidden = !show;
+  if (show) {
+    el.textContent = `🔥 Auf Rekordkurs! ${pace.todayTotal} : ${pace.recordAtSameTime} vs. ${fmtDay(pace.recordDay)}`;
+  }
+}
+
+setInterval(async () => {
+  try {
+    const res = await fetch(`${AREA.base}/api/state`);
+    if (!res.ok) return;
+    const s = await res.json();
+    updatePace(s.funStats?.pace, currentMode);
+  } catch { /* nächster Broadcast/Refresh richtet es */ }
+}, 5 * 60 * 1000);
 
 // Moduswechsel: das ganze Board fährt raus und das neue fährt wieder ein
 function slideSwap(rebuild) {
@@ -489,12 +579,18 @@ connectState({
     renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + AREA.base + '/'));
     applyScrollSpeed(state.scrollSeconds);
     applyFunfactSpeed(state.funfactSeconds);
-    const mode = boardMode === 'today' ? 'today' : 'alltime';
+    const mode = boardMode === 'today' ? 'today'
+      : (boardMode === 'archive' && state.boardDay) ? 'archive'
+      : 'alltime';
 
-    if (currentMode !== null && mode !== currentMode) {
-      slideSwap(() => { currentMode = mode; applyState(state, mode); });
+    // Slide auch beim Wechsel zwischen zwei Archiv-Abenden
+    const switched = currentMode !== null &&
+      (mode !== currentMode || (mode === 'archive' && state.boardDay !== currentDay));
+    if (switched) {
+      slideSwap(() => { currentMode = mode; currentDay = state.boardDay ?? null; applyState(state, mode); });
     } else {
       currentMode = mode;
+      currentDay = state.boardDay ?? null;
       applyState(state, mode);
     }
   },
@@ -526,7 +622,7 @@ function fmtDay(iso) {
   return `${d}.${m}.${y}`;
 }
 
-function computeFacts(players, records, customFacts) {
+function computeFacts(players, records, customFacts, funStats) {
   const out = [];
   const fact = (text) => out.push({ title: 'Fun Fact', text });
 
@@ -553,6 +649,36 @@ function computeFacts(players, records, customFacts) {
     if (n > topN) { topN = n; top = p; }
   }
   if (top) fact(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken.`);
+
+  // Statistik-Facts aus dem Archiv (Server: funStats); erst zeigen, wenn die
+  // Zahlen etwas hergeben, damit das Band nicht mit Banalem langweilt.
+  const fs = funStats ?? {};
+  if (fs.firstToday) {
+    const t = new Date(fs.firstToday.ts);
+    const hm = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
+    fact(`Frühstart: Das erste Getränk heute ging um ${hm} Uhr an ${fs.firstToday.name}.`);
+  }
+  if (fs.topHourToday && fs.topHourToday.n >= 3) {
+    fact(`Durstigste Stunde heute: zwischen ${fs.topHourToday.hour} und ${(fs.topHourToday.hour + 1) % 24} Uhr – ${fs.topHourToday.n} Getränke.`);
+  }
+  if (fs.recordNight && fs.nights >= 2) {
+    fact(`Rekord-Abend: Am ${fmtDay(fs.recordNight.day)} flossen zusammen ${fs.recordNight.total} Getränke.`);
+  }
+  if (fs.pace && fs.pace.onPace && fs.pace.todayTotal >= 3) {
+    fact(`Rekordkurs: Schon ${fs.pace.todayTotal} Getränke heute – der Rekord-Abend vom ${fmtDay(fs.pace.recordDay)} stand um diese Uhrzeit erst bei ${fs.pace.recordAtSameTime}.`);
+  }
+  if (fs.regular && fs.regular.nights >= 3) {
+    fact(`Stammgast: ${fs.regular.name} war schon an ${fs.regular.nights} Abenden dabei.`);
+  }
+  if (fs.topWinner && fs.topWinner.wins >= 2) {
+    fact(`Seriensieger: ${fs.topWinner.name} hat schon ${fs.topWinner.wins} Abende gewonnen.`);
+  }
+  if (fs.nights >= 2) {
+    const beers = players.reduce((sum, p) => sum + (p.beers || 0), 0);
+    const shots = players.reduce((sum, p) => sum + (p.shots || 0), 0);
+    const mixes = players.reduce((sum, p) => sum + (p.mixes || 0), 0);
+    fact(`Gesamtbilanz: ${beers} Bier, ${shots} Shots und ${mixes} Mischen in ${fs.nights} Abenden.`);
+  }
   return out;
 }
 
@@ -565,8 +691,8 @@ function showFact(f) {
   factEl.textContent = f.text;
 }
 
-function updateFacts(players, records, customFacts) {
-  facts = computeFacts(players, records, customFacts);
+function updateFacts(players, records, customFacts, funStats) {
+  facts = computeFacts(players, records, customFacts, funStats);
   const list = currentFactList();
   factIdx %= list.length;
   showFact(list[factIdx]);

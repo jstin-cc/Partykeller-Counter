@@ -6,6 +6,7 @@ import { areas } from './areas.js';
 import { hashPin, verifyPin, playerToken, adminToken, checkPassword } from './auth.js';
 import { setupWs } from './ws.js';
 import { validName, validPin } from './validate.js';
+import { validDayString } from './db.js';
 import { createLoginLimiter, createRateLimiter } from './ratelimit.js';
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -34,6 +35,12 @@ function createApiRouter(area) {
 
   // Abend-Archiv: alle Party-Tage mit Sieger, Teilnehmern und Gesamtmengen
   router.get('/archive', (_req, res) => res.json({ days: db.getArchive() }));
+
+  // Detail eines Party-Tags (u. a. für die Archiv-Bearbeitung im Admin)
+  router.get('/archive/:day', (req, res) => {
+    if (!validDayString(req.params.day)) return res.status(400).json({ error: 'Ungültiger Tag' });
+    res.json(db.getArchiveDay(req.params.day));
+  });
 
   // Persönliche Statistik + Achievements fürs Nutzer-Dashboard
   router.get('/players/:id/stats', (req, res) => {

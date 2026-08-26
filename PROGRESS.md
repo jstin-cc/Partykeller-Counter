@@ -3,9 +3,21 @@
 Nach jedem abgeschlossenen Schritt hier abhaken und committen. Diese Datei ist
 die Wahrheit über den Projektstand (Kontextverlust-sicher).
 
-**Aktueller Stand:** Alle Meilensteine M0–M7 abgeschlossen — die App ist
-funktional komplett (Login, Dashboard, TV-Scoreboard mit QR, Admin,
-Pi-Deploy-Dateien) und end-to-end im Browser getestet.
+**Aktueller Stand:** Alle Meilensteine M0–M8 abgeschlossen — die App ist
+funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
+Admin, Abend-Archiv mit Bearbeitung) und end-to-end im Browser getestet.
+Seit 2026-08-26 (M8, Feedback aus der einwöchigen Testphase, D-021–D-023):
+**TV-Board skaliert auf jeder Auflösung identisch** (1080p-Design-Bühne,
+Tabelle bekommt allen Restplatz, Rotation robust neu geschrieben inkl.
+Neuberechnung bei Resize), **Abende im Archiv bearbeitbar** (±1 je
+Spieler/Sorte, wirkt auf Log + All-Time), **Archiv-Abend nochmal auf dem TV**
+(Admin-Auswahl + Button auf der Archiv-Karte), **eigene Fun-Facts bearbeitbar**,
+**Profil-Tab** im Dashboard (Platz heute/all-time mit Vorder-/Hintermann und
+Abstand, Ø pro Abend), **Abzeichen mit Zähler über alle Abende** plus neues
+Abzeichen **👑 Tagessieger**, **sechs neue Statistik-Fun-Facts** fürs TV-Band.
+Der D-020-Tiebreak (Uhrzeit statt Alphabet) gilt jetzt auch für Archiv-Sieger
+und Tagessieger. Betrieb läuft künftig voraussichtlich auf einem Laptop statt
+Raspberry Pi (Pi-Dateien bleiben nutzbar).
 Seit 2026-07-15 zusätzlich (D-012): **drittes Getränk „Mischen"** über alle
 Screens (inkl. DB-Migration ohne Datenverlust), **Live-Fun-Facts**
 (Tages-Bestleistungen), TV-Rangliste **scrollt** ab Platz 4 (Reset nach oben
@@ -121,6 +133,43 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] README finalisiert (Schnellstart, Screens, Pi-Verweis)
 - [x] Server-Neustart ohne Datenverlust verifiziert (8 Nutzer vor/nach Neustart)
 - [ ] Echter Testlauf auf dem Pi: 2 Handys + TV im WLAN
+      (entschärft: Betrieb läuft voraussichtlich auf einem Laptop)
+
+## M8 — Überarbeitung nach der Testwoche (2026-08-26) ✅
+
+- [x] TV-Board: 1080p-Design-Bühne mit `transform: scale()` — Layout auf jeder
+      Auflösung identisch, Tabelle bekommt allen Restplatz (D-021)
+- [x] TV-Rotation neu: feste Zeilenhöhe, sichtbare Zeilen aus dem Platz
+      berechnet, Neuberechnung bei Resize/Font-Swap, weiches Ausblenden der
+      angeschnittenen Zeile; Tempo-Regler wirkt live
+- [x] Abend-Archiv bearbeitbar: Admin-Modal auf `/abende`, ±1 je
+      Spieler/Sorte/Party-Tag, wirkt transaktional auf Log + All-Time (D-022)
+- [x] Archiv-Abend auf dem TV: Board-Modus `archive` + Tagesauswahl im Admin
+      und „Auf dem TV zeigen" auf den Archiv-Karten (D-022)
+- [x] Eigene Fun-Facts bearbeitbar (updateFact + Inline-Formular im Admin)
+- [x] Dashboard: Profil-Tab (Platz heute/all-time, Vorder-/Hintermann mit
+      Abstand, Ø pro Abend, Verteilung, Abzeichen) — Eingabe-Tab nur noch
+      Zählen (D-023)
+- [x] Abzeichen mit Zähler über alle Abende + neues Abzeichen 👑 Tagessieger
+- [x] Sechs neue Statistik-Fun-Facts (Rekord-Abend, Stammgast, Seriensieger,
+      Frühstart, durstigste Stunde, Gesamtbilanz)
+- [x] Rekordkurs (Bier-Pace) live auf dem TV: glühende Pill + Fun-Fact, wenn
+      der Abend vor dem besten bisherigen Abend liegt (D-024)
+- [x] D-020-Tiebreak auch für Archiv-Sieger/Tagessieger
+
+## Verifikation (2026-08-26, M8)
+
+Server-Tests (WS): Archiv-Modus liefert `boardDay` + sortierte
+`archivePlayers` und räumt sie beim Zurückschalten wieder auf; ungültiger Tag
+und Spieler-Token werden abgelehnt; `adjustArchive` ±1 ändert Tages-Log und
+All-Time-Zähler konsistent, „–1 auf leer" wird abgelehnt; `updateFact` ändert
+Titel + Text. Browser-Tests (Chromium, 1920×1080 / 1366×768 / 1280×800 /
+1093×614@125 %): TV-Layout auf allen Auflösungen identisch (7 sichtbare
+Zeilen + Podest), Rotation läuft komplett durch und resettet nach oben,
+Youngstars-TV (Navy) fehlerfrei; Admin: Archiv-Auswahl + Fact-Bearbeitung;
+`/abende` als Admin: Bearbeiten-Modal (+1/−1 live), „Auf dem TV zeigen" →
+TV zeigt „Abend vom 24.08.2026"; Dashboard-Profil: Platz, Nachbarn
+(inkl. „gleichauf"-Fall), Ø pro Abend, Abzeichen-Zähler. Keine Konsolenfehler.
 
 ## Verifikation (2026-07-17, D-019)
 
