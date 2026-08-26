@@ -459,3 +459,74 @@ Modi All-Time/Heute). Dafür neue Abfragen `lastLogTs`/`lastLogTsToday`
 Trinkspiel-Wettbewerbs ("wer war zuerst dran"); Namensalphabet als Tiebreak
 wirkte willkürlich. Keine neuen Dependencies, `drink_log` trug die nötigen
 Zeitstempel bereits.
+
+## D-021 (2026-08-26): TV-Board auf feste Design-Bühne skaliert, Rotation an feste Zeilenhöhe gekoppelt
+
+**Entscheidung:** Das TV-Scoreboard wird auf eine feste **Design-Bühne**
+(1080 Design-Pixel Höhe, Breite fluid ab 1440) gelayoutet und als Ganzes per
+`transform: scale()` auf die echte Fenstergröße skaliert (`.stage` +
+`fitStage()` in `public/tv.html`). Die Ranglisten-Zeilen haben eine **feste
+Zeilenhöhe** (64 px im Design-Raster); wie viele Zeilen sichtbar sind, ergibt
+sich aus dem Platz — die Rotation (`syncScroll()`) berechnet Sichtfenster und
+Endposition bei jeder Größenänderung neu und blendet die angeschnittene Zeile
+unten weich aus (mask-image).
+
+**Begründung:** Im Praxistest (Laptop, Win11/Chrome, kleinere effektive
+Auflösung durch 125-%-Skalierung) zerquetschten die bisher festen Pixelmaße
+von Kopfzeile/Podest die Tabelle: Zeilenhöhe wurde aus dem Restplatz durch 5
+geteilt, Zeilen überlappten, die Rotation lief gegen falsche Grenzen. Mit der
+skalierten Bühne sieht das Board auf **jeder Auflösung exakt gleich** aus
+(Wunsch-Referenz „Beispiel-gut"), die Tabelle bekommt allen Restplatz, und die
+Rotation hängt nicht mehr von gemessenen Pixelhöhen ab (auch der späte
+Font-Swap kann nichts mehr verschieben).
+
+## D-022 (2026-08-26): Abend-Archiv nachträglich korrigierbar + Archiv-Abend auf dem TV
+
+**Entscheidung:** Admins können vergangene Party-Tage korrigieren und wieder
+anzeigen:
+- **Korrektur** (`adjustArchive` über WS, `db.adjustArchiveDrink`): ±1 Getränk
+  je Spieler/Sorte/Party-Tag. Wirkt in einer Transaktion auf **drink_log UND
+  den All-Time-Zähler** — beim Entfernen fliegt der jüngste Log-Eintrag der
+  Sorte in dem Party-Tag raus, beim Ergänzen wird ein Eintrag hinter das letzte
+  Getränk des Spielers an dem Abend gelegt (sonst 20:00). Damit bleiben
+  Rangliste, Rekorde, Abzeichen und Archiv konsistent. UI: „Bearbeiten"-Modal
+  auf `/abende` (alle Spieler, auch mit 0 — Nachtragen möglich), sichtbar nur
+  mit Admin-Login derselben Browser-Session.
+- **Archiv-Replay:** `setBoardMode` kennt neben `alltime`/`today` jetzt
+  `archive` + `board_day`; der State liefert dann die fertig sortierten Werte
+  des Tages (`archivePlayers`), das TV zeigt „Abend vom …". Umschaltbar im
+  Admin (Auswahlliste) und direkt auf den Archiv-Karten („Auf dem TV zeigen").
+- Neuer REST-Endpunkt `GET /api/archive/:day` (Tagesdetail); der
+  Archiv-Sieger nutzt jetzt ebenfalls den D-020-Tiebreak (Uhrzeit statt
+  Map-Reihenfolge).
+
+**Begründung:** In der Testwoche wurden Getränke vergessen oder falsch
+gezählt; Korrekturen sollen gezielt am betroffenen Abend passieren statt nur
+am All-Time-Zähler (der Log ist die Quelle für Archiv/Rekorde/Abzeichen).
+Vergangene Abende nochmal zeigen zu können war ausdrücklicher Wunsch.
+
+## D-023 (2026-08-26): Profil-Tab im Dashboard, Abzeichen-Zähler, Tagessieger-Abzeichen, Statistik-Fun-Facts
+
+**Entscheidung:**
+- Das Nutzer-Dashboard bekommt einen Umschalter **„Zählen" / „Profil"**: Zählen
+  enthält nur noch die Eingabe (Heute-Karte + drei Getränke-Karten), das Profil
+  bündelt Statistik: Stand heute (Platz, wer direkt **vor/hinter** einem liegt,
+  inkl. Abstand; „gleichauf" bei Gleichstand), All-Time-Stand mit Umfeld,
+  persönliche Statistik (Abende, bestes Ergebnis, **Ø pro Abend**, Verteilung)
+  und die Abzeichen.
+- **Abzeichen** werden jetzt **pro Party-Tag über alle Abende gezählt**
+  (`getPlayerStats` liefert `{count, today}` je Abzeichen) statt nur „heute
+  geschafft ja/nein". Neues Abzeichen **👑 Tagessieger** (Gesamt-Tagessieger
+  des Abends, heute = führt aktuell; Tiebreak D-020 über `getDayWinners`).
+- Das Fun-Fact-Band speist sich zusätzlich aus neuen Server-Kennzahlen
+  (`funStats` im State): Rekord-Abend (alle zusammen), Stammgast (meiste
+  Abende), Seriensieger (meiste Tagessiege), Frühstart (erstes Getränk heute),
+  durstigste Stunde heute, Gesamtbilanz über alle Abende.
+- Eigene Fun-Facts sind **bearbeitbar** (`updateFact` über WS, Inline-Formular
+  im Admin).
+
+**Begründung:** Wunsch aus der Testwoche: Statistik raus aus dem Eingabefluss
+auf eine eigene Profil-Seite, mehr Kontext („wer ist vor/hinter mir"),
+sichtbare Abzeichen-Historie, ein Abzeichen für den Tagessieg und mehr
+abwechslungsreiche Fun-Facts aus echten Daten. Alles aus `drink_log`
+berechenbar — keine Schemaänderung, keine neuen Dependencies.

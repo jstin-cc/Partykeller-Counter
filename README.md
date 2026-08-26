@@ -2,7 +2,7 @@
 
 Gäste zählen ihre Biere und Shots über das Handy, ein Fernseher zeigt die
 dauerhafte All-Time-Rangliste. Läuft komplett im lokalen WLAN auf einem
-Raspberry Pi — keine Internet-Abhängigkeit.
+Laptop oder Raspberry Pi — keine Internet-Abhängigkeit.
 
 Es gibt **zwei Bereiche** mit gleichen Funktionen und komplett getrennten
 Daten: **Partykeller** (`/partykeller`, dunkelgrün) und **Youngstars**
@@ -99,10 +99,10 @@ Partykeller-Bereich.
 |---|---|
 | `/` | Auswahlseite: Partykeller oder Youngstars? |
 | `/<bereich>/` | Nutzer-Login (Name wählen/anlegen; PIN optional, rate-limitiert) |
-| `/<bereich>/dashboard` | Nutzer-Dashboard: eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt, Rang, persönliche Statistik (Abende, bestes Ergebnis, Verteilung) und Achievement-Badges. Youngstars: Bier steht zuunterst |
-| `/<bereich>/tv` | TV-Scoreboard: umschaltbar All-Time / Heute (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen |
-| `/<bereich>/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht & Rotationstempo einstellen, eigene Fun-Facts pflegen, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort, löscht nur den eigenen Bereich) |
-| `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen |
+| `/<bereich>/dashboard` | Nutzer-Dashboard mit zwei Tabs — **Zählen** (eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt) und **Profil** (Platz heute und all-time inkl. wer direkt vor/hinter einem liegt, Abende, bestes Ergebnis, Ø pro Abend, Verteilung, Abzeichen mit Zähler — u. a. 👑 Tagessieger). Youngstars: Bier steht zuunterst |
+| `/<bereich>/tv` | TV-Scoreboard: umschaltbar All-Time / Heute / Archiv-Abend (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen und Statistik-Facts. Skaliert als 1080p-Design-Bühne — sieht auf jeder Auflösung identisch aus |
+| `/<bereich>/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht (inkl. Archiv-Abend) & Rotationstempo einstellen, eigene Fun-Facts pflegen und bearbeiten, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort, löscht nur den eigenen Bereich) |
+| `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen. Mit Admin-Login zusätzlich: Abend nachträglich korrigieren (±1 je Spieler/Getränk, wirkt auf Log + All-Time) und „Auf dem TV zeigen" |
 
 Die App ist als **PWA installierbar**: Seite am Handy öffnen → „Zum
 Startbildschirm hinzufügen" — dann liegt der Counter als App-Icon auf dem
@@ -124,6 +124,10 @@ statisches Frontend ohne Build-Step. Ein Prozess serviert alles.
 - [Prompt.md](Prompt.md) — ursprüngliche Aufgabenstellung
 
 ## Betrieb auf dem Raspberry Pi
+
+Der Betrieb funktioniert genauso auf einem Laptop (`npm start`, TV-Browser im
+Vollbild auf `/tv` — F11 in Chrome); die Pi-Anleitung bleibt für den Fall der
+Fälle erhalten.
 
 Anleitung in [deploy/PI-SETUP.md](deploy/PI-SETUP.md): systemd-Service
 ([deploy/partykeller.service](deploy/partykeller.service)), mDNS-Name
