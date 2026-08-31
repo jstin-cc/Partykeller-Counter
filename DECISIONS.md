@@ -579,3 +579,21 @@ pro Abend oder gesamt. CSV im Langformat ist das, was Excel/LibreOffice ohne
 Zwischenschritt einlesen und pivotieren; serverseitig erzeugt spart es
 Blob-Bastelei im Frontend und liefert einen echten Dateinamen. Keine neuen
 Dependencies, keine Schemaänderung.
+
+## D-026 (2026-08-31): Fun-Fact-Band auf dem TV ist eine Zeile hoch
+
+**Entscheidung:** Das Fun-Fact-Band auf dem TV ist **exakt so hoch wie eine
+Ranglistenzeile** (64 Design-Pixel, `ROW_H`) und der Fact-Text steht in
+**Namensgröße** (28 px, wie `.col-name`); die Überschrift „Fun Fact" bei
+18 px. Das Band bleibt einzeilig: Passt ein Fact nicht in die Breite, skaliert
+`fitFactText()` die Schrift proportional herunter (Untergrenze 15 px, darunter
+schneidet `text-overflow: ellipsis` ab). Neu gemessen wird bei jedem
+Fact-Wechsel, bei `resize` und wenn der Webfont fertig geladen ist.
+
+**Begründung:** Das Band war mit 14 px Text vom Sofa aus praktisch nicht mehr
+lesbar (Gegenentscheidung zur Verkleinerung aus #16, die Platz für die
+Rangliste schaffen sollte). Eine Ranglistenzeile als Maß hält es optisch im
+Raster des Boards und kostet nur ~30 Design-Pixel, also weniger als eine
+Tabellenzeile — bei 1080p bleiben 11 sichtbare Ränge. Das Herunterskalieren
+statt Umbrechen hält die Bühnenhöhe stabil, sodass die Rangliste nicht bei
+jedem Fact-Wechsel springt.
