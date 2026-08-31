@@ -403,6 +403,41 @@ export function createDb(dbPath) {
     return { day, players };
   }
 
+  // Export fürs Abend-Archiv (D-025): eine Zeile je Party-Tag und Person, im
+  // Langformat — so lässt sich die Datei ohne Nacharbeit als Pivot auswerten.
+  // Ohne `day` über alle Abende, mit `day` nur dieser eine. Personen ohne
+  // Getränke an dem Abend bleiben draußen; ausgeblendete Personen sind dabei,
+  // damit die Übergabe vollständig ist (wie die Tagessummen im Archiv).
+  function getExportNights(day = null) {
+    const names = new Map(stmts.listPlayers.all().map((p) => [p.id, p.name]));
+    const byDay = new Map();  // day -> Map(playerId -> { beers, shots, mixes })
+
+    for (const row of stmts.archiveCounts.all()) {
+      if (day && row.day !== day) continue;
+      let players = byDay.get(row.day);
+      if (!players) { players = new Map(); byDay.set(row.day, players); }
+      let e = players.get(row.player_id);
+      if (!e) { e = { beers: 0, shots: 0, mixes: 0 }; players.set(row.player_id, e); }
+      if (row.drink === 'beer') e.beers = row.n;
+      else if (row.drink === 'shot') e.shots = row.n;
+      else e.mixes = row.n;
+    }
+
+    const rows = [];
+    for (const [d, players] of byDay) {
+      for (const [playerId, e] of players) {
+        const total = e.beers + e.shots + e.mixes;
+        if (total === 0) continue;
+        rows.push({ day: d, name: names.get(playerId) ?? '—', ...e, total });
+      }
+    }
+    // Chronologisch, innerhalb eines Abends die stärkste Bilanz zuerst
+    rows.sort((a, b) =>
+      a.day.localeCompare(b.day) || b.total - a.total || a.name.localeCompare(b.name, 'de')
+    );
+    return rows;
+  }
+
   // Archiv-Korrektur (Admin): ein Getränk an einem bestimmten Party-Tag ergänzen
   // oder entfernen. Wirkt auf drink_log UND den All-Time-Zähler, damit Rangliste,
   // Rekorde und Archiv konsistent bleiben.
@@ -657,7 +692,7 @@ export function createDb(dbPath) {
     createPlayer, getPlayer, getPlayerByName, countPlayers,
     incrementDrink, addLogEntry, setCounter, renamePlayer, setHidden,
     getRecords, listFacts, addFact, updateFact, deleteFact,
-    getArchive, getArchiveDay, adjustArchiveDrink, getPlayerStats,
+    getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
     setPinHash, deletePlayer, resetAll, getState,
   };
 }

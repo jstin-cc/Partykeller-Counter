@@ -102,7 +102,26 @@ Partykeller-Bereich.
 | `/<bereich>/dashboard` | Nutzer-Dashboard mit zwei Tabs — **Zählen** (eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt) und **Profil** (Platz heute und all-time inkl. wer direkt vor/hinter einem liegt, Abende, bestes Ergebnis, Ø pro Abend, Verteilung, Abzeichen mit Zähler — u. a. 👑 Tagessieger). Youngstars: Bier steht zuunterst |
 | `/<bereich>/tv` | TV-Scoreboard: umschaltbar All-Time / Heute / Archiv-Abend (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen und Statistik-Facts, Rekordkurs-Anzeige 🔥 wenn der Abend schneller läuft als der beste bisherige. Skaliert als 1080p-Design-Bühne — sieht auf jeder Auflösung identisch aus |
 | `/<bereich>/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht (inkl. Archiv-Abend) & Rotationstempo einstellen, eigene Fun-Facts pflegen und bearbeiten, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort, löscht nur den eigenen Bereich) |
-| `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen. Mit Admin-Login zusätzlich: Abend nachträglich korrigieren (±1 je Spieler/Getränk, wirkt auf Log + All-Time) und „Auf dem TV zeigen" |
+| `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen, dazu **CSV-Download** je Abend und über alle Abende. Mit Admin-Login zusätzlich: Abend nachträglich korrigieren (±1 je Spieler/Getränk, wirkt auf Log + All-Time) und „Auf dem TV zeigen" |
+
+### Übergabedatei (CSV) aus dem Abend-Archiv
+
+Auf `/<bereich>/abende` liefert **„⬇ CSV"** die Teilnehmerliste eines einzelnen
+Abends, **„⬇ Alle Abende als CSV"** oben rechts alle Abende in einer Datei.
+Beides sind normale Downloads — kein Login nötig, wie beim Archiv selbst.
+
+Format: eine Zeile **je Abend und Person** (Langformat, direkt als Pivot
+auswertbar), Spalten
+`Tag;Datum;Wochentag;Name;Bier;Shots;Mischen;Gesamt`. Trennzeichen ist das
+Semikolon, die Datei hat ein UTF-8-BOM — deutsches Excel und LibreOffice
+öffnen sie per Doppelklick korrekt inklusive Umlauten. `Tag` ist zusätzlich in
+ISO-Form (`2026-08-22`) dabei, damit sich die Datei auch maschinell sortieren
+lässt. Personen ohne Getränke an dem Abend stehen nicht drin; eine Summenzeile
+gibt es bewusst nicht.
+
+Die Dateien heißen `partykeller-abend-2026-08-22.csv` bzw.
+`partykeller-abende-gesamt.csv` (Youngstars entsprechend), die Endpunkte
+dahinter sind `GET /<bereich>/api/export/archive[/<tag>]`.
 
 Die App ist als **PWA installierbar**: Seite am Handy öffnen → „Zum
 Startbildschirm hinzufügen" — dann liegt der Counter als App-Icon auf dem

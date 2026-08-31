@@ -105,6 +105,9 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
 | `POST /api/admin/login` | `{password}` | `{token}` |
 | `GET /api/state` | – | kompletter State (Initial-Load/Fallback) |
 | `GET /api/archive` | – | `{days: […]}` — Abend-Archiv: je Party-Tag Sieger, Teilnehmer, Mengen (D-015) |
+| `GET /api/archive/:day` | – | `{day, players}` — Detail eines Party-Tags, alle Spieler (auch mit 0) für die Archiv-Bearbeitung (D-022) |
+| `GET /api/export/archive` | – | CSV über alle Abende, `Content-Disposition: attachment` (D-025) |
+| `GET /api/export/archive/:day` | – | CSV eines Abends (D-025) |
 | `GET /api/players/:id/stats` | – | persönliche Statistik + Achievements fürs Dashboard (D-015) |
 | `GET /health` | – | `{ok: true}` |
 
@@ -188,6 +191,7 @@ Partykeller-Counter/
 │   ├── config.js         # .env laden & validieren
 │   ├── db.js             # Schema, Migrationen, Queries
 │   ├── auth.js           # PIN-Hashing, Token signieren/prüfen
+│   ├── csv.js            # CSV-Übergabedateien fürs Archiv (D-025)
 │   └── ws.js             # Message-Handler + Broadcast
 ├── public/
 │   ├── index.html        # Nutzer-Login
