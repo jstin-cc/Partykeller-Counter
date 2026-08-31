@@ -21,6 +21,9 @@ Offene Restpunkte in [PROGRESS.md](PROGRESS.md).
   bringt dafür fertige Binaries mit — es muss nichts kompiliert werden, keine
   Visual-Studio-Build-Tools nötig.
 - **Git**.
+- Unter **Windows** muss PowerShell einmalig Skripte erlauben, sonst
+  verweigert es `npm` — siehe
+  [Windows: `npm` wird von PowerShell blockiert](#windows-npm-wird-von-powershell-blockiert).
 
 ## Erste Einrichtung
 
@@ -50,6 +53,41 @@ npm start                     # http://localhost:3000
 > `TOKEN_SECRET` enthalten (Vorlage: `.env.example`), sonst startet der Server
 > bewusst nicht. Ein sicheres `TOKEN_SECRET` erzeugst du z. B. mit
 > `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+
+### Windows: `npm` wird von PowerShell blockiert
+
+PowerShell verbietet standardmäßig jedes Skript (`Restricted`) — auch das
+`npm.ps1`, das hinter dem `npm`-Befehl steckt. Der Fehler sieht so aus:
+
+```
+npm : Die Datei "C:\Program Files\nodejs\npm.ps1" kann nicht geladen werden,
+da die Ausführung von Skripts auf diesem System deaktiviert ist.
+```
+
+Einmalig für den eigenen Benutzer freischalten — **kein Admin nötig**, gilt
+dauerhaft für alle künftigen Fenster:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Wenn du nichts dauerhaft ändern willst, reicht das hier — gilt aber nur für
+das gerade offene Fenster und muss nach jedem Neustart der Konsole wieder
+gesetzt werden:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+```
+
+Aktuellen Stand prüfen mit `Get-ExecutionPolicy -List`. Steht bei
+`CurrentUser` schon `RemoteSigned`, ist alles erledigt und der Befehl wird
+nicht noch einmal gebraucht.
+
+`RemoteSigned` erlaubt lokal erstellte Skripte und verlangt bei aus dem
+Internet heruntergeladenen eine gültige Signatur — für eine Entwicklungs-
+maschine die übliche Einstellung. In der **Eingabeaufforderung (cmd)** oder im
+**Git Bash** tritt das Problem gar nicht auf, dort läuft `npm.cmd` statt
+`npm.ps1`.
 
 ## Auf neue Version aktualisieren / Neustart
 
@@ -82,6 +120,9 @@ Deine Daten (`data/*.db`) und die `.env` sind gitignored und bleiben
 beim Update erhalten. Meldet `git pull` „local changes" und du hast am Code
 nichts geändert, hilft `git reset --hard origin/main` — das lässt `data/` und
 `.env` unangetastet.
+
+Beschwert sich PowerShell hier über `npm`, siehe
+[Windows: `npm` wird von PowerShell blockiert](#windows-npm-wird-von-powershell-blockiert).
 
 > **Update auf die Youngstars-Version (D-019):** Einmalig
 > `YOUNGSTARS_ADMIN_PASSWORD=<eigenes Passwort>` in die `.env` eintragen —
