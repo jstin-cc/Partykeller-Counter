@@ -106,8 +106,8 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
 | `GET /api/state` | – | kompletter State (Initial-Load/Fallback) |
 | `GET /api/archive` | – | `{days: […]}` — Abend-Archiv: je Party-Tag Sieger, Teilnehmer, Mengen (D-015) |
 | `GET /api/archive/:day` | – | `{day, players}` — Detail eines Party-Tags, alle Spieler (auch mit 0) für die Archiv-Bearbeitung (D-022) |
-| `GET /api/export/archive` | – | CSV über alle Abende, `Content-Disposition: attachment` (D-025) |
-| `GET /api/export/archive/:day` | – | CSV eines Abends (D-025) |
+| `GET /api/export/archive` | – | CSV über alle Abende, `Content-Disposition: attachment`; **nur Admin** (Token im `Authorization`-Header, sonst 403 — D-025, D-027) |
+| `GET /api/export/archive/:day` | – | CSV eines Abends, ebenfalls nur Admin (D-025, D-027) |
 | `GET /api/players/:id/stats` | – | persönliche Statistik + Achievements fürs Dashboard (D-015) |
 | `GET /health` | – | `{ok: true}` |
 

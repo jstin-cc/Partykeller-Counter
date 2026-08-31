@@ -68,7 +68,7 @@
   .night-stats .label { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
   .night-meta { font-size: 13px; color: var(--ink-muted); display:flex; justify-content:space-between; }
 
-  /* Aktionen je Abend: CSV-Download für alle, Bearbeiten/TV nur mit Admin-Login */
+  /* Admin-Werkzeuge je Abend: CSV-Download, Bearbeiten, auf dem TV zeigen */
   .night-actions { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
   .night-btn {
     flex: 1;
@@ -77,12 +77,6 @@
     cursor: pointer; font-family: 'Work Sans', sans-serif;
   }
   .night-btn.on-tv { background: var(--green); color: var(--bg); border-color: var(--green); }
-  /* Downloads sind echte Links, sehen aber aus wie die übrigen Buttons */
-  a.night-btn {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    text-decoration: none; text-align: center;
-  }
-  a.night-btn:hover { color: var(--creme); border-color: var(--gold); }
   .modal-backdrop {
     position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -109,6 +103,14 @@
     width: 30px; text-align: center; font-family:'Bitter',serif; font-weight:700; font-size:15px;
     font-variant-numeric: tabular-nums;
   }
+  /* Kurze Fehlermeldung, die auch ohne offenes Modal sichtbar ist */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+    background: var(--surface); border: 1px solid var(--glass-edge);
+    border-left: 3px solid var(--brick); border-radius: var(--radius);
+    padding: 12px 18px; font-size: 14px; color: var(--creme); z-index: 20;
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 14px; text-decoration: underline; cursor: pointer; font-family: 'Work Sans', sans-serif; }
 </style>
 </head>
@@ -128,7 +130,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <button id="tv-live" class="night-btn" hidden style="flex:none;">TV zurück zur Live-Ansicht</button>
-        <a id="export-all" class="night-btn" hidden style="flex:none;" download>⬇ Alle Abende als CSV</a>
+        <button id="export-all" class="night-btn" hidden style="flex:none;">⬇ Alle Abende als CSV</button>
         <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
       </div>
     </div>
@@ -141,6 +143,8 @@
 
   <img src="assets/footer-woods.png" alt="" class="footer-woods" style="margin-top:24px;">
 </div>
+
+<div id="toast" class="toast" hidden></div>
 
 <!-- Modal: Abend bearbeiten (nur Admin) – Getränke einzelner Spieler korrigieren -->
 <div id="edit-modal" class="modal-backdrop" hidden>
@@ -174,8 +178,42 @@ function showEditError(message) {
   setTimeout(() => { $('edit-error').textContent = ''; }, 4000);
 }
 
+// Meldung außerhalb des Bearbeiten-Modals (z. B. fehlgeschlagener Download)
+let toastTimer = null;
+function showToast(message) {
+  $('toast').textContent = message;
+  $('toast').hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4000);
+}
+
 function send(msg) {
   ws?.send({ ...msg, token: adminToken });
+}
+
+// Übergabedatei holen (nur Admin, D-027). Der Server prüft das Token im
+// Authorization-Header, ein einfacher Link könnte den nicht mitschicken —
+// deshalb per fetch laden und den Blob über einen Klick-Link speichern.
+async function downloadCsv(path, filename) {
+  try {
+    const res = await fetch(`${AREA.base}/api${path}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    if (!res.ok) {
+      showToast(res.status === 403
+        ? 'Download nur mit Admin-Login möglich – bitte neu anmelden.'
+        : 'Download fehlgeschlagen.');
+      return;
+    }
+    const url = URL.createObjectURL(await res.blob());
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    showToast('Download fehlgeschlagen.');
+  }
 }
 
 const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -250,20 +288,19 @@ function buildCard(night) {
 
   card.append(head, winner, stats, meta);
 
-  const actions = document.createElement('div');
-  actions.className = 'night-actions';
-
-  // Übergabedatei dieses Abends (CSV) – für alle, wie das Archiv selbst
-  const csv = document.createElement('a');
-  csv.className = 'night-btn';
-  csv.href = `${AREA.base}/api/export/archive/${night.day}`;
-  csv.download = '';
-  csv.title = `Teilnehmerliste vom ${date} als CSV`;
-  csv.textContent = '⬇ CSV';
-  actions.appendChild(csv);
-
-  // Admin: Abend nachträglich korrigieren oder nochmal auf dem TV zeigen
+  // Admin: Übergabedatei laden, Abend korrigieren oder nochmal auf dem TV zeigen
   if (adminToken) {
+    const actions = document.createElement('div');
+    actions.className = 'night-actions';
+
+    const csv = document.createElement('button');
+    csv.className = 'night-btn';
+    csv.title = `Teilnehmerliste vom ${date} als CSV`;
+    csv.textContent = '⬇ CSV';
+    csv.addEventListener('click', () =>
+      downloadCsv(`/export/archive/${night.day}`, `${AREA.id}-abend-${night.day}.csv`));
+    actions.appendChild(csv);
+
     const edit = document.createElement('button');
     edit.className = 'night-btn';
     edit.textContent = 'Bearbeiten';
@@ -275,8 +312,8 @@ function buildCard(night) {
     tv.textContent = onTv ? '✓ Läuft auf dem TV' : 'Auf dem TV zeigen';
     tv.addEventListener('click', () => send({ type: 'setBoardMode', mode: 'archive', day: night.day }));
     actions.append(edit, tv);
+    card.appendChild(actions);
   }
-  card.appendChild(actions);
   return card;
 }
 
@@ -286,7 +323,8 @@ function renderCards() {
   $('empty').hidden = nights.length > 0;
   for (const night of nights) box.appendChild(buildCard(night));
   $('tv-live').hidden = !(adminToken && board.mode === 'archive');
-  $('export-all').hidden = nights.length === 0;   // ohne Abende gibt es nichts zu übergeben
+  // Übergabedatei über alle Abende: nur als Admin und nur wenn es Abende gibt
+  $('export-all').hidden = !adminToken || nights.length === 0;
 }
 
 async function load() {
@@ -345,7 +383,8 @@ async function refreshEdit() {
   }
 }
 
-$('export-all').href = `${AREA.base}/api/export/archive`;
+$('export-all').addEventListener('click', () =>
+  downloadCsv('/export/archive', `${AREA.id}-abende-gesamt.csv`));
 $('close-edit').addEventListener('click', () => { $('edit-modal').hidden = true; editDay = null; load(); });
 $('tv-live').addEventListener('click', () => send({ type: 'setBoardMode', mode: 'alltime' }));
 
