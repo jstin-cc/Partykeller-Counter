@@ -597,3 +597,27 @@ Raster des Boards und kostet nur ~30 Design-Pixel, also weniger als eine
 Tabellenzeile — bei 1080p bleiben 11 sichtbare Ränge. Das Herunterskalieren
 statt Umbrechen hält die Bühnenhöhe stabil, sodass die Rangliste nicht bei
 jedem Fact-Wechsel springt.
+
+## D-027 (2026-08-31): CSV-Export nur für Admins
+
+**Entscheidung:** Die Übergabedateien aus dem Abend-Archiv sind nur noch mit
+Admin-Login erreichbar — genau wie „Bearbeiten" und „Auf dem TV zeigen". Das
+gilt auf beiden Ebenen: die Knöpfe „⬇ CSV" und „⬇ Alle Abende als CSV"
+erscheinen nur mit Admin-Token in der Browser-Session, und
+`GET <base>/api/export/archive[/:day]` antwortet ohne gültiges Admin-Token
+dieses Bereichs mit **403**. Ein Spieler-Token oder ein Admin-Token des anderen
+Bereichs reicht nicht (D-019).
+
+Weil ein einfacher `<a href download>` keinen Authorization-Header mitschicken
+kann, holt die Archiv-Seite die Datei jetzt per `fetch` mit
+`Authorization: Bearer <token>` und speichert den Blob über einen erzeugten
+Klick-Link. Das Token bleibt damit aus URL, Browser-Verlauf und Server-Logs
+heraus — anders als bei einem Query-Parameter. Fehlschläge (abgelaufenes
+Token, Netzwerk) zeigt ein kleiner Toast, der auch ohne offenes
+Bearbeiten-Modal sichtbar ist. Ersetzt die Freigabe aus D-025.
+
+**Begründung:** Nutzerwunsch. Die Kartenansicht des Archivs (Sieger,
+Teilnehmerzahl, Tagessummen) bleibt für alle offen, aber die namentliche
+Aufschlüsselung „wer hat an welchem Abend wie viel getrunken" als Datei zum
+Mitnehmen ist etwas anderes als eine Zahl auf dem Bildschirm — das gehört
+hinter denselben Zugang wie die Archiv-Korrektur.

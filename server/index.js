@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { config } from './config.js';
 import { areas } from './areas.js';
-import { hashPin, verifyPin, playerToken, adminToken, checkPassword } from './auth.js';
+import { hashPin, verifyPin, playerToken, adminToken, checkPassword, verifyToken, tokenArea } from './auth.js';
 import { setupWs } from './ws.js';
 import { validName, validPin } from './validate.js';
 import { validDayString } from './db.js';
@@ -44,18 +44,31 @@ function createApiRouter(area) {
   });
 
   // Übergabedateien (CSV) fürs Abend-Archiv (D-025): alle Abende am Stück oder
-  // ein einzelner. Reine Leseendpunkte auf denselben Daten, die das Archiv
-  // ohnehin ausliefert — daher ohne Login, wie /archive selbst.
+  // ein einzelner. Wie die Archiv-Bearbeitung nur für Admins (D-027) — das
+  // Token kommt im Authorization-Header, deshalb holt die Archiv-Seite die
+  // Datei per fetch und nicht über einen einfachen Link.
+  function requireAdmin(req, res) {
+    const auth = verifyToken((req.get('authorization') ?? '').replace(/^Bearer /, ''));
+    if (auth?.role !== 'admin' || tokenArea(auth) !== area.id) {
+      res.status(403).json({ error: 'Nur für Admins' });
+      return false;
+    }
+    return true;
+  }
+
   function sendCsv(res, filename, csv) {
     res.type('text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(csv);
   }
 
-  router.get('/export/archive', (_req, res) =>
-    sendCsv(res, `${area.id}-abende-gesamt.csv`, archiveCsv(db.getExportNights())));
+  router.get('/export/archive', (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    sendCsv(res, `${area.id}-abende-gesamt.csv`, archiveCsv(db.getExportNights()));
+  });
 
   router.get('/export/archive/:day', (req, res) => {
+    if (!requireAdmin(req, res)) return;
     const { day } = req.params;
     if (!validDayString(day)) return res.status(400).json({ error: 'Ungültiger Tag' });
     sendCsv(res, `${area.id}-abend-${day}.csv`, archiveCsv(db.getExportNights(day)));
