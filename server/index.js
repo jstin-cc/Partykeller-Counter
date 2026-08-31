@@ -7,6 +7,7 @@ import { hashPin, verifyPin, playerToken, adminToken, checkPassword } from './au
 import { setupWs } from './ws.js';
 import { validName, validPin } from './validate.js';
 import { validDayString } from './db.js';
+import { archiveCsv } from './csv.js';
 import { createLoginLimiter, createRateLimiter } from './ratelimit.js';
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -40,6 +41,24 @@ function createApiRouter(area) {
   router.get('/archive/:day', (req, res) => {
     if (!validDayString(req.params.day)) return res.status(400).json({ error: 'Ungültiger Tag' });
     res.json(db.getArchiveDay(req.params.day));
+  });
+
+  // Übergabedateien (CSV) fürs Abend-Archiv (D-025): alle Abende am Stück oder
+  // ein einzelner. Reine Leseendpunkte auf denselben Daten, die das Archiv
+  // ohnehin ausliefert — daher ohne Login, wie /archive selbst.
+  function sendCsv(res, filename, csv) {
+    res.type('text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
+  }
+
+  router.get('/export/archive', (_req, res) =>
+    sendCsv(res, `${area.id}-abende-gesamt.csv`, archiveCsv(db.getExportNights())));
+
+  router.get('/export/archive/:day', (req, res) => {
+    const { day } = req.params;
+    if (!validDayString(day)) return res.status(400).json({ error: 'Ungültiger Tag' });
+    sendCsv(res, `${area.id}-abend-${day}.csv`, archiveCsv(db.getExportNights(day)));
   });
 
   // Persönliche Statistik + Achievements fürs Nutzer-Dashboard

@@ -548,3 +548,52 @@ auf dem Board, ob der Abend den Rekord knackt. Der laufende Abend wird bewusst
 gegen den besten *vergangenen* Abend verglichen (sonst wäre der Rekord-Abend
 irgendwann er selbst und die Anzeige sinnlos). Keine Schemaänderung, eine
 zusätzliche COUNT-Abfrage.
+
+## D-025 (2026-08-31): CSV-Übergabedateien im Abend-Archiv
+
+**Entscheidung:** `/abende` bietet Downloads im **Langformat** an — je eine
+Zeile pro Party-Tag und Person mit den Spalten
+`Tag;Datum;Wochentag;Name;Bier;Shots;Mischen;Gesamt`. Zwei Leseendpunkte je
+Bereich: `GET <base>/api/export/archive` (alle Abende, Datei
+`<bereich>-abende-gesamt.csv`) und `GET <base>/api/export/archive/:day` (ein
+Abend, `<bereich>-abend-<tag>.csv`). Der Server erzeugt die Datei und liefert
+sie per `Content-Disposition: attachment`.
+
+Formatentscheidungen (`server/csv.js`): **Semikolon** als Trennzeichen,
+**CRLF** und ein **UTF-8-BOM**, damit ein deutsches Excel die Datei per
+Doppelklick korrekt und mit intakten Umlauten öffnet. `Tag` ist zusätzlich in
+ISO-Form (`2026-08-22`) dabei, damit die Datei auch maschinell sortierbar ist.
+**Keine Summenzeile** — die Datei bleibt eine saubere Tabelle und ist direkt
+als Pivot auswertbar. Zellen, die mit `= + - @` beginnen, werden mit einem
+vorangestellten `'` entschärft (Namen kommen von Gästen, Excel würde sie sonst
+als Formel ausführen). Personen ohne Getränke an dem Abend fallen raus,
+ausgeblendete Personen sind dabei — wie in den Tagessummen des Archivs.
+
+Die Endpunkte sind **ohne Login** erreichbar, genau wie `/archive` und
+`/archive/:day`, aus denen sie sich speisen. Der CSV-Knopf je Abend und
+„Alle Abende als CSV" sind deshalb für alle sichtbar; Bearbeiten und „Auf dem
+TV zeigen" bleiben Admin-only.
+
+**Begründung:** Nutzerwunsch: eine Übergabedatei, die sich auswerten lässt —
+pro Abend oder gesamt. CSV im Langformat ist das, was Excel/LibreOffice ohne
+Zwischenschritt einlesen und pivotieren; serverseitig erzeugt spart es
+Blob-Bastelei im Frontend und liefert einen echten Dateinamen. Keine neuen
+Dependencies, keine Schemaänderung.
+
+## D-026 (2026-08-31): Fun-Fact-Band auf dem TV ist eine Zeile hoch
+
+**Entscheidung:** Das Fun-Fact-Band auf dem TV ist **exakt so hoch wie eine
+Ranglistenzeile** (64 Design-Pixel, `ROW_H`) und der Fact-Text steht in
+**Namensgröße** (28 px, wie `.col-name`); die Überschrift „Fun Fact" bei
+18 px. Das Band bleibt einzeilig: Passt ein Fact nicht in die Breite, skaliert
+`fitFactText()` die Schrift proportional herunter (Untergrenze 15 px, darunter
+schneidet `text-overflow: ellipsis` ab). Neu gemessen wird bei jedem
+Fact-Wechsel, bei `resize` und wenn der Webfont fertig geladen ist.
+
+**Begründung:** Das Band war mit 14 px Text vom Sofa aus praktisch nicht mehr
+lesbar (Gegenentscheidung zur Verkleinerung aus #16, die Platz für die
+Rangliste schaffen sollte). Eine Ranglistenzeile als Maß hält es optisch im
+Raster des Boards und kostet nur ~30 Design-Pixel, also weniger als eine
+Tabellenzeile — bei 1080p bleiben 11 sichtbare Ränge. Das Herunterskalieren
+statt Umbrechen hält die Bühnenhöhe stabil, sodass die Rangliste nicht bei
+jedem Fact-Wechsel springt.

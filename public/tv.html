@@ -136,6 +136,31 @@
     50%      { box-shadow: 0 0 18px oklch(0.80 0.15 83 / 0.45); }
   }
   @media (prefers-reduced-motion: reduce) { .pace-pill { animation: none; } }
+  /* Fun-Fact-Band: genau so hoch wie eine Ranglistenzeile (ROW_H) und der Text
+     in Namensgröße (.col-name), damit es vom Sofa aus lesbar ist. Es bleibt
+     immer einzeilig — zu lange Facts skaliert fitFactText() herunter. */
+  #funfacts {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    height: 64px;
+    padding: 0 24px;
+    background: var(--surface-alt);
+    border-top: 2px solid var(--gold);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  #funfact-title {
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 18px; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.1em; flex-shrink: 0; transition: opacity 0.4s;
+  }
+  #funfact-text {
+    font-family: 'Bitter', serif; font-weight: 600; font-size: 28px; color: var(--creme);
+    min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: opacity 0.4s;
+  }
 </style>
 </head>
 <body>
@@ -212,10 +237,10 @@
 
     </div><!-- /#board -->
 
-    <!-- Fun-Facts (live): kompaktes Band direkt über den Bäumen, verdeckt sie nicht -->
-    <div id="funfacts" class="glass" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:12px;padding:5px 20px;background:var(--surface-alt);border-top:2px solid var(--gold);border-radius:var(--radius);">
-      <span id="funfact-title" style="font-family:'Bitter',serif;font-weight:800;font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;flex-shrink:0;transition:opacity 0.4s;">Fun Fact</span>
-      <span id="funfact-text" style="font-size:14px;color:var(--creme);font-family:'Bitter',serif;font-weight:600;transition:opacity 0.4s;">Bald gibt's hier Statistiken.</span>
+    <!-- Fun-Facts (live): Band direkt über den Bäumen, eine Zeile hoch (Styles oben) -->
+    <div id="funfacts" class="glass">
+      <span id="funfact-title">Fun Fact</span>
+      <span id="funfact-text">Bald gibt's hier Statistiken.</span>
     </div>
 
     <img src="assets/footer-woods.png" alt="" class="footer-woods" style="width:calc(100% + 128px);margin-left:-64px;height:64px;object-fit:cover;object-position:center 30%;display:block;flex-shrink:0;filter:brightness(0.85) saturate(1);">
@@ -686,9 +711,31 @@ function currentFactList() {
   return facts.length ? facts : [FUNFACT_FALLBACK];
 }
 
+// Das Band ist genau eine Ranglistenzeile hoch, der Text also einzeilig. Kurze
+// Facts stehen in Namensgröße da; nur wenn ein Fact breiter ist als das Band,
+// wird er so weit verkleinert, dass er noch komplett hineinpasst.
+const FACT_SIZE_MAX = 28;   // Design-Pixel, wie .col-name
+const FACT_SIZE_MIN = 15;
+
+function fitFactText() {
+  factEl.style.fontSize = `${FACT_SIZE_MAX}px`;
+  const band = $('funfacts');
+  const style = getComputedStyle(band);
+  const avail = band.clientWidth
+    - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+    - parseFloat(style.columnGap || 0) - factTitleEl.offsetWidth;
+  // scrollWidth ist die volle Textbreite, auch wenn die Box schon abschneidet
+  const needed = factEl.scrollWidth;
+  if (avail > 0 && needed > avail) {
+    const size = Math.max(FACT_SIZE_MIN, Math.floor(FACT_SIZE_MAX * avail / needed));
+    factEl.style.fontSize = `${size}px`;
+  }
+}
+
 function showFact(f) {
   factTitleEl.textContent = f.title;
   factEl.textContent = f.text;
+  fitFactText();
 }
 
 function updateFacts(players, records, customFacts, funStats) {
@@ -723,6 +770,12 @@ function applyFunfactSpeed(seconds) {
 }
 
 applyFunfactSpeed(30);
+
+// Bandbreite hängt an der Fenstergröße, die Textbreite am erst nachgeladenen
+// Webfont – in beiden Fällen neu einpassen.
+fitFactText();
+window.addEventListener('resize', fitFactText);
+document.fonts?.ready.then(fitFactText);
 </script>
 </body>
 </html>

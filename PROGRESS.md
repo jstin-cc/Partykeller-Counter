@@ -5,7 +5,13 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 
 **Aktueller Stand:** Alle Meilensteine M0–M8 abgeschlossen — die App ist
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
-Admin, Abend-Archiv mit Bearbeitung) und end-to-end im Browser getestet.
+Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
+getestet.
+Seit 2026-08-31 (D-025, D-026): **CSV-Übergabedateien im Abend-Archiv** —
+„⬇ CSV" auf jeder Abend-Karte und „⬇ Alle Abende als CSV" im Kopf, Langformat
+(eine Zeile je Abend und Person) mit Semikolon/BOM für Excel; und das
+**Fun-Fact-Band auf dem TV ist jetzt eine Ranglistenzeile hoch** mit Text in
+Namensgröße, lange Facts skalieren automatisch herunter.
 Seit 2026-08-26 (M8, Feedback aus der einwöchigen Testphase, D-021–D-023):
 **TV-Board skaliert auf jeder Auflösung identisch** (1080p-Design-Bühne,
 Tabelle bekommt allen Restplatz, Rotation robust neu geschrieben inkl.
@@ -156,6 +162,10 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Rekordkurs (Bier-Pace) live auf dem TV: glühende Pill + Fun-Fact, wenn
       der Abend vor dem besten bisherigen Abend liegt (D-024)
 - [x] D-020-Tiebreak auch für Archiv-Sieger/Tagessieger
+- [x] CSV-Übergabedateien im Abend-Archiv: pro Abend und über alle Abende,
+      Langformat mit Semikolon/CRLF/BOM fürs deutsche Excel (D-025)
+- [x] Fun-Fact-Band auf dem TV so hoch wie eine Ranglistenzeile, Text in
+      Namensgröße, lange Facts skalieren automatisch herunter (D-026)
 
 ## Verifikation (2026-08-26, M8)
 
