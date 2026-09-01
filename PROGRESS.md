@@ -7,6 +7,12 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-01 (D-034, D-035): **Vollsicherung im Admin** — „⬇ Backup
+herunterladen" speichert den ganzen Bereich als JSON (Nutzer samt PIN-Hash,
+komplettes Getränke-Log, Einstellungen, Fun-Facts), „⬆ Backup einspielen"
+stellt daraus alles wieder her (Lösch-Passwort nötig, eine Transaktion, fremde
+Bereiche werden abgewiesen); und die Erklärtexte bei *Abzeichen*, *TV-Anzeige*
+und *Eigene Fun-Facts* sind entfernt.
 Seit 2026-09-01 (D-028–D-033): **Verlaufsgraph auf jeder Abend-Karte**
 (Getränke pro Stunde als Kurve mit Fläche, alle zusammen, Spitzenstunde
 markiert),
@@ -185,6 +191,33 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       ein freistehender Knopf unter der All-Time-Karte (D-033)
 - [x] Treue-Abzeichen nach Anzahl der Abende, nur die höchste Stufe (D-031)
 - [x] Grüner Balken im Zählen/Profil-Umschalter gleitet statt zu springen
+- [x] Vollsicherung: Download (`GET /api/export/backup`) und Import
+      (`POST /api/import/backup`) inkl. Prüfmodul `server/backup.js` (D-034)
+- [x] Admin-Oberfläche: Block „Sicherung" mit beiden Knöpfen und Import-Dialog
+      (Datei + Lösch-Passwort) (D-034)
+- [x] Erklärtexte bei Abzeichen, TV-Anzeige und Eigene Fun-Facts entfernt (D-035)
+
+## Verifikation (2026-09-01, D-034/D-035)
+
+Server-Tests: Export nur mit Admin-Token des eigenen Bereichs (ohne Token, mit
+Spieler-Token und mit Youngstars-Admin je 403); Import weist falsches und
+bloßes Admin-Passwort (403), fremden Bereich, fremdes Format, falsche Version,
+leere/doppelte Namen (auch nur in der Groß-/Kleinschreibung verschieden),
+kaputten PIN-Hash, Log ohne Nutzer, unbekanntes Getränk, negative Zähler und
+fehlende Abschnitte ab (je 400) — der Bestand bleibt dabei unverändert;
+kaputtes JSON → 400, 21 MB → 413, 5 MB gehen durch. Runde von Hand:
+Datenstand mit Einstellungen, Abend-Name, Fun-Fact und Live-Getränk aufgebaut →
+Sicherung geladen → alles gelöscht und fremde Daten angelegt → Import → State,
+Archiv (inkl. Verlauf und Abend-Name) und persönliche Statistik sind wieder
+Byte für Byte identisch, das alte Handy-Token zählt weiter und der PIN-Login
+funktioniert (falsche PIN weiterhin abgelehnt). Browser-Tests (Chromium):
+Download liefert `partykeller-backup-2026-09-01.json`; Import-Dialog mit
+deutschem Datei-Knopf zeigt Fehler bei fehlender Datei, falschem Passwort,
+kaputter Datei und fremdem Format, spielt die Sicherung dann ein („Eingespielt:
+8 Nutzer, 23 Getränke, 0 Fun-Facts") und der zwischenzeitlich angelegte Nutzer
+ist wieder weg; Youngstars-Admin lehnt die Partykeller-Datei ab (im
+Navy-Theme); die drei Erklärtexte sind auf Admin und Dashboard verschwunden,
+die Abzeichen-Tooltips bleiben. Keine Konsolenfehler.
 
 ## Verifikation (2026-09-01, D-028–D-031)
 
