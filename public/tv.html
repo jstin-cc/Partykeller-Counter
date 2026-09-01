@@ -180,7 +180,7 @@
         <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:52px;width:auto;object-fit:contain;flex-shrink:0;">
         <div>
           <div style="font-family:'Bitter',serif;font-weight:800;font-size:36px;color:var(--creme);line-height:1.1;">Getränke-Counter</div>
-          <div id="board-subtitle" style="font-family:'Bitter',serif;font-weight:600;font-size:16px;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;transition:color 0.3s ease;">All-Time Rangliste</div>
+          <div id="board-subtitle" style="font-family:'Bitter',serif;font-weight:600;font-size:16px;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;transition:color 0.3s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:640px;">All-Time Rangliste</div>
         </div>
       </div>
       <div style="text-align:center;">
@@ -537,7 +537,8 @@ function applyState(state, mode) {
 
   $('board-subtitle').textContent =
     mode === 'today' ? 'Rangliste heute'
-    : mode === 'archive' ? `Abend vom ${fmtDay(state.boardDay)}`
+    : mode === 'archive'
+      ? (state.boardName ? `${state.boardName} · ${fmtDay(state.boardDay)}` : `Abend vom ${fmtDay(state.boardDay)}`)
     : 'All-Time Rangliste';
   $('participant-count').textContent =
     mode === 'today' ? `${rows.length} heute dabei`

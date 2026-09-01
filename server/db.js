@@ -19,7 +19,12 @@ export function partyDayRangeMs(day) {
 }
 
 export function validDayString(day) {
-  return typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isFinite(partyDayRangeMs(day)[0]);
+  if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
+  // Die Form allein reicht nicht: new Date(2026, 12, 99) rollt stillschweigend
+  // in den März weiter. Deshalb gegenprüfen, dass das Datum wirklich existiert.
+  const [y, m, d] = day.split('-').map(Number);
+  const date = new Date(y, m - 1, d, 6, 0, 0, 0);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 }
 
 // Aktueller Party-Tag als 'YYYY-MM-DD' (Datum des 06:00-Starts)
@@ -145,6 +150,19 @@ export function createDb(dbPath) {
        FROM drink_log
        GROUP BY day, player_id, drink`
     ),
+    // Verlauf eines Abends: Getränke je Party-Tag und Uhr-Stunde (alle zusammen)
+    archiveHours: db.prepare(
+      `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
+              CAST(strftime('%H', ts/1000, 'unixepoch', 'localtime') AS INTEGER) AS hour,
+              COUNT(*) AS n
+       FROM drink_log
+       GROUP BY day, hour`
+    ),
+    // Abend-Namen liegen als settings-Zeilen 'night_name:<tag>' (D-028)
+    listNightNames: db.prepare(
+      "SELECT key, value FROM settings WHERE key LIKE 'night_name:%'"
+    ),
+    deleteSetting: db.prepare('DELETE FROM settings WHERE key = ?'),
     // Persönliche Statistik: Getränke des Spielers je Party-Tag
     playerDays: db.prepare(
       `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day, COUNT(*) AS n
@@ -336,6 +354,52 @@ export function createDb(dbPath) {
     return byDay;
   }
 
+  // --- Abend-Namen (D-028): frei vergebener Titel je Party-Tag ---------------
+  // Liegen in `settings` unter 'night_name:<tag>' — kein eigenes Schema nötig,
+  // und sie überleben den Neustart wie jede andere Einstellung (D-006).
+  const NIGHT_NAME_PREFIX = 'night_name:';
+
+  function listNightNames() {
+    const map = new Map();
+    for (const row of stmts.listNightNames.all()) {
+      map.set(row.key.slice(NIGHT_NAME_PREFIX.length), row.value);
+    }
+    return map;
+  }
+
+  function getNightName(day) {
+    return getSetting(NIGHT_NAME_PREFIX + day, '');
+  }
+
+  // Leerer Name entfernt die Benennung wieder (statt eine leere Zeile zu halten)
+  function setNightName(day, name) {
+    const key = NIGHT_NAME_PREFIX + day;
+    if (name) setSetting(key, name);
+    else stmts.deleteSetting.run(key);
+  }
+
+  // --- Verlauf je Abend (D-029): Getränke pro Stunde, alle Personen zusammen --
+  // Index 0 ist die Stunde ab 06:00 (Party-Tag-Start, D-005). Leere Stunden am
+  // Anfang und Ende fallen weg, damit der Graph den tatsächlichen Abend zeigt
+  // und nicht 24 Stunden, von denen 16 leer sind.
+  function buildTimelines() {
+    const raw = new Map();   // day -> number[24]
+    for (const row of stmts.archiveHours.all()) {
+      let slots = raw.get(row.day);
+      if (!slots) { slots = new Array(24).fill(0); raw.set(row.day, slots); }
+      slots[(row.hour - 6 + 24) % 24] += row.n;
+    }
+    const out = new Map();
+    for (const [day, slots] of raw) {
+      const first = slots.findIndex((n) => n > 0);
+      if (first < 0) continue;
+      let last = slots.length - 1;
+      while (slots[last] === 0) last -= 1;
+      out.set(day, { startHour: (6 + first) % 24, counts: slots.slice(first, last + 1) });
+    }
+    return out;
+  }
+
   // --- Abend-Archiv: jeder Party-Tag mit Sieger, Teilnehmern und Gesamtmengen ---
   function getArchive() {
     const days = new Map(); // day -> { totals, perPlayer: Map }
@@ -353,11 +417,15 @@ export function createDb(dbPath) {
 
     const names = new Map(stmts.listPlayers.all().map((p) => [p.id, p.name]));
     const winners = getDayWinners();   // Tagessieger inkl. Uhrzeit-Tiebreak (D-020)
+    const nightNames = listNightNames();
+    const timelines = buildTimelines();
     return [...days.values()]
       .map((d) => {
         const w = winners.get(d.day);
         return {
           day: d.day,
+          name: nightNames.get(d.day) ?? '',
+          timeline: timelines.get(d.day) ?? null,
           beers: d.beers,
           shots: d.shots,
           mixes: d.mixes,
@@ -400,7 +468,7 @@ export function createDb(dbPath) {
       (a.lastDrinkTs ?? Infinity) - (b.lastDrinkTs ?? Infinity) ||
       a.name.localeCompare(b.name, 'de')
     );
-    return { day, players };
+    return { day, name: getNightName(day), players };
   }
 
   // Export fürs Abend-Archiv (D-025): eine Zeile je Party-Tag und Person, im
@@ -457,6 +525,25 @@ export function createDb(dbPath) {
     }
     incrementDrink(playerId, drink, delta);
   });
+
+  // Treue-Abzeichen (D-031): Stufen nach der Anzahl besuchter Abende. Es gilt
+  // immer nur die höchste erreichte Stufe; unter der ersten Schwelle gibt es
+  // gar keins.
+  const VISIT_TIERS = [
+    { days: 10, label: 'Stammgast' },
+    { days: 20, label: 'Dauergast' },
+    { days: 50, label: 'Kellerlegende' },
+    { days: 100, label: 'Ehrenmitglied' },
+    { days: 200, label: 'Urgestein' },
+  ];
+
+  function visitBadge(days) {
+    let best = null;
+    for (const tier of VISIT_TIERS) if (days >= tier.days) best = tier;
+    if (!best) return null;
+    const next = VISIT_TIERS.find((t) => t.days > best.days) ?? null;
+    return { level: best.days, label: best.label, days, next: next ? next.days : null };
+  }
 
   // --- Persönliche Statistik + Abzeichen (für das Profil im Nutzer-Dashboard) ---
   // Jedes Abzeichen wird pro Party-Tag vergeben; `count` zählt, an wie vielen
@@ -517,6 +604,8 @@ export function createDb(dbPath) {
     return {
       days: rows.length,
       best,
+      // Treue-Abzeichen: null, solange die erste Stufe nicht erreicht ist (D-031)
+      visitBadge: visitBadge(rows.length),
       // Ø Getränke pro Abend (nur geloggte Getränke, eine Nachkommastelle)
       avgPerNight: rows.length ? Math.round((drinksTotal / rows.length) * 10) / 10 : 0,
       achievements: Object.fromEntries(
@@ -607,6 +696,7 @@ export function createDb(dbPath) {
     };
     if (boardMode === 'archive' && validDayString(boardDay)) {
       state.boardDay = boardDay;
+      state.boardName = getNightName(boardDay);
       state.archivePlayers = getArchiveDay(boardDay).players.filter((p) => p.total > 0);
     }
     return state;
@@ -693,6 +783,7 @@ export function createDb(dbPath) {
     incrementDrink, addLogEntry, setCounter, renamePlayer, setHidden,
     getRecords, listFacts, addFact, updateFact, deleteFact,
     getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
+    getNightName, setNightName,
     setPinHash, deletePlayer, resetAll, getState,
   };
 }

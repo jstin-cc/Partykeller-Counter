@@ -35,7 +35,7 @@
 
   /* Zwei Ansichten: Zählen (Eingabe) und Profil (Statistik) */
   .tabs {
-    display: flex; gap: 6px; padding: 5px;
+    display: flex; gap: 6px; padding: 5px; position: relative;
     background: var(--surface-alt); border: 1px solid var(--glass-edge);
     border-radius: 999px;
   }
@@ -43,9 +43,66 @@
     flex: 1; padding: 10px; border: none; border-radius: 999px; cursor: pointer;
     background: transparent; color: var(--ink-muted);
     font-family: 'Bitter', serif; font-weight: 700; font-size: 15px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: color 0.2s ease;
+    position: relative; z-index: 1;   /* über dem gleitenden Balken */
   }
-  .tab-btn.active { background: var(--green); color: var(--bg); }
+  .tab-btn.active { color: var(--bg); }
+  /* Der grüne Balken ist ein eigenes Element und gleitet zur aktiven Seite,
+     statt zwischen den Knöpfen zu springen. Breite/Weg ergeben sich aus dem
+     Innenabstand (5 px) und dem Spalt (6 px) der .tabs-Leiste. */
+  .tab-indicator {
+    position: absolute; top: 5px; bottom: 5px; left: 5px;
+    width: calc(50% - 8px);
+    background: var(--green); border-radius: 999px;
+    transition: transform 0.3s cubic-bezier(0.32, 1.15, 0.4, 1);
+    pointer-events: none;
+  }
+  .tabs[data-pos="1"] .tab-indicator { transform: translateX(calc(100% + 6px)); }
+  @media (prefers-reduced-motion: reduce) { .tab-indicator { transition: none; } }
+
+  /* „Ganze Rangliste": Knopf unter den Nachbarn + Blatt von unten (D-030) */
+  .show-all {
+    width: 100%; background: var(--surface-2); border: 1px solid var(--glass-edge);
+    color: var(--ink-muted); border-radius: var(--radius); padding: 13px 12px;
+    font-family: 'Work Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
+  .show-all:hover { color: var(--ink); border-color: var(--green); }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: flex-end; justify-content: center; z-index: 10;
+  }
+  .board-sheet {
+    background: var(--surface); border-top: 4px solid var(--green);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    width: 100%; max-width: 480px; max-height: 86vh;
+    padding: 18px 20px 24px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+    animation: sheet-up 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes sheet-up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .board-sheet { animation: none; } }
+  #board-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .board-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    border-radius: var(--radius);
+  }
+  .board-row .rank {
+    width: 36px; font-family: 'Bitter', serif; font-weight: 800; font-size: 15px;
+    font-variant-numeric: tabular-nums; color: var(--ink-muted);
+  }
+  .board-row.top .rank { color: var(--gold); }
+  .board-row .who { flex: 1; font-family: 'Bitter', serif; font-weight: 700; font-size: 15px; }
+  .board-row .total {
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 15px;
+    font-variant-numeric: tabular-nums; color: var(--gold);
+  }
+  /* Eigene Zeile hervorgehoben – sie wird beim Öffnen in die Mitte gescrollt */
+  .board-row.me { background: var(--surface); border-color: var(--green); }
+  .board-row.me .who { color: var(--green); }
 
   /* Anzahl-Pill am Abzeichen: wie oft schon erreicht */
   .badge-count {
@@ -86,7 +143,8 @@
       </div>
 
       <!-- Umschalter: Zählen (Eingabe) / Profil (Statistik & Abzeichen) -->
-      <div class="tabs" role="tablist">
+      <div id="main-tabs" class="tabs" role="tablist" data-pos="0">
+        <div class="tab-indicator"></div>
         <button id="tab-btn-count" class="tab-btn active" type="button">Zählen</button>
         <button id="tab-btn-profile" class="tab-btn" type="button">Profil</button>
       </div>
@@ -188,6 +246,9 @@
           <div id="prof-alltime-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
         </div>
 
+        <!-- Ein Knopf für beide Zeiträume: im Blatt selbst ist umschaltbar -->
+        <button id="show-board" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
+
         <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung -->
         <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:16px;">
           <div class="card-title" style="color:var(--gold);">Deine Statistik</div>
@@ -225,8 +286,9 @@
         <!-- Abzeichen: leuchtet, wenn heute erreicht; die Pill zählt alle Abende -->
         <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:12px;">
           <div class="card-title" style="color:var(--gold);">Abzeichen</div>
-          <div style="font-size:12px;color:var(--ink-muted);">Leuchtet, wenn heute geschafft – die Zahl zählt, an wie vielen Abenden insgesamt.</div>
+          <div style="font-size:12px;color:var(--ink-muted);">Leuchtet, wenn heute geschafft – die Zahl zählt, an wie vielen Abenden insgesamt. Das Treue-Abzeichen zeigt immer nur die höchste erreichte Stufe.</div>
           <div class="badges">
+            <div id="badge-visits" class="badge earned" hidden>🎖 <span id="badge-visits-label">Stammgast</span> <span class="badge-count">×0</span></div>
             <div id="badge-winner" class="badge" title="Gesamt-Tagessieger des Abends">👑 Tagessieger <span class="badge-count">×0</span></div>
             <div id="badge-first" class="badge" title="Das erste Getränk des Abends kam von dir">🥇 Erster Trinker <span class="badge-count">×0</span></div>
             <div id="badge-midnight" class="badge" title="Ein Bier zwischen 0 und 1 Uhr">🌙 Mitternachtsbier <span class="badge-count">×0</span></div>
@@ -254,6 +316,26 @@
   <img src="assets/footer-woods.png" alt="" class="footer-woods">
 </div>
 
+<!-- Ganze Rangliste (D-030): dasselbe Blatt für „heute" und „all-time",
+     oben umschaltbar, die eigene Zeile ist markiert und wird angesteuert. -->
+<div id="board-modal" class="modal-backdrop" hidden>
+  <div class="board-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div id="board-title" style="font-family:'Bitter',serif;font-weight:800;font-size:20px;color:var(--creme);">Rangliste</div>
+        <div id="board-count" style="font-size:13px;color:var(--ink-muted);"></div>
+      </div>
+      <button id="board-close" class="show-all" type="button" style="width:auto;padding:9px 14px;font-size:13px;">Schließen</button>
+    </div>
+    <div id="board-tabs" class="tabs" role="tablist" data-pos="0">
+      <div class="tab-indicator"></div>
+      <button id="board-tab-today" class="tab-btn active" type="button">Heute</button>
+      <button id="board-tab-alltime" class="tab-btn" type="button">All-Time</button>
+    </div>
+    <div id="board-list"></div>
+  </div>
+</div>
+
 <script type="module">
 import { AREA } from './js/area.js';
 import { getSession, clearSession } from './js/api.js';
@@ -276,6 +358,7 @@ if (!token || !playerId) {
     $('tab-profile').hidden = !profile;
     $('tab-btn-count').classList.toggle('active', !profile);
     $('tab-btn-profile').classList.toggle('active', profile);
+    $('main-tabs').dataset.pos = profile ? '1' : '0';   // grüner Balken gleitet
   }
   $('tab-btn-count').addEventListener('click', () => showTab(false));
   $('tab-btn-profile').addEventListener('click', () => showTab(true));
@@ -310,7 +393,7 @@ if (!token || !playerId) {
     try {
       const res = await fetch(`${AREA.base}/api/players/${encodeURIComponent(playerId)}/stats`);
       if (!res.ok) return;
-      const { days, best, avgPerNight, achievements } = await res.json();
+      const { days, best, avgPerNight, achievements, visitBadge } = await res.json();
       bump('stat-days', days);
       if (best) {
         $('stat-best').textContent = best.total;
@@ -319,6 +402,17 @@ if (!token || !playerId) {
       $('stat-avg').textContent = days
         ? avgPerNight.toLocaleString('de-DE', { maximumFractionDigits: 1 })
         : '–';
+      // Treue-Abzeichen (D-031): nur die höchste erreichte Stufe, und gar keins,
+      // solange die erste Schwelle (10 Abende) nicht erreicht ist.
+      $('badge-visits').hidden = !visitBadge;
+      if (visitBadge) {
+        $('badge-visits-label').textContent = visitBadge.label;
+        $('badge-visits').querySelector('.badge-count').textContent = `×${visitBadge.days}`;
+        $('badge-visits').title = visitBadge.next
+          ? `${visitBadge.days} Abende dabei – nächste Stufe bei ${visitBadge.next}.`
+          : `${visitBadge.days} Abende dabei – höchste Stufe erreicht.`;
+      }
+
       // Abzeichen: leuchtet bei „heute geschafft", Pill zählt alle Abende
       for (const [id, key] of [
         ['badge-winner', 'dayWinner'],
@@ -387,6 +481,88 @@ if (!token || !playerId) {
     }
   }
 
+  // --- Ganze Rangliste (D-030) ---------------------------------------------
+  // Zeigt dieselbe Liste, aus der oben Platz und Nachbarn stammen — damit die
+  // Zahlen in Karte und Blatt nicht auseinanderlaufen. Läuft live weiter,
+  // solange das Blatt offen ist.
+  let lastPlayers = [];
+  let boardScope = 'today';
+
+  function boardEntries(scope) {
+    if (scope === 'today') {
+      return lastPlayers
+        .filter((p) => todayTotal(p) > 0)
+        .map((p) => ({ id: p.id, name: p.name, total: todayTotal(p), ts: p.lastDrinkTsToday }))
+        .sort((a, b) => b.total - a.total || (a.ts ?? Infinity) - (b.ts ?? Infinity) || a.name.localeCompare(b.name, 'de'));
+    }
+    // All-Time kommt vom Server fertig sortiert (inkl. Tiebreak D-020)
+    return lastPlayers.map((p) => ({ id: p.id, name: p.name, total: p.total }));
+  }
+
+  function renderBoard(scrollToMe = false) {
+    const entries = boardEntries(boardScope);
+    $('board-title').textContent = boardScope === 'today' ? 'Rangliste heute' : 'All-Time Rangliste';
+    $('board-count').textContent = boardScope === 'today'
+      ? (entries.length === 1 ? '1 Person heute dabei' : `${entries.length} Personen heute dabei`)
+      : (entries.length === 1 ? '1 Person insgesamt' : `${entries.length} Personen insgesamt`);
+
+    const list = $('board-list');
+    list.textContent = '';
+    if (!entries.length) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'text-align:center;color:var(--ink-muted);font-size:14px;padding:18px 0;';
+      empty.textContent = 'Heute Abend hat noch niemand etwas gezählt.';
+      list.appendChild(empty);
+      return;
+    }
+
+    let myRow = null;
+    entries.forEach((e, i) => {
+      const row = document.createElement('div');
+      row.className = 'board-row';
+      if (i < 3) row.classList.add('top');
+      if (e.id === playerId) { row.classList.add('me'); myRow = row; }
+      const rank = document.createElement('span');
+      rank.className = 'rank';
+      rank.textContent = `#${i + 1}`;
+      const who = document.createElement('span');
+      who.className = 'who';
+      who.textContent = e.id === playerId ? `${e.name} (du)` : e.name;
+      const total = document.createElement('span');
+      total.className = 'total';
+      total.textContent = e.total;
+      row.append(rank, who, total);
+      list.appendChild(row);
+    });
+    // Beim Öffnen zur eigenen Zeile springen – bei 40 Leuten sucht sonst jeder
+    if (scrollToMe && myRow) {
+      requestAnimationFrame(() => myRow.scrollIntoView({ block: 'center' }));
+    }
+  }
+
+  function setBoardScope(scope, scrollToMe = false) {
+    boardScope = scope;
+    $('board-tabs').dataset.pos = scope === 'today' ? '0' : '1';
+    $('board-tab-today').classList.toggle('active', scope === 'today');
+    $('board-tab-alltime').classList.toggle('active', scope !== 'today');
+    renderBoard(scrollToMe);
+  }
+
+  function openBoard(scope) {
+    $('board-modal').hidden = false;
+    setBoardScope(scope, true);
+  }
+
+  const closeBoard = () => { $('board-modal').hidden = true; };
+
+  $('show-board').addEventListener('click', () => openBoard('alltime'));
+  $('board-tab-today').addEventListener('click', () => setBoardScope('today', true));
+  $('board-tab-alltime').addEventListener('click', () => setBoardScope('alltime', true));
+  $('board-close').addEventListener('click', closeBoard);
+  // Klick auf den abgedunkelten Hintergrund schließt ebenfalls
+  $('board-modal').addEventListener('click', (e) => { if (e.target === $('board-modal')) closeBoard(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBoard(); });
+
   function updateProfile(players, me) {
     // Heute: nur wer heute geloggt hat, Tiebreak wie auf dem TV (D-020)
     const todayList = players
@@ -440,6 +616,8 @@ if (!token || !playerId) {
       bump('mixes-total', me.mixes);
       updateDistribution(me);
       updateProfile(players, me);
+      lastPlayers = players;
+      if (!$('board-modal').hidden) renderBoard();
       document.title = `${AREA.id === 'youngstars' ? 'Youngstars' : 'SV Partykeller'} – ${me.name}`;
 
       // Statistik nachladen, wenn heute irgendwo etwas dazukam (Achievements

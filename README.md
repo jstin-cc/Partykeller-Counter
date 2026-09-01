@@ -11,7 +11,7 @@ Die Startseite `/` fragt zuerst, wo gezählt wird. Jeder Bereich hat eigene
 Nutzer, Rangliste, Fun-Facts, Archiv, TV-Einstellungen und einen eigenen
 Admin-Zugang (Youngstars: `YOUNGSTARS_ADMIN_PASSWORD`).
 
-**Status:** Funktional komplett (M0–M7) — Login, Nutzer-Dashboard,
+**Status:** Funktional komplett (M0–M8) — Login, Nutzer-Dashboard,
 TV-Scoreboard mit QR-Code und Admin-Bereich laufen live über WebSocket.
 Offene Restpunkte in [PROGRESS.md](PROGRESS.md).
 
@@ -140,10 +140,10 @@ Partykeller-Bereich.
 |---|---|
 | `/` | Auswahlseite: Partykeller oder Youngstars? |
 | `/<bereich>/` | Nutzer-Login (Name wählen/anlegen; PIN optional, rate-limitiert) |
-| `/<bereich>/dashboard` | Nutzer-Dashboard mit zwei Tabs — **Zählen** (eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt) und **Profil** (Platz heute und all-time inkl. wer direkt vor/hinter einem liegt, Abende, bestes Ergebnis, Ø pro Abend, Verteilung, Abzeichen mit Zähler — u. a. 👑 Tagessieger). Youngstars: Bier steht zuunterst |
-| `/<bereich>/tv` | TV-Scoreboard: umschaltbar All-Time / Heute / Archiv-Abend (animiert; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen und Statistik-Facts, Rekordkurs-Anzeige 🔥 wenn der Abend schneller läuft als der beste bisherige. Skaliert als 1080p-Design-Bühne — sieht auf jeder Auflösung identisch aus |
+| `/<bereich>/dashboard` | Nutzer-Dashboard mit zwei Tabs — **Zählen** (eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt) und **Profil** (Platz heute und all-time inkl. wer direkt vor/hinter einem liegt, **„Ganze Rangliste ansehen"** als Blatt von unten mit markierter eigener Zeile, Abende, bestes Ergebnis, Ø pro Abend, Verteilung, Abzeichen mit Zähler — u. a. 👑 Tagessieger und das 🎖 Treue-Abzeichen ab 10 Abenden). Youngstars: Bier steht zuunterst |
+| `/<bereich>/tv` | TV-Scoreboard: umschaltbar All-Time / Heute / Archiv-Abend (animiert, benannte Abende stehen mit ihrem Namen im Titel; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen und Statistik-Facts, Rekordkurs-Anzeige 🔥 wenn der Abend schneller läuft als der beste bisherige. Skaliert als 1080p-Design-Bühne — sieht auf jeder Auflösung identisch aus |
 | `/<bereich>/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht (inkl. Archiv-Abend) & Rotationstempo einstellen, eigene Fun-Facts pflegen und bearbeiten, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort, löscht nur den eigenen Bereich) |
-| `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl und Gesamtmengen. Mit Admin-Login zusätzlich: **CSV-Download** je Abend und über alle Abende, Abend nachträglich korrigieren (±1 je Spieler/Getränk, wirkt auf Log + All-Time) und „Auf dem TV zeigen" |
+| `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl, Gesamtmengen und dem **Verlauf des Abends** (Getränke pro Stunde, alle zusammen, Spitzenstunde hervorgehoben). Mit Admin-Login zusätzlich: **CSV-Download** je Abend und über alle Abende, Abend nachträglich korrigieren (±1 je Spieler/Getränk, wirkt auf Log + All-Time), **Abend benennen** (Feld im Bearbeiten-Dialog; der Name steht auf der Karte und im TV-Titel) und „Auf dem TV zeigen" |
 
 ### Übergabedatei (CSV) aus dem Abend-Archiv
 

@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { config } from './config.js';
 import { verifyToken, tokenArea, hashPin } from './auth.js';
-import { validName, validPin, validFactTitle, validFactText, normalizeJoinUrl } from './validate.js';
+import { validName, validPin, validFactTitle, validFactText, validNightName, normalizeJoinUrl } from './validate.js';
 import { validDayString } from './db.js';
 
 // Nachrichten-Contract siehe PLAN.md §5; Server validiert alles.
@@ -125,6 +125,15 @@ function createHandlers(area) {
       if (!['beer', 'shot', 'mix'].includes(drink)) throw new Error('Unbekanntes Getränk');
       if (delta !== 1 && delta !== -1) throw new Error('delta muss +1 oder -1 sein');
       db.adjustArchiveDrink(playerId, day, drink, delta);
+    },
+
+    // Abend im Archiv benennen (Admin, D-028); leerer Name entfernt die Benennung
+    setNightName(auth, { day, name }) {
+      requireAdmin(auth);
+      if (!validDayString(day)) throw new Error('Ungültiger Archiv-Tag');
+      const clean = String(name ?? '').trim();
+      if (!validNightName(clean)) throw new Error('Abend-Name: höchstens 40 Zeichen');
+      db.setNightName(day, clean);
     },
 
     deletePlayer(auth, { id }) {
