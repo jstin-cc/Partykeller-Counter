@@ -26,18 +26,20 @@
   --mix: oklch(0.70 0.15 300);   /* „Mischen" – eigenes Getränk, violett/cocktailhaft */
   --bg: oklch(0.15 0.035 155);
   --bg-hi: oklch(0.19 0.035 155);
-  /* Dunkles „Liquid Glass" (Glassmorphism): relativ dunkel, relativ
-     undurchsichtig, leicht grünstichig statt braun. Alpha < 1, damit
-     backdrop-filter den Hintergrund durchscheinen lässt. */
-  --surface: oklch(0.23 0.02 160 / 0.54);
-  --surface-alt: oklch(0.19 0.018 160 / 0.47);
-  --surface-2: oklch(0.29 0.022 160 / 0.60);
-  --glass-edge: oklch(0.92 0.02 160 / 0.12);   /* feine helle Glaskante */
-  --glass-blur: 16px;
+  /* Deckende Flächen (D-028): kein Glassmorphism mehr. Ohne Blur trägt die
+     Fläche selbst den Kontrast, deshalb sind die Töne fest und die Trennlinie
+     deutlich sichtbar statt nur angedeutet. */
+  --surface: oklch(0.21 0.025 158);
+  --surface-alt: oklch(0.175 0.022 158);
+  --surface-2: oklch(0.26 0.028 158);
+  --line: oklch(0.40 0.030 158);       /* sichtbare Kante statt Glasschimmer */
 
-  /* Eckenradien – Kanten sind bewusst leicht abgerundet */
-  --radius: 12px;      /* Buttons, Felder, kleine Controls */
-  --radius-lg: 18px;   /* Karten und große Flächen */
+  /* Eckenradien nach Bauteil (D-028) — nicht mehr ein Radius für alles:
+     Buttons sind scharfkantig, Karten leicht gerundet, Tabellen eckig. */
+  --radius-btn: 3px;   /* Buttons: kantig, wie gedruckte Schilder */
+  --radius: 8px;       /* Eingabefelder und kleine Controls */
+  --radius-lg: 14px;   /* Karten */
+  --radius-flat: 0;    /* Tabellen und große Listenflächen */
 }
 
 /* --- Youngstars-Bereich (D-019): dunkles Navy statt Dunkelgrün, Akzente in
@@ -52,10 +54,10 @@ html[data-area="youngstars"] {
   --mix: oklch(0.70 0.14 310);          /* Mischen: kühleres Violett zum Navy */
   --bg: oklch(0.15 0.045 260);
   --bg-hi: oklch(0.19 0.045 260);
-  --surface: oklch(0.23 0.025 260 / 0.54);
-  --surface-alt: oklch(0.19 0.022 260 / 0.47);
-  --surface-2: oklch(0.29 0.028 260 / 0.60);
-  --glass-edge: oklch(0.92 0.02 260 / 0.12);
+  --surface: oklch(0.21 0.030 260);
+  --surface-alt: oklch(0.175 0.026 260);
+  --surface-2: oklch(0.26 0.034 260);
+  --line: oklch(0.40 0.035 260);
 }
 
 /* Zapfen-Wasserzeichen in Navy (gleiche Form, hellere Navy-Füllung) */
@@ -79,11 +81,9 @@ html[data-area="youngstars"] .ys-logo {
   filter: drop-shadow(0 0 14px oklch(0.70 0.19 40 / 0.35));
 }
 
-/* Wiederverwendbare Glas-Behandlung */
-.glass {
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-edge);
+/* Wiederverwendbare Flächen-Behandlung (früher „.glass") */
+.panel {
+  border: 1px solid var(--line);
 }
 
 * { box-sizing: border-box; }
@@ -150,32 +150,32 @@ a:hover { color: var(--gold); }
 /* Karten mit Farbkante oben */
 .card {
   background: var(--surface);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--line);
   border-top: 3px solid var(--edge, var(--green));
   border-radius: var(--radius-lg);
+  border-color: var(--line);
+  border-top-color: var(--edge, var(--green));
   padding: 20px;
 }
 .card--green { --edge: var(--green); }
 .card--amber { --edge: var(--amber); }
 .card--brick { --edge: var(--brick); }
 
+/* Normale Schreibweise (D-028): Versalien tragen keine Information, sie
+   machen nur jedes Label gleich laut. Gewicht und Farbe reichen. */
 .card-title {
   font-family: 'Bitter', serif;
   font-weight: 700;
-  font-size: 16px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 17px;
+  letter-spacing: 0.01em;
 }
 
 .eyebrow {
   font-family: 'Bitter', serif;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.01em;
 }
 
 .num { font-variant-numeric: tabular-nums; font-family: 'Bitter', serif; font-weight: 800; }
@@ -189,7 +189,7 @@ a:hover { color: var(--gold); }
   width: 100%;
   color: var(--bg);
   border: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-btn);
   padding: 22px;
   font-family: 'Bitter', serif;
   font-weight: 800;
@@ -202,9 +202,7 @@ a:hover { color: var(--gold); }
 /* Rang-Pill */
 .pill {
   background: var(--surface-2);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--line);
   border-radius: 999px;
   padding: 5px 12px;
   font-size: 12px;
@@ -220,26 +218,22 @@ a:hover { color: var(--gold); }
 .cell .value { font-size: 32px; color: var(--ink); }
 .cell .value--gold { color: var(--gold); }
 .cell .label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 /* Formulare (Login) */
 .field {
   width: 100%;
   background: var(--surface-alt);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: 'Work Sans', sans-serif;
   font-size: 18px;
   padding: 14px;
 }
-.field:focus { outline: 2px solid var(--green); border-color: var(--green); }
+.field:focus { outline: 2px solid var(--green); outline-offset: 1px; border-color: var(--green); }
 
 .error-msg { color: var(--brick); font-size: 14px; min-height: 1.2em; }
 
@@ -267,14 +261,23 @@ button:not(:disabled):active { transform: scale(0.95); }
 }
 .pk-pop { animation: pk-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); transform-origin: center; }
 
-/* Kurzes Aufleuchten (z. B. Podest bei Platzwechsel). */
+/* Kurze Hervorhebung bei Platzwechsel (D-028): kein Neon-Glühen mehr,
+   stattdessen hellt die Fläche kurz auf und die Kante zieht an. */
 @keyframes pk-flash {
-  0%   { box-shadow: 0 0 0 0 var(--pk-flash, oklch(0.80 0.15 83 / 0.0)); }
-  30%  { box-shadow: 0 0 26px 4px var(--pk-flash, oklch(0.80 0.15 83 / 0.55)); }
-  100% { box-shadow: 0 0 0 0 var(--pk-flash, oklch(0.80 0.15 83 / 0.0)); }
+  0%   { background-color: var(--surface); border-color: var(--line); }
+  30%  { background-color: var(--surface-2); border-color: var(--gold); }
+  100% { background-color: var(--surface); border-color: var(--line); }
 }
 .pk-flash { animation: pk-flash 0.9s ease; }
 
 @media (prefers-reduced-motion: reduce) {
   .pk-pop, .pk-flash { animation: none; }
 }
+
+/* --- Gezeichnete Icons statt Emoji (D-028, siehe public/js/icons.js) --- */
+.ico {
+  display: inline-block;
+  vertical-align: -0.18em;
+  flex-shrink: 0;
+}
+.ico-wrap { display: inline-flex; align-items: center; }

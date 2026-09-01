@@ -27,9 +27,7 @@
     align-items: center;
     gap: 14px;
     background: var(--surface);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-edge);
+    border: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 13px 16px;
     cursor: pointer;
@@ -55,9 +53,7 @@
   .pin-row { display: flex; gap: 8px; padding: 10px 4px 4px 4px; }
   .input-flat {
     background: var(--surface-2);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-edge);
+    border: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 13px 16px;
     color: var(--ink);
@@ -103,7 +99,7 @@
     <div id="error-banner" class="error-banner" hidden></div>
 
     <div>
-      <div style="font-family:'Bitter',serif;font-weight:600;font-size:14px;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--green);padding-bottom:8px;margin-bottom:12px;">Dein Konto</div>
+      <div style="font-family:'Bitter',serif;font-weight:600;font-size:14px;color:var(--gold);letter-spacing:0.01em;border-bottom:2px solid var(--green);padding-bottom:8px;margin-bottom:12px;">Dein Konto</div>
       <div id="user-list" style="display:flex;flex-direction:column;gap:8px;"></div>
       <div id="list-empty" hidden style="color:var(--ink-muted);font-size:14px;">Noch niemand da – leg unten los.</div>
     </div>

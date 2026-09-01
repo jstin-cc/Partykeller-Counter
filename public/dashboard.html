@@ -16,31 +16,30 @@
   .badge {
     display: flex; align-items: center; gap: 7px;
     padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
-    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    background: var(--surface-2); border: 1px solid var(--line);
     color: var(--ink-muted); opacity: 0.55;
     transition: opacity 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
   .badge.earned {
     opacity: 1; color: var(--gold);
     border-color: oklch(0.80 0.15 83 / 0.55);
-    box-shadow: 0 0 12px oklch(0.80 0.15 83 / 0.18);
   }
   /* Verteilungsbalken Bier/Shots/Mischen */
   .dist-bar {
     display: flex; height: 14px; border-radius: 999px; overflow: hidden;
-    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    background: var(--surface-2); border: 1px solid var(--line);
   }
   .dist-bar > div { transition: width 0.5s ease; }
   .dist-legend { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; }
 
   /* Zwei Ansichten: Zählen (Eingabe) und Profil (Statistik) */
   .tabs {
-    display: flex; gap: 6px; padding: 5px;
-    background: var(--surface-alt); border: 1px solid var(--glass-edge);
-    border-radius: 999px;
+    display: flex; gap: 4px; padding: 4px;
+    background: var(--surface-alt); border: 1px solid var(--line);
+    border-radius: var(--radius);
   }
   .tab-btn {
-    flex: 1; padding: 10px; border: none; border-radius: 999px; cursor: pointer;
+    flex: 1; padding: 10px; border: none; border-radius: var(--radius-btn); cursor: pointer;
     background: transparent; color: var(--ink-muted);
     font-family: 'Bitter', serif; font-weight: 700; font-size: 15px;
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -51,7 +50,7 @@
   .badge-count {
     font-family: 'Bitter', serif; font-weight: 800; font-size: 12px;
     font-variant-numeric: tabular-nums;
-    background: var(--surface); border: 1px solid var(--glass-edge);
+    background: var(--surface); border: 1px solid var(--line);
     border-radius: 999px; padding: 1px 7px;
   }
   .badge.earned .badge-count { color: var(--gold); border-color: oklch(0.80 0.15 83 / 0.4); }
@@ -59,7 +58,7 @@
   /* Nachbarn in der Rangliste: wer ist vor/hinter mir */
   .rival {
     display: flex; align-items: center; gap: 10px;
-    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    background: var(--surface-2); border: 1px solid var(--line);
     border-radius: var(--radius); padding: 10px 14px; font-size: 14px;
   }
   .rival .who { font-family: 'Bitter', serif; font-weight: 700; flex: 1; }
@@ -95,7 +94,7 @@
 
       <div class="card card--green" style="text-align:center;padding:18px;">
         <div class="eyebrow">Getränke heute</div>
-        <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px oklch(0.64 0.15 152 / 0.45);">0</div>
+        <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);">0</div>
         <div style="font-size:14px;color:var(--ink-muted);margin-top:4px;">
           Gesamt seit Beginn: <span id="alltime-total" style="color:var(--gold);font-weight:700;">0</span>
         </div>
@@ -227,11 +226,11 @@
           <div class="card-title" style="color:var(--gold);">Abzeichen</div>
           <div style="font-size:12px;color:var(--ink-muted);">Leuchtet, wenn heute geschafft – die Zahl zählt, an wie vielen Abenden insgesamt.</div>
           <div class="badges">
-            <div id="badge-winner" class="badge" title="Gesamt-Tagessieger des Abends">👑 Tagessieger <span class="badge-count">×0</span></div>
-            <div id="badge-first" class="badge" title="Das erste Getränk des Abends kam von dir">🥇 Erster Trinker <span class="badge-count">×0</span></div>
-            <div id="badge-midnight" class="badge" title="Ein Bier zwischen 0 und 1 Uhr">🌙 Mitternachtsbier <span class="badge-count">×0</span></div>
-            <div id="badge-hour" class="badge" title="Drei Getränke innerhalb einer Stunde">⚡ Drei in einer Stunde <span class="badge-count">×0</span></div>
-            <div id="badge-mix" class="badge" title="Mindestens drei Mischgetränke an einem Abend">🍹 Mischmeister <span class="badge-count">×0</span></div>
+            <div id="badge-winner" class="badge" title="Gesamt-Tagessieger des Abends" data-ico="crown">Tagessieger <span class="badge-count">×0</span></div>
+            <div id="badge-first" class="badge" title="Das erste Getränk des Abends kam von dir" data-ico="flag">Erster Trinker <span class="badge-count">×0</span></div>
+            <div id="badge-midnight" class="badge" title="Ein Bier zwischen 0 und 1 Uhr" data-ico="moon">Mitternachtsbier <span class="badge-count">×0</span></div>
+            <div id="badge-hour" class="badge" title="Drei Getränke innerhalb einer Stunde" data-ico="bolt">Drei in einer Stunde <span class="badge-count">×0</span></div>
+            <div id="badge-mix" class="badge" title="Mindestens drei Mischgetränke an einem Abend" data-ico="glass">Mischmeister <span class="badge-count">×0</span></div>
           </div>
         </div>
 
@@ -258,6 +257,9 @@
 import { AREA } from './js/area.js';
 import { getSession, clearSession } from './js/api.js';
 import { connectState } from './js/ws-client.js';
+import { icon, paintIcons } from './js/icons.js';
+
+paintIcons();
 
 const { token, playerId } = getSession();
 const $ = (id) => document.getElementById(id);
@@ -337,11 +339,12 @@ if (!token || !playerId) {
   // --- Profil: Platz heute/all-time und wer direkt vor bzw. hinter mir liegt ---
   const todayTotal = (p) => p.beersToday + p.shotsToday + p.mixesToday;
 
-  function rivalRow(icon, label, gapText) {
+  function rivalRow(mark, label, gapText) {
     const row = document.createElement('div');
     row.className = 'rival';
     const ic = document.createElement('span');
-    ic.textContent = icon;
+    ic.className = 'ico-wrap';
+    ic.innerHTML = mark;   // gezeichnetes Icon oder ▲/▼ (D-028)
     const who = document.createElement('span');
     who.className = 'who';
     who.textContent = label;
@@ -364,7 +367,7 @@ if (!token || !playerId) {
       if (labelSuffix === 'heute') {
         const hint = document.createElement('div');
         hint.style.cssText = 'font-size:13px;color:var(--ink-muted);text-align:center;';
-        hint.textContent = 'Heute noch nichts getrunken – das erste zählt doppelt schön. 🍺';
+        hint.textContent = 'Heute noch nichts getrunken – das erste zählt doppelt schön.';
         box.appendChild(hint);
       }
       return;
@@ -378,7 +381,7 @@ if (!token || !playerId) {
     const gapUp = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} vor dir`);
     const gapDown = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} zurück`);
     if (!ahead) {
-      box.appendChild(rivalRow('👑', 'Du führst!', behind ? `${fmtDrinks(me.total - behind.total)} Vorsprung` : ''));
+      box.appendChild(rivalRow(icon('crown', 16), 'Du führst!', behind ? `${fmtDrinks(me.total - behind.total)} Vorsprung` : ''));
     } else {
       box.appendChild(rivalRow('▲', `Vor dir: ${ahead.name}`, gapUp(ahead.total - me.total)));
     }

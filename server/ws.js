@@ -217,7 +217,7 @@ export function setupWs(server, areas) {
 
         // Spieler-Increments drosseln (pro Spieler; Admins bleiben ungedrosselt)
         if (msg.type === 'increment' && auth.role === 'player' && !allowIncrement(auth.sub)) {
-          ws.send(JSON.stringify({ type: 'error', message: 'Immer mit der Ruhe – gleich geht’s weiter. 🍺' }));
+          ws.send(JSON.stringify({ type: 'error', message: 'Immer mit der Ruhe – gleich geht’s weiter.' }));
           return;
         }
 

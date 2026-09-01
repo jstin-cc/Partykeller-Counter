@@ -24,9 +24,7 @@
   }
   .night-card {
     background: var(--surface);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-edge);
+    border: 1px solid var(--line);
     border-top: 3px solid var(--green);
     border-radius: var(--radius-lg);
     padding: 18px 20px;
@@ -43,15 +41,15 @@
   .night-weekday {
     font-size: 13px;
     color: var(--ink-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    
+    letter-spacing:0.01em;
   }
   .night-winner {
     display: flex;
     align-items: center;
     gap: 10px;
     background: var(--surface-2);
-    border: 1px solid var(--glass-edge);
+    border: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 10px 14px;
   }
@@ -65,21 +63,21 @@
   }
   .night-stats .cell { text-align: center; flex: 1; }
   .night-stats .value { font-family:'Bitter',serif; font-weight:800; font-size:22px; }
-  .night-stats .label { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .night-stats .label { font-size: 11px; color: var(--ink-muted); letter-spacing:0.01em; margin-top: 2px; }
   .night-meta { font-size: 13px; color: var(--ink-muted); display:flex; justify-content:space-between; }
 
   /* Admin-Werkzeuge je Abend: CSV-Download, Bearbeiten, auf dem TV zeigen */
   .night-actions { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
   .night-btn {
     flex: 1;
-    background: var(--surface-2); border: 1px solid var(--glass-edge); color: var(--ink-muted);
-    border-radius: var(--radius); padding: 9px 12px; font-weight: 600; font-size: 13px;
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-muted);
+    border-radius: var(--radius-btn); padding: 9px 12px; font-weight: 600; font-size: 13px;
     cursor: pointer; font-family: 'Work Sans', sans-serif;
   }
   .night-btn.on-tv { background: var(--green); color: var(--bg); border-color: var(--green); }
   .modal-backdrop {
     position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    
     display: flex; align-items: center; justify-content: center; z-index: 10; padding: 20px;
   }
   .edit-card {
@@ -90,12 +88,12 @@
   #edit-rows { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
   .edit-row {
     display: flex; align-items: center; gap: 10px; padding: 10px 14px; flex-wrap: wrap;
-    background: var(--surface-2); border: 1px solid var(--glass-edge); border-radius: var(--radius);
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius);
   }
   .edit-row .name { flex: 1; min-width: 120px; font-family:'Bitter',serif; font-weight:700; font-size:15px; }
   .edit-step { display: flex; align-items: center; gap: 5px; }
   .edit-step button {
-    width: 28px; height: 28px; border-radius: var(--radius); border: none; font-size: 15px;
+    width: 28px; height: 28px; border-radius: var(--radius-btn); border: none; font-size: 15px;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     background: var(--surface); color: var(--ink);
   }
@@ -106,10 +104,10 @@
   /* Kurze Fehlermeldung, die auch ohne offenes Modal sichtbar ist */
   .toast {
     position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
-    background: var(--surface); border: 1px solid var(--glass-edge);
+    background: var(--surface); border: 1px solid var(--line);
     border-left: 3px solid var(--brick); border-radius: var(--radius);
     padding: 12px 18px; font-size: 14px; color: var(--creme); z-index: 20;
-    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    
   }
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 14px; text-decoration: underline; cursor: pointer; font-family: 'Work Sans', sans-serif; }
 </style>
@@ -130,7 +128,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <button id="tv-live" class="night-btn" hidden style="flex:none;">TV zurück zur Live-Ansicht</button>
-        <button id="export-all" class="night-btn" hidden style="flex:none;">⬇ Alle Abende als CSV</button>
+        <button id="export-all" class="night-btn" hidden style="flex:none;" data-ico="download">Alle Abende als CSV</button>
         <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
       </div>
     </div>
@@ -148,7 +146,7 @@
 
 <!-- Modal: Abend bearbeiten (nur Admin) – Getränke einzelner Spieler korrigieren -->
 <div id="edit-modal" class="modal-backdrop" hidden>
-  <div class="glass edit-card">
+  <div class="panel edit-card">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
       <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Abend bearbeiten: <span id="edit-day-label"></span></h2>
       <button id="close-edit" class="link-btn">Schließen</button>
@@ -162,6 +160,9 @@
 <script type="module">
 import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
+import { icon, paintIcons } from './js/icons.js';
+
+paintIcons();
 
 const $ = (id) => document.getElementById(id);
 
@@ -259,7 +260,7 @@ function buildCard(night) {
   winner.className = 'night-winner';
   if (night.winner) {
     const crown = document.createElement('span');
-    crown.textContent = '👑';
+    crown.innerHTML = icon('crown', 18);
     const name = document.createElement('span');
     name.className = 'name';
     name.textContent = night.winner.name;
@@ -296,7 +297,7 @@ function buildCard(night) {
     const csv = document.createElement('button');
     csv.className = 'night-btn';
     csv.title = `Teilnehmerliste vom ${date} als CSV`;
-    csv.textContent = '⬇ CSV';
+    csv.innerHTML = `${icon('download', 15)} CSV`;
     csv.addEventListener('click', () =>
       downloadCsv(`/export/archive/${night.day}`, `${AREA.id}-abend-${night.day}.csv`));
     actions.appendChild(csv);

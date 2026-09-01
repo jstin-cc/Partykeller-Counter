@@ -3,6 +3,12 @@
 Nach jedem abgeschlossenen Schritt hier abhaken und committen. Diese Datei ist
 die Wahrheit über den Projektstand (Kontextverlust-sicher).
 
+**Zuletzt (2026-09-01, D-028):** Oberfläche vom generischen Dashboard-Look
+gelöst — Glassmorphism und Neon-Glühen entfernt, Radien nach Bauteil
+differenziert, Versalien auf den TV-Tabellenkopf beschränkt, Emoji durch eine
+eigene gezeichnete Icon-Serie (`public/js/icons.js`) ersetzt. Reine
+Oberflächenänderung, keine Funktion betroffen.
+
 **Aktueller Stand:** Alle Meilensteine M0–M8 abgeschlossen — die App ist
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser

@@ -621,3 +621,50 @@ Teilnehmerzahl, Tagessummen) bleibt für alle offen, aber die namentliche
 Aufschlüsselung „wer hat an welchem Abend wie viel getrunken" als Datei zum
 Mitnehmen ist etwas anderes als eine Zahl auf dem Bildschirm — das gehört
 hinter denselben Zugang wie die Archiv-Korrektur.
+
+## D-028 (2026-09-01): Optik löst sich vom generischen Dashboard-Look
+
+**Entscheidung:** Fünf Merkmale, die die App wie ein beliebiges generiertes
+Dashboard aussehen ließen, sind entfernt bzw. ersetzt:
+
+1. **Kein Glassmorphism mehr.** Alle `backdrop-filter`-Weichzeichner sind raus
+   (22 Stellen), die Flächen (`--surface`, `--surface-alt`, `--surface-2`) sind
+   deckend statt halbtransparent. Statt des angedeuteten „Glasschimmers" trägt
+   jetzt eine sichtbare Kante (`--line`, früher `--glass-edge`) die Trennung.
+   Die Utility-Klasse `.glass` heißt entsprechend `.panel`.
+2. **Kein Neon-Glühen.** Alle `text-shadow`/`box-shadow` der Form `0 0 Npx`
+   sind entfernt (11 Stellen). Große Zahlen wirken über Größe und Farbe. Die
+   `pk-flash`-Animation bei Platzwechsel hellt jetzt die Fläche auf und zieht
+   die Kante an, statt gold zu leuchten. Ausnahme: das Youngstars-Logo behält
+   seinen `drop-shadow` — es ist ein Neonschild, das Glühen ist dort Motiv.
+3. **Radien nach Bauteil statt einem Radius für alles.** Neue Tokens:
+   `--radius-btn: 3px` (Buttons, kantig), `--radius: 8px` (Eingabefelder),
+   `--radius-lg: 14px` (Karten), `--radius-flat: 0` (Tabellen und Listen).
+   Die TV-Rangliste, die Ranglistenzeilen, das Fun-Fact-Band und der QR-Kasten
+   sind damit eckig; der Tab-Umschalter im Dashboard ist nicht mehr vollrund.
+4. **Versalien nur noch an einer Stelle.** `text-transform: uppercase` steht
+   jetzt ausschließlich im Tabellenkopf des TV-Boards (Rang/Name/Bier/…).
+   `.card-title`, `.eyebrow`, `.cell .label` und alle Inline-Vorkommen in
+   admin/abende/index/tv sind normale Schreibweise; der zugehörige Sperrsatz
+   ist von 0.06–0.12em auf 0.01em zurückgenommen.
+5. **Gezeichnete Icons statt Emoji.** Neu: `public/js/icons.js` mit einer
+   geschlossenen Serie (24×24-Raster, 1,8 px Strich, runde Enden, Farbe über
+   `currentColor`). Ersetzt 👑 🥇 🌙 ⚡ 🍹 (Abzeichen und Rivalen-Zeile),
+   🔥 (Rekordkurs-Pill) und ⬇ (CSV-Knöpfe). `paintIcons()` versorgt statisches
+   Markup über `data-ico="name"`. Die dekorativen 🍺 in Hinweistext und
+   WS-Fehlermeldung sind ersatzlos gestrichen.
+
+**Begründung:** Dunkles Milchglas, glühende Ziffern, ein einheitlicher Radius,
+durchgehende Versalien und System-Emoji sind die Merkmale, an denen man
+generierte Oberflächen erkennt. Sie tragen keine Information — Emoji sehen
+zudem auf jedem Betriebssystem anders aus und lassen sich nicht einfärben.
+Der Verein hat mit Logo, Zapfen und Wald-Footer eigenes Material; das soll die
+Optik tragen, nicht eine Effektschicht darüber.
+
+**Folge für die Design-Vorgabe:** Die v3-Dateien aus dem Claude-Design-Projekt
+sind damit nicht mehr in jedem Detail verbindlich. Sie bleiben die Referenz für
+Layout, Farbwelt und Typografie; die oben genannten Effekte weichen bewusst ab.
+CLAUDE.md ist entsprechend angepasst.
+
+**Nicht geändert:** Farbtokens, Schriften, Layout, Seitenaufbau und sämtliche
+Funktionen. Es ist eine reine Oberflächenänderung.

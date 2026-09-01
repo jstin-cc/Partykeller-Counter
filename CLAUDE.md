@@ -40,7 +40,14 @@ mit getrennten Daten und eigenem Theme (D-019): **Partykeller**
 ## Design (verbindlich)
 
 - Quelle: Claude-Design-Projekt „Getränke-Counter Partykeller"
-  (`88f5d903-cd4e-489d-9ce7-d904fffe8155`), **immer die v3-Dateien**.
+  (`88f5d903-cd4e-489d-9ce7-d904fffe8155`), **immer die v3-Dateien** — seit
+  D-028 verbindlich für Layout, Farbwelt und Typografie, **nicht** mehr für
+  Effekte: kein Glassmorphism, kein Neon-Glühen, Radien nach Bauteil
+  (`--radius-btn` / `--radius` / `--radius-lg` / `--radius-flat`), Versalien
+  nur im TV-Tabellenkopf.
+- **Keine Emoji in der Oberfläche** — Icons kommen aus `public/js/icons.js`
+  (`icon(name)` bzw. `data-ico="name"` + `paintIcons()`), damit sie überall
+  gleich aussehen und die Farbe der Umgebung erben (D-028).
 - Design-Tokens (oklch-Farben, Bitter + Work Sans) in PLAN.md §8 → `public/css/theme.css`.
 - UI-Sprache ist Deutsch. Zähler mit `font-variant-numeric: tabular-nums`.
 

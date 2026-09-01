@@ -44,9 +44,7 @@
   }
   .podium-card {
     background: linear-gradient(180deg, var(--surface-hi), var(--surface));
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-edge);
+    border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     width: 100%;
     display: flex;
@@ -66,11 +64,12 @@
   }
   /* Rangliste ab Platz 4: großes gerundetes Panel, darin einzeln
      abgerundete Zeilen, die als Fenster durchscrollen. */
+  /* Tabelle ist eckig (D-028) — sie ist eine Liste, keine Karte. */
   .table-panel {
     flex: 1; min-height: 0;
     display: flex; flex-direction: column;
     background: var(--surface-alt);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-flat);
     padding: 12px 14px;
     overflow: hidden;
   }
@@ -89,10 +88,8 @@
     padding: 0 24px;
     flex: 0 0 auto;
     position: relative;
-    border: 1px solid var(--glass-edge);
-    border-radius: var(--radius);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--line);
+    border-radius: var(--radius-flat);
   }
   .row:nth-child(odd) { background: var(--surface); }
   .row:nth-child(even) { background: var(--surface-alt); }
@@ -112,7 +109,7 @@
   .col-beer { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--amber); font-variant-numeric:tabular-nums; }
   .col-shot { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--brick); font-variant-numeric:tabular-nums; }
   .col-mix { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--mix); font-variant-numeric:tabular-nums; }
-  .col-total { width:140px; text-align:right; font-family:'Bitter',serif; font-weight:800; font-size:34px; color:var(--gold); text-shadow:0 0 10px oklch(0.80 0.15 83 / 0.25); font-variant-numeric:tabular-nums; }
+  .col-total { width:140px; text-align:right; font-family:'Bitter',serif; font-weight:800; font-size:34px; color:var(--gold); font-variant-numeric:tabular-nums; }
   /* Rekordkurs (Bier-Pace): glüht auf, wenn der Abend schneller läuft als der
      Rekord-Abend zur gleichen Uhrzeit */
   .pace-pill {
@@ -132,8 +129,8 @@
     animation: pk-paceglow 2.4s ease-in-out infinite;
   }
   @keyframes pk-paceglow {
-    0%, 100% { box-shadow: 0 0 4px oklch(0.80 0.15 83 / 0.15); }
-    50%      { box-shadow: 0 0 18px oklch(0.80 0.15 83 / 0.45); }
+    0%, 100% { }
+    50%      { }
   }
   @media (prefers-reduced-motion: reduce) { .pace-pill { animation: none; } }
   /* Fun-Fact-Band: genau so hoch wie eine Ranglistenzeile (ROW_H) und der Text
@@ -149,12 +146,12 @@
     padding: 0 24px;
     background: var(--surface-alt);
     border-top: 2px solid var(--gold);
-    border-radius: var(--radius);
+    border-radius: var(--radius-flat);
     overflow: hidden;
   }
   #funfact-title {
     font-family: 'Bitter', serif; font-weight: 800; font-size: 18px; color: var(--gold);
-    text-transform: uppercase; letter-spacing: 0.1em; flex-shrink: 0; transition: opacity 0.4s;
+    letter-spacing: 0.1em; flex-shrink: 0; transition: opacity 0.4s;
   }
   #funfact-text {
     font-family: 'Bitter', serif; font-weight: 600; font-size: 28px; color: var(--creme);
@@ -180,15 +177,15 @@
         <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:52px;width:auto;object-fit:contain;flex-shrink:0;">
         <div>
           <div style="font-family:'Bitter',serif;font-weight:800;font-size:36px;color:var(--creme);line-height:1.1;">Getränke-Counter</div>
-          <div id="board-subtitle" style="font-family:'Bitter',serif;font-weight:600;font-size:16px;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;transition:color 0.3s ease;">All-Time Rangliste</div>
+          <div id="board-subtitle" style="font-family:'Bitter',serif;font-weight:600;font-size:16px;color:var(--green);letter-spacing:0.1em;transition:color 0.3s ease;">All-Time Rangliste</div>
         </div>
       </div>
       <div style="text-align:center;">
         <div id="participant-count" class="num" style="font-size:22px;color:var(--creme);font-weight:700;">0 Teilnehmer</div>
         <div id="totals" style="font-size:14px;color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums;">0 Bier · 0 Shots gesamt</div>
-        <div id="pace-pill" class="pace-pill" hidden>🔥 Auf Rekordkurs!</div>
+        <div id="pace-pill" class="pace-pill" hidden>Auf Rekordkurs!</div>
       </div>
-      <div class="glass" style="display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface-alt);border-radius:var(--radius-lg);">
+      <div class="panel" style="display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface-alt);border-radius:var(--radius-flat);">
         <div style="font-size:14px;color:var(--creme);text-align:right;line-height:1.4;font-family:'Bitter',serif;font-weight:600;">Scan zum<br>Beitreten</div>
         <div id="qr" style="width:90px;height:90px;border-radius:0;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;"></div>
       </div>
@@ -198,33 +195,33 @@
 
     <div id="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:32px;flex-shrink:0;height:224px;">
       <div id="pod-2" hidden style="width:250px;display:flex;flex-direction:column;align-items:center;">
-        <div class="podium-badge" style="width:56px;height:56px;font-size:22px;background:oklch(0.78 0.015 240);margin-bottom:-28px;box-shadow:0 0 16px oklch(0.78 0.015 240 / 0.4);">2</div>
+        <div class="podium-badge" style="width:56px;height:56px;font-size:22px;background:oklch(0.78 0.015 240);margin-bottom:-28px;">2</div>
         <div class="podium-card" style="border-top:3px solid oklch(0.78 0.015 240);padding:40px 18px 14px 18px;height:148px;gap:2px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:23px;"></div>
-          <div data-f="total" class="num" style="font-size:46px;line-height:1;color:var(--gold);text-shadow:0 0 20px oklch(0.80 0.15 83 / 0.35);"></div>
+          <div data-f="total" class="num" style="font-size:46px;line-height:1;color:var(--gold);"></div>
           <div style="font-size:13px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
         </div>
       </div>
       <div id="pod-1" hidden style="width:300px;display:flex;flex-direction:column;align-items:center;">
-        <div class="podium-badge" style="width:70px;height:70px;font-size:30px;background:var(--gold);margin-bottom:-35px;box-shadow:0 0 28px oklch(0.80 0.15 83 / 0.6);">1</div>
+        <div class="podium-badge" style="width:70px;height:70px;font-size:30px;background:var(--gold);margin-bottom:-35px;">1</div>
         <div class="podium-card" style="border-top:4px solid var(--gold);padding:46px 20px 14px 20px;height:196px;gap:4px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:800;font-size:28px;"></div>
-          <div data-f="total" class="num" style="font-size:66px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
+          <div data-f="total" class="num" style="font-size:66px;line-height:1;color:var(--gold);"></div>
           <div style="font-size:14px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
         </div>
       </div>
       <div id="pod-3" hidden style="width:240px;display:flex;flex-direction:column;align-items:center;">
-        <div class="podium-badge" style="width:52px;height:52px;font-size:21px;background:oklch(0.64 0.09 45);margin-bottom:-26px;box-shadow:0 0 16px oklch(0.64 0.09 45 / 0.4);">3</div>
+        <div class="podium-badge" style="width:52px;height:52px;font-size:21px;background:oklch(0.64 0.09 45);margin-bottom:-26px;">3</div>
         <div class="podium-card" style="border-top:3px solid oklch(0.64 0.09 45);padding:38px 18px 12px 18px;height:130px;gap:2px;">
           <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:21px;"></div>
-          <div data-f="total" class="num" style="font-size:38px;line-height:1;color:var(--gold);text-shadow:0 0 14px oklch(0.80 0.15 83 / 0.3);"></div>
+          <div data-f="total" class="num" style="font-size:38px;line-height:1;color:var(--gold);"></div>
           <div style="font-size:12px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
         </div>
       </div>
     </div>
 
-    <div class="glass table-panel">
-      <div style="display:flex;align-items:center;gap:28px;padding:0 24px 12px 24px;text-transform:uppercase;letter-spacing:0.08em;font-size:14px;color:var(--gold);flex-shrink:0;">
+    <div class="panel table-panel">
+      <div style="display:flex;align-items:center;gap:28px;padding:0 24px 12px 24px;text-transform:uppercase;letter-spacing:0.08em;font-size:13px;color:var(--gold);flex-shrink:0;">
         <div style="width:70px;">Rang</div>
         <div style="flex:1;">Name</div>
         <div style="width:120px;text-align:right;">Bier</div>
@@ -238,7 +235,7 @@
     </div><!-- /#board -->
 
     <!-- Fun-Facts (live): Band direkt über den Bäumen, eine Zeile hoch (Styles oben) -->
-    <div id="funfacts" class="glass">
+    <div id="funfacts" class="panel">
       <span id="funfact-title">Fun Fact</span>
       <span id="funfact-text">Bald gibt's hier Statistiken.</span>
     </div>
@@ -251,6 +248,9 @@
 <script type="module">
 import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
+import { icon, paintIcons } from './js/icons.js';
+
+paintIcons();
 
 const $ = (id) => document.getElementById(id);
 
@@ -566,7 +566,7 @@ function updatePace(pace, mode) {
   const show = mode !== 'archive' && !!pace && pace.onPace && pace.todayTotal >= 3;
   el.hidden = !show;
   if (show) {
-    el.textContent = `🔥 Auf Rekordkurs! ${pace.todayTotal} : ${pace.recordAtSameTime} vs. ${fmtDay(pace.recordDay)}`;
+    el.innerHTML = `${icon('pace', 17)} Auf Rekordkurs! ${pace.todayTotal} : ${pace.recordAtSameTime} vs. ${fmtDay(pace.recordDay)}`;
   }
 }
 
