@@ -8,12 +8,26 @@ import { setupWs } from './ws.js';
 import { validName, validPin } from './validate.js';
 import { validDayString } from './db.js';
 import { archiveCsv } from './csv.js';
+import { parseBackup } from './backup.js';
 import { createLoginLimiter, createRateLimiter } from './ratelimit.js';
+
+// Datum fürs Dateinamens-Suffix der Sicherung (lokal, nicht UTC)
+function todayStamp() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
 const app = express();
-app.use(express.json());
+
+// Body-Parser: normal knapp gehalten, nur die eingespielte Vollsicherung darf
+// groß sein (ein Log über mehrere Jahre sprengt sonst das Standardlimit).
+const smallJson = express.json({ limit: '100kb' });
+const backupJson = express.json({ limit: '20mb' });
+app.use((req, res, next) =>
+  (req.path.endsWith('/api/import/backup') ? backupJson : smallJson)(req, res, next));
 
 // Rate-Limit gegen PIN-Raten: max. 5 Fehlversuche pro Minute und IP,
 // danach 60 Sekunden Sperre. Erfolgreicher Login setzt zurück.
@@ -72,6 +86,50 @@ function createApiRouter(area) {
     const { day } = req.params;
     if (!validDayString(day)) return res.status(400).json({ error: 'Ungültiger Tag' });
     sendCsv(res, `${area.id}-abend-${day}.csv`, archiveCsv(db.getExportNights(day)));
+  });
+
+  // Vollsicherung (D-034): eine JSON-Datei mit allem, was der Bereich braucht,
+  // um nach einem Geräte-Tausch identisch weiterzulaufen. Wie die CSV-Exporte
+  // nur für Admins, deshalb Token im Header und Download per fetch.
+  router.get('/export/backup', (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    const backup = { ...db.exportBackup(), area: area.id };
+    res.type('application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${area.id}-backup-${todayStamp()}.json"`);
+    res.send(JSON.stringify(backup));
+  });
+
+  // Gegenstück: eine Sicherung wieder einspielen. Das ersetzt den kompletten
+  // Bestand des Bereichs, ist also so destruktiv wie der Reset — deshalb
+  // dasselbe eigene Lösch-Passwort (RESET_PASSWORD) und dasselbe Rate-Limit.
+  router.post('/import/backup', (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    if (rateLimited(req, res)) return;
+    const { password, backup } = req.body ?? {};
+    if (!checkPassword(password, config.resetPassword)) {
+      loginLimiter.fail(req.ip);
+      return res.status(403).json({ error: 'Falsches Lösch-Passwort' });
+    }
+    loginLimiter.clear(req.ip);
+    // Sicherung des anderen Bereichs: technisch möglich, aber praktisch immer
+    // ein Versehen (Youngstars-Daten im Partykeller) — deshalb abweisen.
+    if (backup?.area && backup.area !== area.id) {
+      return res.status(400).json({ error: 'Diese Sicherung stammt aus dem anderen Bereich' });
+    }
+    let parsed;
+    try {
+      parsed = parseBackup(backup);
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    let counts;
+    try {
+      counts = db.importBackup(parsed);
+    } catch (err) {
+      return res.status(400).json({ error: `Einspielen fehlgeschlagen: ${err.message}` });
+    }
+    area.broadcast();
+    res.json(counts);
   });
 
   // Persönliche Statistik + Achievements fürs Nutzer-Dashboard
@@ -188,6 +246,17 @@ for (const p of ['/dashboard', '/tv', '/admin', '/abende']) {
 }
 
 app.use(express.static(publicDir, { index: false }));
+
+// Fehler aus dem Body-Parser als JSON beantworten (die Admin-Oberfläche zeigt
+// error an) — sonst käme beim Import einer kaputten Datei eine HTML-Seite.
+app.use((err, req, res, next) => {
+  if (err?.type === 'entity.too.large') {
+    const backup = req.path.endsWith('/api/import/backup');
+    return res.status(413).json({ error: backup ? 'Sicherung ist zu groß (max. 20 MB)' : 'Anfrage ist zu groß' });
+  }
+  if (err instanceof SyntaxError && 'body' in err) return res.status(400).json({ error: 'Datei ist kein gültiges JSON' });
+  return next(err);
+});
 
 const server = app.listen(config.port, () => {
   console.log(`Partykeller-Counter läuft auf http://0.0.0.0:${config.port}`);

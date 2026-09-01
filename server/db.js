@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import Database from 'better-sqlite3';
+import { BACKUP_FORMAT, BACKUP_VERSION } from './backup.js';
 
 // Party-Tag läuft 06:00 -> 05:59 des Folgetags (D-005)
 export function partyDayStartMs(now = Date.now()) {
@@ -236,6 +237,28 @@ export function createDb(dbPath) {
     updateFact: db.prepare('UPDATE facts SET title = ?, text = ? WHERE id = ?'),
     deleteFact: db.prepare('DELETE FROM facts WHERE id = ?'),
     countFacts: db.prepare('SELECT COUNT(*) AS n FROM facts'),
+    // Vollsicherung (D-034): alles roh raus bzw. wieder rein — inkl. IDs,
+    // PIN-Hashes und Zeitstempeln, damit eine Wiederherstellung identisch ist.
+    backupPlayers: db.prepare(
+      `SELECT id, name, pin_hash, beers, shots, mixes, hidden, created_at
+       FROM players ORDER BY created_at, name`
+    ),
+    backupLog: db.prepare('SELECT id, player_id, drink, ts FROM drink_log ORDER BY id'),
+    backupSettings: db.prepare('SELECT key, value FROM settings ORDER BY key'),
+    backupFacts: db.prepare('SELECT id, title, text, created_at FROM facts ORDER BY id'),
+    insertPlayerFull: db.prepare(
+      `INSERT INTO players (id, name, pin_hash, beers, shots, mixes, hidden, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ),
+    insertLogFull: db.prepare(
+      'INSERT INTO drink_log (id, player_id, drink, ts) VALUES (?, ?, ?, ?)'
+    ),
+    insertFactFull: db.prepare(
+      'INSERT INTO facts (id, title, text, created_at) VALUES (?, ?, ?, ?)'
+    ),
+    clearPlayers: db.prepare('DELETE FROM players'),
+    clearSettings: db.prepare('DELETE FROM settings'),
+    clearFacts: db.prepare('DELETE FROM facts'),
     getSetting: db.prepare('SELECT value FROM settings WHERE key = ?'),
     setSetting: db.prepare(
       'INSERT INTO settings (key, value) VALUES (?, ?) ' +
@@ -627,6 +650,42 @@ export function createDb(dbPath) {
     stmts.clearLog.run();
   });
 
+  // --- Vollsicherung (D-034) ---
+
+  // Alles, was diesen Bereich ausmacht, in einem JSON-tauglichen Objekt.
+  function exportBackup() {
+    return {
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      createdAt: new Date().toISOString(),
+      players: stmts.backupPlayers.all(),
+      drinkLog: stmts.backupLog.all(),
+      settings: stmts.backupSettings.all(),
+      facts: stmts.backupFacts.all(),
+    };
+  }
+
+  // Spielt eine von parseBackup() geprüfte Sicherung ein: ersetzt den kompletten
+  // Bestand dieses Bereichs. Als eine Transaktion — schlägt irgendetwas fehl
+  // (z. B. ein doppelter Name), bleibt der alte Stand unverändert stehen.
+  const importBackup = db.transaction((data) => {
+    stmts.clearLog.run();
+    stmts.clearPlayers.run();
+    stmts.clearSettings.run();
+    stmts.clearFacts.run();
+    for (const p of data.players) {
+      stmts.insertPlayerFull.run(p.id, p.name, p.pin_hash, p.beers, p.shots, p.mixes, p.hidden, p.created_at);
+    }
+    for (const e of data.drinkLog) stmts.insertLogFull.run(e.id, e.player_id, e.drink, e.ts);
+    for (const s of data.settings) setSetting(s.key, s.value);
+    for (const f of data.facts) stmts.insertFactFull.run(f.id, f.title, f.text, f.created_at);
+    return {
+      players: data.players.length,
+      drinks: data.drinkLog.length,
+      facts: data.facts.length,
+    };
+  });
+
   // Kompletter Client-State: Rangliste + Heute-Werte (ohne pin_hash!)
   function getState() {
     const today = new Map();
@@ -785,5 +844,6 @@ export function createDb(dbPath) {
     getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
     getNightName, setNightName,
     setPinHash, deletePlayer, resetAll, getState,
+    exportBackup, importBackup,
   };
 }
