@@ -63,9 +63,11 @@
   /* „Ganze Rangliste": Knopf unter den Nachbarn + Blatt von unten (D-030) */
   .show-all {
     width: 100%; background: var(--surface-2); border: 1px solid var(--glass-edge);
-    color: var(--ink-muted); border-radius: var(--radius); padding: 9px 12px;
-    font-family: 'Work Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;
+    color: var(--ink-muted); border-radius: var(--radius); padding: 13px 12px;
+    font-family: 'Work Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
   }
+  .show-all:hover { color: var(--ink); border-color: var(--green); }
   .modal-backdrop {
     position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -225,7 +227,6 @@
             </div>
           </div>
           <div id="prof-today-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
-          <button id="show-all-today" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
         </div>
 
         <!-- All-Time: Gesamtstand + Umfeld -->
@@ -243,8 +244,10 @@
             </div>
           </div>
           <div id="prof-alltime-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
-          <button id="show-all-alltime" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
         </div>
+
+        <!-- Ein Knopf für beide Zeiträume: im Blatt selbst ist umschaltbar -->
+        <button id="show-board" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
 
         <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung -->
         <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:16px;">
@@ -322,7 +325,7 @@
         <div id="board-title" style="font-family:'Bitter',serif;font-weight:800;font-size:20px;color:var(--creme);">Rangliste</div>
         <div id="board-count" style="font-size:13px;color:var(--ink-muted);"></div>
       </div>
-      <button id="board-close" class="show-all" type="button" style="width:auto;">Schließen</button>
+      <button id="board-close" class="show-all" type="button" style="width:auto;padding:9px 14px;font-size:13px;">Schließen</button>
     </div>
     <div id="board-tabs" class="tabs" role="tablist" data-pos="0">
       <div class="tab-indicator"></div>
@@ -552,8 +555,7 @@ if (!token || !playerId) {
 
   const closeBoard = () => { $('board-modal').hidden = true; };
 
-  $('show-all-today').addEventListener('click', () => openBoard('today'));
-  $('show-all-alltime').addEventListener('click', () => openBoard('alltime'));
+  $('show-board').addEventListener('click', () => openBoard('alltime'));
   $('board-tab-today').addEventListener('click', () => setBoardScope('today', true));
   $('board-tab-alltime').addEventListener('click', () => setBoardScope('alltime', true));
   $('board-close').addEventListener('click', closeBoard);
