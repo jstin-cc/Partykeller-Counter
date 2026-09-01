@@ -35,7 +35,7 @@
 
   /* Zwei Ansichten: Zählen (Eingabe) und Profil (Statistik) */
   .tabs {
-    display: flex; gap: 6px; padding: 5px;
+    display: flex; gap: 6px; padding: 5px; position: relative;
     background: var(--surface-alt); border: 1px solid var(--glass-edge);
     border-radius: 999px;
   }
@@ -43,9 +43,64 @@
     flex: 1; padding: 10px; border: none; border-radius: 999px; cursor: pointer;
     background: transparent; color: var(--ink-muted);
     font-family: 'Bitter', serif; font-weight: 700; font-size: 15px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: color 0.2s ease;
+    position: relative; z-index: 1;   /* über dem gleitenden Balken */
   }
-  .tab-btn.active { background: var(--green); color: var(--bg); }
+  .tab-btn.active { color: var(--bg); }
+  /* Der grüne Balken ist ein eigenes Element und gleitet zur aktiven Seite,
+     statt zwischen den Knöpfen zu springen. Breite/Weg ergeben sich aus dem
+     Innenabstand (5 px) und dem Spalt (6 px) der .tabs-Leiste. */
+  .tab-indicator {
+    position: absolute; top: 5px; bottom: 5px; left: 5px;
+    width: calc(50% - 8px);
+    background: var(--green); border-radius: 999px;
+    transition: transform 0.3s cubic-bezier(0.32, 1.15, 0.4, 1);
+    pointer-events: none;
+  }
+  .tabs[data-pos="1"] .tab-indicator { transform: translateX(calc(100% + 6px)); }
+  @media (prefers-reduced-motion: reduce) { .tab-indicator { transition: none; } }
+
+  /* „Ganze Rangliste": Knopf unter den Nachbarn + Blatt von unten (D-030) */
+  .show-all {
+    width: 100%; background: var(--surface-2); border: 1px solid var(--glass-edge);
+    color: var(--ink-muted); border-radius: var(--radius); padding: 9px 12px;
+    font-family: 'Work Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: flex-end; justify-content: center; z-index: 10;
+  }
+  .board-sheet {
+    background: var(--surface); border-top: 4px solid var(--green);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    width: 100%; max-width: 480px; max-height: 86vh;
+    padding: 18px 20px 24px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+    animation: sheet-up 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes sheet-up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .board-sheet { animation: none; } }
+  #board-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .board-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    border-radius: var(--radius);
+  }
+  .board-row .rank {
+    width: 36px; font-family: 'Bitter', serif; font-weight: 800; font-size: 15px;
+    font-variant-numeric: tabular-nums; color: var(--ink-muted);
+  }
+  .board-row.top .rank { color: var(--gold); }
+  .board-row .who { flex: 1; font-family: 'Bitter', serif; font-weight: 700; font-size: 15px; }
+  .board-row .total {
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 15px;
+    font-variant-numeric: tabular-nums; color: var(--gold);
+  }
+  /* Eigene Zeile hervorgehoben – sie wird beim Öffnen in die Mitte gescrollt */
+  .board-row.me { background: var(--surface); border-color: var(--green); }
+  .board-row.me .who { color: var(--green); }
 
   /* Anzahl-Pill am Abzeichen: wie oft schon erreicht */
   .badge-count {
@@ -86,7 +141,8 @@
       </div>
 
       <!-- Umschalter: Zählen (Eingabe) / Profil (Statistik & Abzeichen) -->
-      <div class="tabs" role="tablist">
+      <div id="main-tabs" class="tabs" role="tablist" data-pos="0">
+        <div class="tab-indicator"></div>
         <button id="tab-btn-count" class="tab-btn active" type="button">Zählen</button>
         <button id="tab-btn-profile" class="tab-btn" type="button">Profil</button>
       </div>
@@ -276,6 +332,7 @@ if (!token || !playerId) {
     $('tab-profile').hidden = !profile;
     $('tab-btn-count').classList.toggle('active', !profile);
     $('tab-btn-profile').classList.toggle('active', profile);
+    $('main-tabs').dataset.pos = profile ? '1' : '0';   // grüner Balken gleitet
   }
   $('tab-btn-count').addEventListener('click', () => showTab(false));
   $('tab-btn-profile').addEventListener('click', () => showTab(true));
