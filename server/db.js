@@ -526,6 +526,25 @@ export function createDb(dbPath) {
     incrementDrink(playerId, drink, delta);
   });
 
+  // Treue-Abzeichen (D-031): Stufen nach der Anzahl besuchter Abende. Es gilt
+  // immer nur die höchste erreichte Stufe; unter der ersten Schwelle gibt es
+  // gar keins.
+  const VISIT_TIERS = [
+    { days: 10, label: 'Stammgast' },
+    { days: 20, label: 'Dauergast' },
+    { days: 50, label: 'Kellerlegende' },
+    { days: 100, label: 'Ehrenmitglied' },
+    { days: 200, label: 'Urgestein' },
+  ];
+
+  function visitBadge(days) {
+    let best = null;
+    for (const tier of VISIT_TIERS) if (days >= tier.days) best = tier;
+    if (!best) return null;
+    const next = VISIT_TIERS.find((t) => t.days > best.days) ?? null;
+    return { level: best.days, label: best.label, days, next: next ? next.days : null };
+  }
+
   // --- Persönliche Statistik + Abzeichen (für das Profil im Nutzer-Dashboard) ---
   // Jedes Abzeichen wird pro Party-Tag vergeben; `count` zählt, an wie vielen
   // Abenden (inkl. heute) es erreicht wurde, `today` gilt für den laufenden Abend:
@@ -585,6 +604,8 @@ export function createDb(dbPath) {
     return {
       days: rows.length,
       best,
+      // Treue-Abzeichen: null, solange die erste Stufe nicht erreicht ist (D-031)
+      visitBadge: visitBadge(rows.length),
       // Ø Getränke pro Abend (nur geloggte Getränke, eine Nachkommastelle)
       avgPerNight: rows.length ? Math.round((drinksTotal / rows.length) * 10) / 10 : 0,
       achievements: Object.fromEntries(

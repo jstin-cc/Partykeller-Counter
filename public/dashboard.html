@@ -283,8 +283,9 @@
         <!-- Abzeichen: leuchtet, wenn heute erreicht; die Pill zählt alle Abende -->
         <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:12px;">
           <div class="card-title" style="color:var(--gold);">Abzeichen</div>
-          <div style="font-size:12px;color:var(--ink-muted);">Leuchtet, wenn heute geschafft – die Zahl zählt, an wie vielen Abenden insgesamt.</div>
+          <div style="font-size:12px;color:var(--ink-muted);">Leuchtet, wenn heute geschafft – die Zahl zählt, an wie vielen Abenden insgesamt. Das Treue-Abzeichen zeigt immer nur die höchste erreichte Stufe.</div>
           <div class="badges">
+            <div id="badge-visits" class="badge earned" hidden>🎖 <span id="badge-visits-label">Stammgast</span> <span class="badge-count">×0</span></div>
             <div id="badge-winner" class="badge" title="Gesamt-Tagessieger des Abends">👑 Tagessieger <span class="badge-count">×0</span></div>
             <div id="badge-first" class="badge" title="Das erste Getränk des Abends kam von dir">🥇 Erster Trinker <span class="badge-count">×0</span></div>
             <div id="badge-midnight" class="badge" title="Ein Bier zwischen 0 und 1 Uhr">🌙 Mitternachtsbier <span class="badge-count">×0</span></div>
@@ -389,7 +390,7 @@ if (!token || !playerId) {
     try {
       const res = await fetch(`${AREA.base}/api/players/${encodeURIComponent(playerId)}/stats`);
       if (!res.ok) return;
-      const { days, best, avgPerNight, achievements } = await res.json();
+      const { days, best, avgPerNight, achievements, visitBadge } = await res.json();
       bump('stat-days', days);
       if (best) {
         $('stat-best').textContent = best.total;
@@ -398,6 +399,17 @@ if (!token || !playerId) {
       $('stat-avg').textContent = days
         ? avgPerNight.toLocaleString('de-DE', { maximumFractionDigits: 1 })
         : '–';
+      // Treue-Abzeichen (D-031): nur die höchste erreichte Stufe, und gar keins,
+      // solange die erste Schwelle (10 Abende) nicht erreicht ist.
+      $('badge-visits').hidden = !visitBadge;
+      if (visitBadge) {
+        $('badge-visits-label').textContent = visitBadge.label;
+        $('badge-visits').querySelector('.badge-count').textContent = `×${visitBadge.days}`;
+        $('badge-visits').title = visitBadge.next
+          ? `${visitBadge.days} Abende dabei – nächste Stufe bei ${visitBadge.next}.`
+          : `${visitBadge.days} Abende dabei – höchste Stufe erreicht.`;
+      }
+
       // Abzeichen: leuchtet bei „heute geschafft", Pill zählt alle Abende
       for (const [id, key] of [
         ['badge-winner', 'dayWinner'],
