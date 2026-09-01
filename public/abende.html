@@ -67,6 +67,35 @@
   .night-stats .value { font-family:'Bitter',serif; font-weight:800; font-size:22px; }
   .night-stats .label { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
   .night-meta { font-size: 13px; color: var(--ink-muted); display:flex; justify-content:space-between; }
+  /* Vom Admin vergebener Abend-Name (D-028) – steht über dem Datum */
+  .night-name {
+    font-family: 'Bitter', serif; font-weight: 700; font-size: 15px;
+    color: var(--gold); margin-top: 2px;
+  }
+
+  /* Verlauf des Abends (D-029): ein Balken je Stunde, alle Getränke zusammen */
+  .night-chart { display: flex; flex-direction: column; gap: 5px; }
+  .night-chart .chart-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+  .night-chart .chart-head .what {
+    font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .night-chart .chart-head .peak {
+    font-family: 'Bitter', serif; font-weight: 700; font-size: 12px; color: var(--gold);
+    font-variant-numeric: tabular-nums;
+  }
+  .night-chart svg { width: 100%; height: 52px; display: block; }
+  .night-chart rect { fill: var(--green); opacity: 0.7; }
+  .night-chart rect.peak-bar { fill: var(--gold); opacity: 1; }
+  .night-chart .axis {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--ink-muted); font-variant-numeric: tabular-nums;
+  }
+
+  /* Abend benennen: sitzt im Bearbeiten-Modal, also nur für Admins sichtbar */
+  .name-row { display: flex; gap: 8px; align-items: stretch; }
+  .name-row .field { font-size: 16px; padding: 10px 12px; }
 
   /* Admin-Werkzeuge je Abend: CSV-Download, Bearbeiten, auf dem TV zeigen */
   .night-actions { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
@@ -111,6 +140,7 @@
     padding: 12px 18px; font-size: 14px; color: var(--creme); z-index: 20;
     backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
   }
+  .toast.ok { border-left-color: var(--green); }
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 14px; text-decoration: underline; cursor: pointer; font-family: 'Work Sans', sans-serif; }
 </style>
 </head>
@@ -155,6 +185,20 @@
     </div>
     <p style="font-size:13px;color:var(--ink-muted);margin:0;line-height:1.5;">Korrekturen ändern das Getränke-Log dieses Abends <strong>und</strong> die All-Time-Zähler. Spieler mit 0 stehen unten – so lässt sich auch nachtragen, wer vergessen wurde.</p>
     <div id="edit-error" class="error-msg" style="min-height:0;"></div>
+
+    <!-- Abend benennen (D-028): erscheint nur hier, also erst nach „Bearbeiten" -->
+    <div>
+      <label for="edit-name-input" class="eyebrow" style="display:block;margin-bottom:6px;">Name des Abends</label>
+      <div class="name-row">
+        <input id="edit-name-input" class="field" maxlength="40" autocomplete="off"
+               placeholder="z. B. Saisonabschluss (leer lassen = kein Name)">
+        <button id="save-name" class="night-btn" style="flex:none;">Speichern</button>
+      </div>
+      <div style="font-size:12px;color:var(--ink-muted);margin-top:6px;">
+        Steht auf der Abend-Karte und im TV-Titel, wenn der Abend dort läuft.
+      </div>
+    </div>
+
     <div id="edit-rows"></div>
   </div>
 </div>
@@ -180,8 +224,9 @@ function showEditError(message) {
 
 // Meldung außerhalb des Bearbeiten-Modals (z. B. fehlgeschlagener Download)
 let toastTimer = null;
-function showToast(message) {
+function showToast(message, ok = false) {
   $('toast').textContent = message;
+  $('toast').classList.toggle('ok', ok);
   $('toast').hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4000);
@@ -227,6 +272,66 @@ function fmtDay(iso) {
   };
 }
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const hourLabel = (h) => `${((h % 24) + 24) % 24} Uhr`;
+
+// Verlauf des Abends (D-029): ein Balken je Stunde, alle Personen zusammen.
+// Der Server liefert nur die Stunden, in denen wirklich etwas passiert ist —
+// die viewBox wächst also mit dem Abend und wird per preserveAspectRatio auf
+// die Kartenbreite gezogen (kein Messen der Breite nötig).
+function buildChart(timeline) {
+  if (!timeline?.counts?.length) return null;
+  const { startHour, counts } = timeline;
+  const max = Math.max(...counts);
+  const peak = counts.indexOf(max);
+  const SLOT = 4, BAR = 3, H = 40;
+
+  const box = document.createElement('div');
+  box.className = 'night-chart';
+
+  const head = document.createElement('div');
+  head.className = 'chart-head';
+  const what = document.createElement('span');
+  what.className = 'what';
+  what.textContent = 'Verlauf pro Stunde';
+  const peakEl = document.createElement('span');
+  peakEl.className = 'peak';
+  peakEl.textContent = `Spitze ${hourLabel(startHour + peak)}: ${max}`;
+  head.append(what, peakEl);
+
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${counts.length * SLOT} ${H}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label',
+    `Getränke pro Stunde von ${hourLabel(startHour)} bis ${hourLabel(startHour + counts.length)}, Spitze ${max}`);
+  counts.forEach((n, i) => {
+    // Leere Stunden bekommen einen Stummel, damit die Lücke sichtbar bleibt
+    const h = n > 0 ? Math.max(2, (n / max) * H) : 0.8;
+    const rect = document.createElementNS(SVG_NS, 'rect');
+    rect.setAttribute('x', String(i * SLOT));
+    rect.setAttribute('y', String(H - h));
+    rect.setAttribute('width', String(BAR));
+    rect.setAttribute('height', String(h));
+    if (i === peak) rect.classList.add('peak-bar');
+    const title = document.createElementNS(SVG_NS, 'title');
+    title.textContent = `${hourLabel(startHour + i)}: ${n === 1 ? '1 Getränk' : `${n} Getränke`}`;
+    rect.appendChild(title);
+    svg.appendChild(rect);
+  });
+
+  const axis = document.createElement('div');
+  axis.className = 'axis';
+  const from = document.createElement('span');
+  from.textContent = hourLabel(startHour);
+  const to = document.createElement('span');
+  to.textContent = hourLabel(startHour + counts.length - 1);
+  axis.append(from, to);
+
+  box.append(head, svg, axis);
+  return box;
+}
+
 function statCell(value, label, color) {
   const cell = document.createElement('div');
   cell.className = 'cell';
@@ -254,6 +359,13 @@ function buildCard(night) {
   dt.className = 'night-date';
   dt.textContent = date;
   head.append(wd, dt);
+  // Vom Admin vergebener Name (D-028) – steht unter dem Datum, falls gesetzt
+  if (night.name) {
+    const nm = document.createElement('div');
+    nm.className = 'night-name';
+    nm.textContent = night.name;
+    head.appendChild(nm);
+  }
 
   const winner = document.createElement('div');
   winner.className = 'night-winner';
@@ -286,7 +398,10 @@ function buildCard(night) {
   part.textContent = night.participants === 1 ? '1 Teilnehmer:in' : `${night.participants} Teilnehmer:innen`;
   meta.append(part);
 
-  card.append(head, winner, stats, meta);
+  card.append(head, winner, stats);
+  const chart = buildChart(night.timeline);
+  if (chart) card.appendChild(chart);
+  card.appendChild(meta);
 
   // Admin: Übergabedatei laden, Abend korrigieren oder nochmal auf dem TV zeigen
   if (adminToken) {
@@ -338,8 +453,18 @@ async function openEdit(day) {
   editDay = day;
   $('edit-day-label').textContent = fmtDay(day).date;
   $('edit-error').textContent = '';
+  // Name nur beim Öffnen setzen: spätere State-Broadcasts sollen nicht in ein
+  // Feld schreiben, in dem gerade getippt wird.
+  $('edit-name-input').value = nights.find((n) => n.day === day)?.name ?? '';
   $('edit-modal').hidden = false;
   await refreshEdit();
+}
+
+// Abend benennen (D-028); leeres Feld entfernt den Namen wieder
+function saveNightName() {
+  if (!editDay) return;
+  send({ type: 'setNightName', day: editDay, name: $('edit-name-input').value.trim() });
+  showToast($('edit-name-input').value.trim() ? 'Name gespeichert.' : 'Name entfernt.', true);
 }
 
 async function refreshEdit() {
@@ -385,6 +510,8 @@ async function refreshEdit() {
 
 $('export-all').addEventListener('click', () =>
   downloadCsv('/export/archive', `${AREA.id}-abende-gesamt.csv`));
+$('save-name').addEventListener('click', saveNightName);
+$('edit-name-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveNightName(); });
 $('close-edit').addEventListener('click', () => { $('edit-modal').hidden = true; editDay = null; load(); });
 $('tv-live').addEventListener('click', () => send({ type: 'setBoardMode', mode: 'alltime' }));
 

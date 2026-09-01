@@ -15,6 +15,12 @@ export function validFactText(text) {
   return typeof text === 'string' && text.trim().length >= 1 && text.trim().length <= 160;
 }
 
+// Abend-Name im Archiv (D-028): frei, aber kurz genug für Karte und TV-Titel.
+// Leer ist erlaubt und entfernt die Benennung wieder.
+export function validNightName(name) {
+  return typeof name === 'string' && name.length <= 40;
+}
+
 // Beitritts-Adresse für den QR-Code: leer erlaubt (Fallback auf Server-Adresse),
 // sonst zu einer vollständigen http(s)-URL normalisiert. Wirft bei Unsinn.
 export function normalizeJoinUrl(raw) {
