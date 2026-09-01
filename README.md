@@ -142,7 +142,7 @@ Partykeller-Bereich.
 | `/<bereich>/` | Nutzer-Login (Name wählen/anlegen; PIN optional, rate-limitiert) |
 | `/<bereich>/dashboard` | Nutzer-Dashboard mit zwei Tabs — **Zählen** (eigene Bier-/Shot-/Mischen-Zähler, Heute & Gesamt) und **Profil** (Platz heute und all-time inkl. wer direkt vor/hinter einem liegt, **„Ganze Rangliste ansehen"** als Blatt von unten mit markierter eigener Zeile, Abende, bestes Ergebnis, Ø pro Abend, Verteilung, Abzeichen mit Zähler — u. a. 👑 Tagessieger und das 🎖 Treue-Abzeichen ab 10 Abenden). Youngstars: Bier steht zuunterst |
 | `/<bereich>/tv` | TV-Scoreboard: umschaltbar All-Time / Heute / Archiv-Abend (animiert, benannte Abende stehen mit ihrem Namen im Titel; „Heute" zeigt nur, wer heute geloggt hat), Podest Top 3, QR-Code zum Beitritt, ab Platz 4 durchscrollende Liste (Tempo im Admin einstellbar), Live-Fun-Facts inkl. eigener Meldungen und Statistik-Facts, Rekordkurs-Anzeige 🔥 wenn der Abend schneller läuft als der beste bisherige. Skaliert als 1080p-Design-Bühne — sieht auf jeder Auflösung identisch aus |
-| `/<bereich>/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht (inkl. Archiv-Abend) & Rotationstempo einstellen, eigene Fun-Facts pflegen und bearbeiten, QR-Adresse setzen, Komplett-Reset (mit Lösch-Passwort, löscht nur den eigenen Bereich) |
+| `/<bereich>/admin` | Admin: Nutzer & Zähler (Bier/Shots/Mischen) verwalten, in der Gesamtansicht ein-/ausblenden, TV-Ansicht (inkl. Archiv-Abend) & Rotationstempo einstellen, eigene Fun-Facts pflegen und bearbeiten, QR-Adresse setzen, **Backup herunterladen und einspielen**, Komplett-Reset (mit Lösch-Passwort, löscht nur den eigenen Bereich) |
 | `/<bereich>/abende` | Abend-Archiv: jeder Party-Tag als Karte mit Sieger 👑, Teilnehmerzahl, Gesamtmengen und dem **Verlauf des Abends** (Getränke pro Stunde, alle zusammen, Spitzenstunde hervorgehoben). Mit Admin-Login zusätzlich: **CSV-Download** je Abend und über alle Abende, Abend nachträglich korrigieren (±1 je Spieler/Getränk, wirkt auf Log + All-Time), **Abend benennen** (Feld im Bearbeiten-Dialog; der Name steht auf der Karte und im TV-Titel) und „Auf dem TV zeigen" |
 
 ### Übergabedatei (CSV) aus dem Abend-Archiv
@@ -167,6 +167,34 @@ Die Dateien heißen `partykeller-abend-2026-08-22.csv` bzw.
 `partykeller-abende-gesamt.csv` (Youngstars entsprechend), die Endpunkte
 dahinter sind `GET /<bereich>/api/export/archive[/<tag>]` mit dem Admin-Token
 im `Authorization`-Header.
+
+### Sicherung: alles herunterladen und im Notfall wiederherstellen
+
+Im Admin-Bereich unter **Sicherung**:
+
+- **⬇ Backup herunterladen** speichert den kompletten Bereich als eine
+  JSON-Datei (`partykeller-backup-2026-09-01.json`): alle Nutzer mit ID,
+  PIN-Hash, Zählern und Sichtbarkeit, das gesamte Getränke-Log, die
+  Einstellungen (TV-Ansicht, Abend-Namen, QR-Adresse, Tempi) und die eigenen
+  Fun-Facts. Am besten nach jedem Abend einmal auf einen USB-Stick oder in die
+  Cloud legen.
+- **⬆ Backup einspielen** stellt daraus alles wieder her — z. B. auf einem
+  neuen Laptop oder nach einer kaputten SD-Karte. Das **ersetzt** den
+  kompletten Bestand des Bereichs, deshalb ist wie beim Komplett-Reset das
+  **Lösch-Passwort** nötig. Geht beim Einspielen etwas schief (kaputte Datei,
+  Sicherung des anderen Bereichs), bleibt der alte Stand unangetastet.
+
+Jeder Bereich hat seine eigene Sicherung: eine Partykeller-Datei lässt sich
+nicht in den Youngstars-Bereich einspielen (und umgekehrt).
+
+Wichtig: Die **`.env` ist nicht Teil der Sicherung** — sie muss getrennt
+aufgehoben werden. Nur mit demselben `TOKEN_SECRET` bleiben nach der
+Wiederherstellung auch die Logins auf den Handys gültig; mit einem neuen
+Secret müssen sich alle einmal neu anmelden (die PINs stimmen weiterhin).
+
+Die Endpunkte dahinter sind `GET /<bereich>/api/export/backup` und
+`POST /<bereich>/api/import/backup`, beide nur mit Admin-Token im
+`Authorization`-Header (D-034).
 
 Die App ist als **PWA installierbar**: Seite am Handy öffnen → „Zum
 Startbildschirm hinzufügen" — dann liegt der Counter als App-Icon auf dem

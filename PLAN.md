@@ -108,6 +108,8 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
 | `GET /api/archive/:day` | – | `{day, players}` — Detail eines Party-Tags, alle Spieler (auch mit 0) für die Archiv-Bearbeitung (D-022) |
 | `GET /api/export/archive` | – | CSV über alle Abende, `Content-Disposition: attachment`; **nur Admin** (Token im `Authorization`-Header, sonst 403 — D-025, D-027) |
 | `GET /api/export/archive/:day` | – | CSV eines Abends, ebenfalls nur Admin (D-025, D-027) |
+| `GET /api/export/backup` | – | Vollsicherung des Bereichs als JSON, `Content-Disposition: attachment`; **nur Admin** (D-034) |
+| `POST /api/import/backup` | `{password, backup}` | Sicherung einspielen — ersetzt den ganzen Bereich; **nur Admin** und nur mit `RESET_PASSWORD` (D-034) |
 | `GET /api/players/:id/stats` | – | persönliche Statistik + Achievements fürs Dashboard (D-015) |
 | `GET /health` | – | `{ok: true}` |
 

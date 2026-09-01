@@ -731,3 +731,46 @@ ohnehin zwischen beiden Zeiträumen gewechselt wird, sind eine Wiederholung —
 und in der Karte sah der Knopf wie ein weiterer Karteninhalt aus. Freistehend
 liest er sich als das, was er ist: der Weg aus dem eigenen Umfeld in die
 vollständige Liste.
+
+## D-034 (2026-09-01): Vollsicherung als JSON — Download und Import im Admin
+
+**Entscheidung:** Der Admin-Bereich bekommt zwei Knöpfe: **„⬇ Backup
+herunterladen"** lädt den kompletten Bereich als eine JSON-Datei
+(`GET /<bereich>/api/export/backup`), **„⬆ Backup einspielen"** stellt daraus
+alles wieder her (`POST /<bereich>/api/import/backup`). In der Datei stehen
+Nutzer inklusive ID, PIN-Hash, Zählern und Sichtbarkeit, das komplette
+`drink_log` mit IDs und Zeitstempeln, alle `settings` (TV-Modus, Abend-Namen,
+QR-Adresse, Takte) und die eigenen Fun-Facts. Der Import ersetzt den Bestand
+des Bereichs vollständig, in **einer Transaktion**, nach einer kompletten
+Prüfung in `server/backup.js` — schlägt irgendetwas fehl, bleibt der alte Stand
+unverändert. Weil er so destruktiv ist wie „Alles zurücksetzen", verlangt er
+dasselbe **Lösch-Passwort** (`RESET_PASSWORD`), hängt am selben Rate-Limit und
+ist nur mit Admin-Token des eigenen Bereichs erreichbar; eine Sicherung des
+anderen Bereichs (Feld `area`) wird abgewiesen. Format-Kennung
+`partykeller-counter-backup`, `version: 1`.
+
+**Begründung:** Nutzerwunsch — bisher hing der ganze Keller an einer
+SQLite-Datei auf einem Laptop, und die CSV-Exporte (D-025) sind
+Auswertungsdateien, keine Sicherung: ihnen fehlen IDs, PIN-Hashes und
+Einstellungen. JSON statt einer Kopie der `.db`, weil die Datei so aus dem
+Browser heraus über das Admin-Login geladen werden kann (kein Dateizugriff auf
+dem Server nötig), auch bei laufendem Server konsistent ist (WAL-Dateien
+einzeln zu kopieren ist es nicht) und beim Einspielen Feld für Feld geprüft
+werden kann. IDs wandern bewusst mit: nur dann zeigen alte Links, Abend-Namen
+und vor allem die **Tokens auf den Handys** nach der Wiederherstellung wieder
+auf dieselben Personen (D-006). Nicht in der Datei steht die `.env` — sie
+gehört getrennt gesichert, und nur mit demselben `TOKEN_SECRET` bleiben die
+Logins gültig. Der Body-Parser bekommt für diesen einen Endpunkt 20 MB (sonst
+100 kB), damit auch ein Log über Jahre durchpasst.
+
+## D-035 (2026-09-01): Erklärtexte an Abzeichen, TV-Anzeige und Fun-Facts entfernt
+
+**Entscheidung:** Die drei beschreibenden Untertitel sind raus: „Leuchtet, wenn
+heute geschafft …" unter *Abzeichen* im Profil, „Haken in der Liste gilt nur
+für die Gesamtansicht …" im Admin-Block *TV-Anzeige* und „Laufen im TV-Band
+zusammen mit den Live-Facts durch." bei *Eigene Fun-Facts*. Die Tooltips an den
+einzelnen Abzeichen bleiben.
+
+**Begründung:** Nutzerwunsch. Die Bereiche sind eingeführt und werden von
+denselben paar Leuten bedient — der Dauertext erklärt nichts mehr, kostet aber
+in jeder Ansicht Platz und Ruhe.
