@@ -19,7 +19,12 @@ export function partyDayRangeMs(day) {
 }
 
 export function validDayString(day) {
-  return typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isFinite(partyDayRangeMs(day)[0]);
+  if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
+  // Die Form allein reicht nicht: new Date(2026, 12, 99) rollt stillschweigend
+  // in den März weiter. Deshalb gegenprüfen, dass das Datum wirklich existiert.
+  const [y, m, d] = day.split('-').map(Number);
+  const date = new Date(y, m - 1, d, 6, 0, 0, 0);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 }
 
 // Aktueller Party-Tag als 'YYYY-MM-DD' (Datum des 06:00-Starts)
