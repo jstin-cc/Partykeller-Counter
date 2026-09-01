@@ -621,3 +621,79 @@ Teilnehmerzahl, Tagessummen) bleibt für alle offen, aber die namentliche
 Aufschlüsselung „wer hat an welchem Abend wie viel getrunken" als Datei zum
 Mitnehmen ist etwas anderes als eine Zahl auf dem Bildschirm — das gehört
 hinter denselben Zugang wie die Archiv-Korrektur.
+
+## D-028 (2026-09-01): Abende im Archiv benennen
+
+**Entscheidung:** Jeder Party-Tag kann einen freien Namen bekommen („Saison-
+abschluss", „Bierpong-Turnier"). Das Feld steht **im Bearbeiten-Dialog** der
+Abend-Karte — also hinter demselben Admin-Zugang wie die Korrekturen und der
+CSV-Export (D-027) und für Gäste gar nicht sichtbar. Gespeichert wird als
+Zeile in der bestehenden `settings`-Tabelle unter dem Schlüssel
+`night_name:<YYYY-MM-DD>`; ein leeres Feld löscht die Zeile wieder. Der Name
+erscheint auf der Abend-Karte unter dem Datum und im TV-Titel, wenn der Abend
+über „Auf dem TV zeigen" läuft (`Saisonabschluss · 31.08.2026`). Der Server
+prüft Tag und Länge (max. 40 Zeichen) wie jede andere Mutation.
+
+**Begründung:** Nutzerwunsch. `settings` statt einer eigenen Tabelle, weil ein
+Name genau ein Schlüssel-Wert-Paar ist: keine Migration, keine Fremdschlüssel,
+und die Persistenz über Neustarts (D-006) gilt automatisch. Ein Abend ohne
+Namen kostet dadurch auch keine Zeile. Die 40 Zeichen sind die Grenze, ab der
+der TV-Titel in der Kopfzeile zu breit würde — dort steht er einzeilig mit
+Ellipsis, damit die Bühnenhöhe des Boards unverändert bleibt (D-021).
+
+## D-029 (2026-09-01): Verlaufsgraph auf jeder Abend-Karte
+
+**Entscheidung:** Jede Karte im Abend-Archiv zeigt den Verlauf des Abends als
+Balken je Stunde — **alle Personen zusammen**, nicht pro Sorte und nicht pro
+Person. Der Server liefert ihn im Archiv-Endpunkt gleich mit
+(`timeline: { startHour, counts }`), gezählt über `drink_log` gruppiert nach
+Party-Tag und Uhr-Stunde. Leere Stunden am Anfang und Ende fallen weg, in der
+Mitte bleiben sie als Lücke stehen. Die Spitzenstunde ist golden hervorgehoben
+und steht als Text über dem Graphen („Spitze 23 Uhr: 11").
+
+**Begründung:** Nutzerwunsch. Die Werte kommen mit der Liste mit, statt je
+Karte einen eigenen Request auszulösen — bei 30 Abenden wären das sonst 30
+Anfragen für eine Kleinigkeit. Gezeichnet wird als Inline-SVG mit
+`preserveAspectRatio="none"`: kein Chart-Paket (Regel „keine neuen
+Dependencies", D-001) und keine Breitenmessung im JS, die Karte skaliert den
+Graphen selbst. Stunden statt feinerer Schritte, weil ein Abend so auf 6–10
+Balken kommt — auf 280 px Kartenbreite ist das die Auflösung, die man noch
+lesen kann.
+
+## D-030 (2026-09-01): Ganze Rangliste im Profil
+
+**Entscheidung:** Die Profil-Karten „Heute Abend" und „All-Time" bekommen je
+einen Knopf „Ganze Rangliste ansehen ›". Er öffnet **ein** Blatt, das von
+unten hereinfährt, oben zwischen Heute und All-Time umschaltet und die
+komplette Liste zeigt: Platz, Name, Gesamt. Die eigene Zeile ist grün
+umrandet, mit „(du)" beschriftet und wird beim Öffnen in die Mitte gescrollt.
+Die Liste stammt aus demselben State-Broadcast wie die Karten darüber und
+läuft live weiter, solange das Blatt offen ist. Schließen per Knopf, Klick auf
+den Hintergrund oder Escape.
+
+**Begründung:** Nutzerwunsch — bisher zeigte das Profil nur den eigenen Platz
+und die direkten Nachbarn, „wo stehen eigentlich alle?" ging nur über den TV.
+Ein Blatt statt einer eigenen Seite, weil der Weg zurück sonst über den
+Browser-Zurück-Knopf ginge und die WS-Verbindung neu aufgebaut würde. Ein
+gemeinsames Blatt für beide Zeiträume statt zwei Ansichten, weil der Vergleich
+„heute vs. insgesamt" genau der Grund ist, aus dem man die Liste aufmacht.
+Bewusst dieselbe Sortierung wie in den Karten (inkl. Tiebreak D-020), damit
+Platzangabe oben und Liste unten nie auseinanderlaufen.
+
+## D-031 (2026-09-01): Treue-Abzeichen nach Anzahl der Abende
+
+**Entscheidung:** Neues Abzeichen im Profil, das zählt, an wie vielen Abenden
+jemand dabei war. Stufen bei **10 (Stammgast), 20 (Dauergast), 50
+(Kellerlegende), 100 (Ehrenmitglied) und 200 (Urgestein)**. Angezeigt wird
+immer nur die **höchste erreichte** Stufe; unter 10 Abenden erscheint gar
+kein Abzeichen. Die Pill zeigt die tatsächliche Zahl der Abende, der Tooltip
+die nächste Stufe. Der Server berechnet die Stufe in `getPlayerStats`, das
+Frontend zeigt nur an.
+
+**Begründung:** Nutzerwunsch. Die Stufen sind bewusst als „höchste gewinnt"
+umgesetzt statt als Reihe von fünf Abzeichen — sonst füllt sich die Zeile mit
+Stufen, die man längst hinter sich hat. Kein Abzeichen unterhalb der ersten
+Schwelle, damit die Abzeichen-Zeile für neue Gäste nicht mit einem leeren
+Platzhalter startet. Anders als die übrigen Abzeichen („leuchtet, wenn heute
+geschafft") ist es dauerhaft verdient — der Hinweistext über der Zeile sagt
+das jetzt dazu.
