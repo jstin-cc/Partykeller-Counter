@@ -697,3 +697,37 @@ Schwelle, damit die Abzeichen-Zeile für neue Gäste nicht mit einem leeren
 Platzhalter startet. Anders als die übrigen Abzeichen („leuchtet, wenn heute
 geschafft") ist es dauerhaft verdient — der Hinweistext über der Zeile sagt
 das jetzt dazu.
+
+## D-032 (2026-09-01): Verlauf als Kurve statt als Balken
+
+**Entscheidung:** Der Verlaufsgraph auf der Abend-Karte ist eine **weiche
+Kurve mit gefüllter Fläche** statt der Balkenreihe aus D-029. Die Datenlage
+bleibt unverändert (ein Wert je Stunde, alle Personen zusammen); nur die
+Darstellung wechselt. Gezeichnet als Catmull-Rom-Kurve, von Hand in kubische
+Béziers umgerechnet, mit geklemmten Kontrollpunkten, damit die Kurve bei
+starken Sprüngen nicht unter die Grundlinie ausschlägt. Die Spitzenstunde
+bekommt eine gestrichelte Markierung bis zur Grundlinie und einen goldenen
+Punkt; unsichtbare Streifen je Stunde halten den Tooltip. Ersetzt die
+Balkendarstellung aus D-029.
+
+**Begründung:** Nutzerwunsch. Ein Abend hat 5–10 Stunden mit Werten — als
+Balken ist das eine Reihe breiter Klötze, als Kurve sieht man den Bogen des
+Abends (langsam an, Spitze, Ausklang) auf einen Blick. Zwei Details fallen
+dabei an: Die Fläche wird per `preserveAspectRatio="none"` ungleichmäßig auf
+die Kartenbreite gezogen, deshalb hängt die Linienstärke an
+`vector-effect: non-scaling-stroke` — sonst würde die Linie mitverzerrt. Und
+der Punkt auf der Spitze ist ein HTML-Element über der Fläche, weil ein
+`<circle>` durch dieselbe Skalierung zur Ellipse würde.
+
+## D-033 (2026-09-01): Ein Knopf für die ganze Rangliste
+
+**Entscheidung:** Statt eines Knopfes in jeder der beiden Profil-Karten
+(D-030) steht **ein** Knopf „Ganze Rangliste ansehen ›" allein unter der
+All-Time-Karte. Er öffnet das Blatt in der All-Time-Ansicht; auf Heute wird im
+Blatt selbst umgeschaltet.
+
+**Begründung:** Nutzerwunsch. Zwei Knöpfe, die dasselbe Blatt öffnen, in dem
+ohnehin zwischen beiden Zeiträumen gewechselt wird, sind eine Wiederholung —
+und in der Karte sah der Knopf wie ein weiterer Karteninhalt aus. Freistehend
+liest er sich als das, was er ist: der Weg aus dem eigenen Umfeld in die
+vollständige Liste.

@@ -7,12 +7,13 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
-Seit 2026-09-01 (D-028–D-031): **Verlaufsgraph auf jeder Abend-Karte**
-(Getränke pro Stunde, alle zusammen, Spitzenstunde hervorgehoben),
+Seit 2026-09-01 (D-028–D-033): **Verlaufsgraph auf jeder Abend-Karte**
+(Getränke pro Stunde als Kurve mit Fläche, alle zusammen, Spitzenstunde
+markiert),
 **Abende benennbar** (Feld im Bearbeiten-Dialog, also nur für Admins; Name
 steht auf der Karte und im TV-Titel), **„Ganze Rangliste ansehen"** im Profil
-(Blatt von unten, Heute/All-Time umschaltbar, eigene Zeile markiert und
-angesteuert), **Treue-Abzeichen** ab 10 Abenden (10/20/50/100/200, immer nur
+(ein Knopf unter der All-Time-Karte öffnet ein Blatt von unten, Heute/All-Time
+darin umschaltbar, eigene Zeile markiert und angesteuert), **Treue-Abzeichen** ab 10 Abenden (10/20/50/100/200, immer nur
 die höchste Stufe) und der grüne Balken im Zählen/Profil-Umschalter **gleitet**
 jetzt, statt zu springen.
 Seit 2026-08-31 (D-025, D-026, D-027): **CSV-Übergabedateien im Abend-Archiv**
@@ -177,17 +178,20 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       Endpunkte prüfen das Admin-Token im Authorization-Header (D-027)
 - [x] Fun-Fact-Band auf dem TV so hoch wie eine Ranglistenzeile, Text in
       Namensgröße, lange Facts skalieren automatisch herunter (D-026)
-- [x] Verlaufsgraph (Getränke pro Stunde) auf jeder Abend-Karte (D-029)
+- [x] Verlaufsgraph (Getränke pro Stunde) auf jeder Abend-Karte (D-029),
+      als Kurve mit Fläche statt Balken (D-032)
 - [x] Abende benennbar im Bearbeiten-Dialog, Name auf Karte + TV-Titel (D-028)
-- [x] „Ganze Rangliste ansehen" im Profil, Heute/All-Time umschaltbar (D-030)
+- [x] „Ganze Rangliste ansehen" im Profil, Heute/All-Time umschaltbar (D-030),
+      ein freistehender Knopf unter der All-Time-Karte (D-033)
 - [x] Treue-Abzeichen nach Anzahl der Abende, nur die höchste Stufe (D-031)
 - [x] Grüner Balken im Zählen/Profil-Umschalter gleitet statt zu springen
 
 ## Verifikation (2026-09-01, D-028–D-031)
 
-Browser-Tests (Chromium, Testdatenbank mit 15 Abenden): Archiv-Karten zeigen
-den Stundenverlauf inkl. Spitzenstunde und Achsenbeschriftung (auch für den
-laufenden Abend); „Bearbeiten" → Name „Saisonabschluss" gespeichert →
+Browser-Tests (Chromium, Testdatenbank mit 16 Abenden): Archiv-Karten zeigen
+den Stundenverlauf als Kurve inkl. Spitzenmarkierung und Achsenbeschriftung
+(auch für den laufenden Abend und für einen Abend mit nur einer Stunde, der
+dann eine einzelne Uhrzeit ausweist); „Bearbeiten" → Name „Saisonabschluss" gespeichert →
 erscheint auf der Karte und nach „Auf dem TV zeigen" im TV-Titel
 („SAISONABSCHLUSS · 31.08.2026"); Dashboard-Profil: Treue-Abzeichen
 „🎖 Stammgast ×15" mit Tooltip zur nächsten Stufe, „Ganze Rangliste ansehen"
