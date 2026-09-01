@@ -225,6 +225,7 @@
             </div>
           </div>
           <div id="prof-today-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button id="show-all-today" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
         </div>
 
         <!-- All-Time: Gesamtstand + Umfeld -->
@@ -242,6 +243,7 @@
             </div>
           </div>
           <div id="prof-alltime-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button id="show-all-alltime" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
         </div>
 
         <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung -->
@@ -308,6 +310,26 @@
   </div>
 
   <img src="assets/footer-woods.png" alt="" class="footer-woods">
+</div>
+
+<!-- Ganze Rangliste (D-030): dasselbe Blatt für „heute" und „all-time",
+     oben umschaltbar, die eigene Zeile ist markiert und wird angesteuert. -->
+<div id="board-modal" class="modal-backdrop" hidden>
+  <div class="board-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div id="board-title" style="font-family:'Bitter',serif;font-weight:800;font-size:20px;color:var(--creme);">Rangliste</div>
+        <div id="board-count" style="font-size:13px;color:var(--ink-muted);"></div>
+      </div>
+      <button id="board-close" class="show-all" type="button" style="width:auto;">Schließen</button>
+    </div>
+    <div id="board-tabs" class="tabs" role="tablist" data-pos="0">
+      <div class="tab-indicator"></div>
+      <button id="board-tab-today" class="tab-btn active" type="button">Heute</button>
+      <button id="board-tab-alltime" class="tab-btn" type="button">All-Time</button>
+    </div>
+    <div id="board-list"></div>
+  </div>
 </div>
 
 <script type="module">
@@ -444,6 +466,89 @@ if (!token || !playerId) {
     }
   }
 
+  // --- Ganze Rangliste (D-030) ---------------------------------------------
+  // Zeigt dieselbe Liste, aus der oben Platz und Nachbarn stammen — damit die
+  // Zahlen in Karte und Blatt nicht auseinanderlaufen. Läuft live weiter,
+  // solange das Blatt offen ist.
+  let lastPlayers = [];
+  let boardScope = 'today';
+
+  function boardEntries(scope) {
+    if (scope === 'today') {
+      return lastPlayers
+        .filter((p) => todayTotal(p) > 0)
+        .map((p) => ({ id: p.id, name: p.name, total: todayTotal(p), ts: p.lastDrinkTsToday }))
+        .sort((a, b) => b.total - a.total || (a.ts ?? Infinity) - (b.ts ?? Infinity) || a.name.localeCompare(b.name, 'de'));
+    }
+    // All-Time kommt vom Server fertig sortiert (inkl. Tiebreak D-020)
+    return lastPlayers.map((p) => ({ id: p.id, name: p.name, total: p.total }));
+  }
+
+  function renderBoard(scrollToMe = false) {
+    const entries = boardEntries(boardScope);
+    $('board-title').textContent = boardScope === 'today' ? 'Rangliste heute' : 'All-Time Rangliste';
+    $('board-count').textContent = boardScope === 'today'
+      ? (entries.length === 1 ? '1 Person heute dabei' : `${entries.length} Personen heute dabei`)
+      : (entries.length === 1 ? '1 Person insgesamt' : `${entries.length} Personen insgesamt`);
+
+    const list = $('board-list');
+    list.textContent = '';
+    if (!entries.length) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'text-align:center;color:var(--ink-muted);font-size:14px;padding:18px 0;';
+      empty.textContent = 'Heute Abend hat noch niemand etwas gezählt.';
+      list.appendChild(empty);
+      return;
+    }
+
+    let myRow = null;
+    entries.forEach((e, i) => {
+      const row = document.createElement('div');
+      row.className = 'board-row';
+      if (i < 3) row.classList.add('top');
+      if (e.id === playerId) { row.classList.add('me'); myRow = row; }
+      const rank = document.createElement('span');
+      rank.className = 'rank';
+      rank.textContent = `#${i + 1}`;
+      const who = document.createElement('span');
+      who.className = 'who';
+      who.textContent = e.id === playerId ? `${e.name} (du)` : e.name;
+      const total = document.createElement('span');
+      total.className = 'total';
+      total.textContent = e.total;
+      row.append(rank, who, total);
+      list.appendChild(row);
+    });
+    // Beim Öffnen zur eigenen Zeile springen – bei 40 Leuten sucht sonst jeder
+    if (scrollToMe && myRow) {
+      requestAnimationFrame(() => myRow.scrollIntoView({ block: 'center' }));
+    }
+  }
+
+  function setBoardScope(scope, scrollToMe = false) {
+    boardScope = scope;
+    $('board-tabs').dataset.pos = scope === 'today' ? '0' : '1';
+    $('board-tab-today').classList.toggle('active', scope === 'today');
+    $('board-tab-alltime').classList.toggle('active', scope !== 'today');
+    renderBoard(scrollToMe);
+  }
+
+  function openBoard(scope) {
+    $('board-modal').hidden = false;
+    setBoardScope(scope, true);
+  }
+
+  const closeBoard = () => { $('board-modal').hidden = true; };
+
+  $('show-all-today').addEventListener('click', () => openBoard('today'));
+  $('show-all-alltime').addEventListener('click', () => openBoard('alltime'));
+  $('board-tab-today').addEventListener('click', () => setBoardScope('today', true));
+  $('board-tab-alltime').addEventListener('click', () => setBoardScope('alltime', true));
+  $('board-close').addEventListener('click', closeBoard);
+  // Klick auf den abgedunkelten Hintergrund schließt ebenfalls
+  $('board-modal').addEventListener('click', (e) => { if (e.target === $('board-modal')) closeBoard(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBoard(); });
+
   function updateProfile(players, me) {
     // Heute: nur wer heute geloggt hat, Tiebreak wie auf dem TV (D-020)
     const todayList = players
@@ -497,6 +602,8 @@ if (!token || !playerId) {
       bump('mixes-total', me.mixes);
       updateDistribution(me);
       updateProfile(players, me);
+      lastPlayers = players;
+      if (!$('board-modal').hidden) renderBoard();
       document.title = `${AREA.id === 'youngstars' ? 'Youngstars' : 'SV Partykeller'} – ${me.name}`;
 
       // Statistik nachladen, wenn heute irgendwo etwas dazukam (Achievements
