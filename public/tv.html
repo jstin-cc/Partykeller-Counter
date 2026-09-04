@@ -641,6 +641,15 @@ function leaderBy(players, key) {
   return best;
 }
 
+// Pausenlänge in Worten: ab zwei Monaten in Monaten, sonst in Tagen
+function fmtGap(days) {
+  if (days >= 60) return `${Math.round(days / 30)} Monaten`;
+  return days === 1 ? 'einem Tag' : `${days} Tagen`;
+}
+
+// Wortform für Meilensteine: 'Max steht jetzt bei 100 Bier insgesamt'
+const MILESTONE_WORDS = { beer: 'Bier', shot: 'Shots', mix: 'Mischen', total: 'Getränken' };
+
 // '2026-09-25' -> '25.09.2026'
 function fmtDay(iso) {
   if (!iso) return '';
@@ -699,6 +708,21 @@ function computeFacts(players, records, customFacts, funStats) {
   if (fs.topWinner && fs.topWinner.wins >= 2) {
     fact(`Seriensieger: ${fs.topWinner.name} hat schon ${fs.topWinner.wins} Abende gewonnen.`);
   }
+  // Momente des Abends (D-036): Rückkehr, runde Marken, Führungswechsel
+  if (fs.comeback) {
+    fact(`Comeback: ${fs.comeback.name} ist nach ${fmtGap(fs.comeback.days)} wieder dabei – zuletzt am ${fmtDay(fs.comeback.lastDay)}.`);
+  }
+  if (fs.milestone) {
+    const word = MILESTONE_WORDS[fs.milestone.kind] ?? 'Getränken';
+    fact(`Runde Sache: ${fs.milestone.name} steht jetzt bei ${fs.milestone.n} ${word} insgesamt.`);
+  }
+  if (fs.houseMilestone) {
+    fact(`Hausmarke: Hier wurden insgesamt schon ${fs.houseMilestone.total} Getränke gezählt.`);
+  }
+  if (fs.newLeader) {
+    fact(`Neu an der Spitze: ${fs.newLeader.name} hat ${fs.newLeader.previous} in der All-Time-Liste überholt.`);
+  }
+
   if (fs.nights >= 2) {
     const beers = players.reduce((sum, p) => sum + (p.beers || 0), 0);
     const shots = players.reduce((sum, p) => sum + (p.shots || 0), 0);
