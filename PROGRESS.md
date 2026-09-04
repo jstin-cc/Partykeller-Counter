@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-04 (D-036): **Vier neue Fun-Facts im TV-Band** — *Comeback*
+(wer nach mindestens einem Monat Pause heute wieder dabei ist), *persönliche
+Marke* (volle 50er je Sorte, volle 100er insgesamt, 30 Minuten lang sichtbar),
+*Hausmarke* (volle 500er über alle zusammen) und *Führungswechsel* an der
+Spitze der All-Time-Liste.
 Seit 2026-09-01 (D-034, D-035): **Vollsicherung im Admin** — „⬇ Backup
 herunterladen" speichert den ganzen Bereich als JSON (Nutzer samt PIN-Hash,
 komplettes Getränke-Log, Einstellungen, Fun-Facts), „⬆ Backup einspielen"
@@ -196,6 +201,26 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Admin-Oberfläche: Block „Sicherung" mit beiden Knöpfen und Import-Dialog
       (Datei + Lösch-Passwort) (D-034)
 - [x] Erklärtexte bei Abzeichen, TV-Anzeige und Eigene Fun-Facts entfernt (D-035)
+- [x] Vier neue Fun-Facts: Comeback, persönliche Marke, Hausmarke,
+      Führungswechsel (`getFunStats` + TV-Band, D-036)
+
+## Verifikation (2026-09-04, D-036)
+
+Server-Tests gegen frisch aufgebaute Testdatenbanken: Comeback erscheint erst
+ab 30 Tagen Pause und wählt bei mehreren Rückkehrern die längste (200 statt 122
+Tage); persönliche Marke feuert beim 50. Shot und beim 100. Getränk (Gesamtmarke
+schlägt dabei die Sortenmarke) und verschwindet wieder, sobald das Getränk
+länger als 30 Minuten her ist; Hausmarke bei genau 500 Getränken und noch nach
+drei Stunden sichtbar; Führungswechsel meldet „Anna hat Bernd überholt", bleibt
+aber stumm, wenn ein von Hand gesetzter Zähler den sichtbaren Platz 1
+verschiebt; ausgeblendete Personen lösen weder Marke noch Hausmarke aus; ohne
+Ereignis sind alle vier Felder `null`. Browser-Test (Chromium, TV-Seite mit 503
+Getränken über 10 Abende): alle vier Facts laufen im Band durch — „Comeback:
+Clara ist nach 4 Monaten wieder dabei – zuletzt am 07.05.2026.", „Runde Sache:
+Bernd steht jetzt bei 50 Shots insgesamt.", „Hausmarke: Hier wurden insgesamt
+schon 500 Getränke gezählt.", „Neu an der Spitze: Anna hat Bernd in der
+All-Time-Liste überholt." Keine Konsolenfehler. Laufzeit von `getState` mit
+40.000 Log-Einträgen: 196 ms vorher, 215 ms nachher.
 
 ## Verifikation (2026-09-01, D-034/D-035)
 

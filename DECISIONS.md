@@ -774,3 +774,32 @@ einzelnen Abzeichen bleiben.
 **Begründung:** Nutzerwunsch. Die Bereiche sind eingeführt und werden von
 denselben paar Leuten bedient — der Dauertext erklärt nichts mehr, kostet aber
 in jeder Ansicht Platz und Ruhe.
+
+## D-036 (2026-09-04): Vier neue Fun-Facts — Comeback und die Meilensteine
+
+**Entscheidung:** Das TV-Band bekommt vier weitere berechnete Facts:
+
+- **Comeback** — wer heute wieder dabei ist, davor aber mindestens einen Monat
+  gefehlt hat („nach 4 Monaten wieder dabei – zuletzt am 07.05.2026"). Es
+  gewinnt die längste Pause.
+- **Persönliche Marke** — volle 50er je Sorte und volle 100er insgesamt
+  („steht jetzt bei 50 Shots insgesamt"), sichtbar für 30 Minuten nach dem
+  Getränk, das die Marke gerissen hat.
+- **Hausmarke** — volle 500er über alle Personen zusammen; sie fällt selten
+  genug, um den ganzen Abend stehen zu bleiben.
+- **Führungswechsel** — wer heute an die Spitze der All-Time-Liste gezogen ist
+  und wen er dafür überholt hat.
+
+Alle vier rechnen aus `drink_log` (Server, `getFunStats`), ausgeblendete
+Personen zählen wie überall nicht mit.
+
+**Begründung:** Nutzerwunsch aus einer Ideenliste. Grundlage ist bewusst das
+Log und nicht die All-Time-Zähler: nur im Log steht, **wann** eine Marke
+gefallen ist — ohne Zeitstempel gäbe es kein „gerade eben". Weil Admin-Korrekturen
+(`setCounter`) am Log vorbeigehen, können Log-Stand und sichtbarer Platz 1
+auseinanderlaufen; beim Führungswechsel wird deshalb gegengeprüft, und stimmen
+beide nicht überein, sagt das Band lieber nichts, statt auf dem Fernseher eine
+falsche Überholung zu behaupten. Die Marken sind Momente, keine Dauerzustände —
+darum das 30-Minuten-Fenster für die persönliche Marke; ohne das würde sie bis
+zum nächsten Meilenstein im Band kleben. Die Facts beschreiben, was passiert
+ist, und fordern niemanden zu etwas auf.
