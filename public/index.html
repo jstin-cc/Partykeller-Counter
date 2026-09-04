@@ -142,7 +142,10 @@ function showError(msg) {
   el.hidden = !msg;
 }
 
-function renderUsers(players) {
+// Im Admin ausgeblendete Konten stehen auch hier nicht mehr in der Auswahl
+// (D-037) — angemeldet bleibt, wer schon ein Token auf dem Handy hat.
+function renderUsers(all) {
+  const players = all.filter((p) => !p.hidden);
   const list = $('user-list');
   list.textContent = '';
   $('list-empty').hidden = players.length > 0;

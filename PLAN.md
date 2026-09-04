@@ -46,7 +46,7 @@ CREATE TABLE players (
   beers      INTEGER NOT NULL DEFAULT 0,  -- All-Time-Zähler
   shots      INTEGER NOT NULL DEFAULT 0,
   mixes      INTEGER NOT NULL DEFAULT 0,  -- „Mischen" (D-012)
-  hidden     INTEGER NOT NULL DEFAULT 0,  -- aus dem TV-Scoreboard ausgeblendet (D-013)
+  hidden     INTEGER NOT NULL DEFAULT 0,  -- aus TV-Gesamtansicht und Anmeldeliste ausgeblendet (D-013, D-037)
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
