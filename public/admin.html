@@ -554,7 +554,7 @@ function renderRows() {
       vis.type = 'checkbox';
       vis.className = 'vis-check';
       vis.checked = !p.hidden;
-      vis.title = 'Im TV-Scoreboard anzeigen';
+      vis.title = 'Im TV-Scoreboard und in der Anmeldeliste anzeigen';
       vis.addEventListener('change', () => send({ type: 'setHidden', id: p.id, hidden: !vis.checked }));
       const name = document.createElement('div');
       name.style.cssText = "font-size:16px;font-weight:600;font-family:'Bitter',serif;";
