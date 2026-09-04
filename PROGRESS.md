@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-04 (D-037): **Ausgeblendete Konten stehen auch nicht mehr in der
+Anmeldeliste** — der Sichtbarkeits-Haken im Admin gilt jetzt für TV-Gesamtansicht
+und Anmeldeseite; bereits angemeldete Handys bleiben angemeldet.
 Seit 2026-09-04 (D-036): **Vier neue Fun-Facts im TV-Band** — *Comeback*
 (wer nach mindestens einem Monat Pause heute wieder dabei ist), *persönliche
 Marke* (volle 50er je Sorte, volle 100er insgesamt, 30 Minuten lang sichtbar),
@@ -203,6 +206,17 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Erklärtexte bei Abzeichen, TV-Anzeige und Eigene Fun-Facts entfernt (D-035)
 - [x] Vier neue Fun-Facts: Comeback, persönliche Marke, Hausmarke,
       Führungswechsel (`getFunStats` + TV-Band, D-036)
+- [x] Ausgeblendete Konten aus der Anmeldeliste gefiltert (D-037)
+
+## Verifikation (2026-09-04, D-037)
+
+Browser-Tests (Chromium, Testdatenbanken): Anmeldeseite Partykeller zeigt nur
+noch Anna und Ben, das ausgeblendete Konto „Geist" fehlt; sind alle Konten
+ausgeblendet (Youngstars-Testbereich), erscheint der normale Leertext „Noch
+niemand da – leg unten los."; Anmeldung eines sichtbaren Kontos mit PIN führt
+weiter aufs Dashboard. Ein ausgeblendetes Konto kann sich über
+`POST /api/login` weiterhin anmelden (Server absichtlich unverändert). Keine
+Konsolenfehler.
 
 ## Verifikation (2026-09-04, D-036)
 

@@ -803,3 +803,22 @@ falsche Überholung zu behaupten. Die Marken sind Momente, keine Dauerzustände 
 darum das 30-Minuten-Fenster für die persönliche Marke; ohne das würde sie bis
 zum nächsten Meilenstein im Band kleben. Die Facts beschreiben, was passiert
 ist, und fordern niemanden zu etwas auf.
+
+## D-037 (2026-09-04): Ausgeblendete Konten stehen auch nicht mehr in der Anmeldeliste
+
+**Entscheidung:** Der Sichtbarkeits-Haken im Admin blendet ein Konto jetzt auch
+auf der Anmeldeseite („Wer bist du?") aus, nicht mehr nur in der TV-Gesamtansicht.
+`renderUsers` in `public/index.html` filtert dafür `hidden`-Konten aus der
+Auswahl; sind alle ausgeblendet, greift der normale Leertext. Server und
+Datenmodell bleiben unverändert: Wer bereits ein Token auf dem Handy hat, bleibt
+angemeldet und zählt weiter, und `POST /api/login` weist ausgeblendete Konten
+nicht ab.
+
+**Begründung:** Nutzerwunsch. Der Haken war bisher nur eine TV-Einstellung, das
+Konto stand aber weiter in der Anmeldeliste — bei Gästen, die einmal da waren
+und nicht wiederkommen, wächst die Liste auf dem Handy immer weiter zu. Bewusst
+nur eine Anzeige-Entscheidung im Frontend und keine Sperre: „ausgeblendet" heißt
+weiterhin „nicht in der Rangliste", nicht „gesperrt". Zwei Folgen, die man kennen
+sollte — der Name eines ausgeblendeten Kontos bleibt vergeben („Name ist schon
+vergeben" beim Neuanlegen), und wer sein Konto nach dem Ausblenden am Handy
+abmeldet, kommt ohne den Admin nicht mehr hinein.
