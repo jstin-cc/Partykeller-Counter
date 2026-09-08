@@ -147,19 +147,15 @@ a:hover { color: var(--gold); }
   z-index: 1;
 }
 
-/* Karten mit Farbkante oben */
+/* Karten: ruhige Glaskante rundum, keine Farbkante oben */
 .card {
   background: var(--surface);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-edge);
-  border-top: 3px solid var(--edge, var(--green));
   border-radius: var(--radius-lg);
   padding: 20px;
 }
-.card--green { --edge: var(--green); }
-.card--amber { --edge: var(--amber); }
-.card--brick { --edge: var(--brick); }
 
 .card-title {
   font-family: 'Bitter', serif;
@@ -198,20 +194,6 @@ a:hover { color: var(--gold); }
 }
 .btn-big:active { filter: brightness(1.1); }
 .btn-big:disabled { opacity: 0.5; cursor: default; }
-
-/* Rang-Pill */
-.pill {
-  background: var(--surface-2);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-edge);
-  border-radius: 999px;
-  padding: 5px 12px;
-  font-size: 12px;
-  color: var(--gold);
-  font-family: 'Bitter', serif;
-  font-weight: 700;
-}
 
 /* Heute/Gesamt-Zweispalter */
 .split { display: flex; }
@@ -256,7 +238,7 @@ button:not(:disabled):active { transform: scale(0.95); }
 .btn-big:not(:disabled):hover { filter: brightness(1.05); }
 
 /* Flächen wechseln Zustände weich (Hover, Umsortierung, Sichtbarkeit). */
-.card, .user-row, .pill { transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease, opacity 0.25s ease; }
+.card, .user-row { transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease, opacity 0.25s ease; }
 .user-row:active { transform: scale(0.99); }
 
 /* Zahl „ploppt" kurz auf, wenn ein Zähler steigt. */

@@ -7,6 +7,12 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-08 (D-038): **Oberfläche aufgeräumt** — Erklärtexte auf
+Anmeldung, Dashboard, Admin und Abend-Archiv entfernt, „Gesamt seit Beginn"
+und die Rang-Pille aus dem Zählen-Tab genommen (steht im Profil), Karten ohne
+Farbkante oben, „X Getränke Rückstand", auf dem TV „Mischen" ab zwei und
+gleiches Leuchten auf allen drei Podestzahlen; Zahlen ploppen nur noch beim
+Hochzählen auf, nicht mehr bei jedem Tab-Wechsel.
 Seit 2026-09-04 (D-037): **Ausgeblendete Konten stehen auch nicht mehr in der
 Anmeldeliste** — der Sichtbarkeits-Haken im Admin gilt jetzt für TV-Gesamtansicht
 und Anmeldeseite; bereits angemeldete Handys bleiben angemeldet.
@@ -207,6 +213,23 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Vier neue Fun-Facts: Comeback, persönliche Marke, Hausmarke,
       Führungswechsel (`getFunStats` + TV-Band, D-036)
 - [x] Ausgeblendete Konten aus der Anmeldeliste gefiltert (D-037)
+- [x] Feinschliff der Oberfläche: Texte gekürzt, doppelte Zahlen entfernt,
+      Karten ohne Farbkante, TV-Mehrzahl „Mischen", Pop nur bei echter
+      Änderung (D-038)
+
+## Verifikation (2026-09-08, D-038)
+
+Browser-Tests (Chromium, Testdatenbank mit vier Konten und einem laufenden
+Abend): Anmeldung zeigt „Anmeldung" und „Registrieren" ohne Untertitel;
+Dashboard-Tab *Zählen* ohne Rang-Pille und ohne „Gesamt seit Beginn", alle
+Karten ohne Farbkante oben; Profil zeigt „7 Getränke Rückstand" und keinen
+Aufmunterungssatz mehr; Admin hat *QR-Adresse* und *Sicherung* in einer Zeile;
+Abend-Archiv ohne Untertitel und Hinweistext, Spitzenpunkt ohne Leuchten,
+Bearbeiten-Blatt ohne Kante. TV-Kopfzeile: „16 Bier · 4 Shots · 7 Mischen
+gesamt", Podest-Detail bei einer Mische weiterhin „1 Mische". Pop-Test:
+`#today-total` trägt `pk-pop` direkt nach „+ Bier", nach 900 ms nicht mehr, und
+nach einem Wechsel Profil → Zählen ebenfalls nicht. Keine Konsolenfehler auf
+allen fünf Seiten.
 
 ## Verifikation (2026-09-04, D-037)
 

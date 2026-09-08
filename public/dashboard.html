@@ -74,7 +74,7 @@
     display: flex; align-items: flex-end; justify-content: center; z-index: 10;
   }
   .board-sheet {
-    background: var(--surface); border-top: 4px solid var(--green);
+    background: var(--surface);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
     width: 100%; max-width: 480px; max-height: 86vh;
@@ -129,12 +129,12 @@
 
   <div class="screen-inner">
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
+      <a href="./" style="flex:1;text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:80px;width:auto;object-fit:contain;">
         <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:38px;width:auto;object-fit:contain;">
       </div>
-      <div id="rank-pill" class="pill num" hidden></div>
+      <div style="flex:1;"></div>
     </div>
 
     <div id="user-view" hidden style="display:flex;flex-direction:column;gap:18px;">
@@ -151,15 +151,12 @@
 
       <div id="tab-count" style="display:flex;flex-direction:column;gap:18px;">
 
-      <div class="card card--green" style="text-align:center;padding:18px;">
+      <div class="card" style="text-align:center;padding:18px;">
         <div class="eyebrow">Getränke heute</div>
         <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px oklch(0.64 0.15 152 / 0.45);">0</div>
-        <div style="font-size:14px;color:var(--ink-muted);margin-top:4px;">
-          Gesamt seit Beginn: <span id="alltime-total" style="color:var(--gold);font-weight:700;">0</span>
-        </div>
       </div>
 
-      <div id="card-beer" class="card card--amber" style="display:flex;flex-direction:column;gap:14px;">
+      <div id="card-beer" class="card" style="display:flex;flex-direction:column;gap:14px;">
         <div class="card-title" style="color:var(--amber);">Bier</div>
         <button id="add-beer" class="btn-big" style="background:var(--amber);">+ Bier hinzufügen</button>
         <div class="split">
@@ -175,7 +172,7 @@
         </div>
       </div>
 
-      <div class="card card--brick" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="display:flex;flex-direction:column;gap:14px;">
         <div class="card-title" style="color:var(--brick);">Shots</div>
         <button id="add-shot" class="btn-big" style="background:var(--brick);color:var(--ink);">+ Shot hinzufügen</button>
         <div class="split">
@@ -191,7 +188,7 @@
         </div>
       </div>
 
-      <div id="card-mix" class="card" style="--edge:var(--mix);display:flex;flex-direction:column;gap:14px;">
+      <div id="card-mix" class="card" style="display:flex;flex-direction:column;gap:14px;">
         <div class="card-title" style="color:var(--mix);">Mischen</div>
         <button id="add-mix" class="btn-big" style="background:var(--mix);">+ Mische hinzufügen</button>
         <div class="split">
@@ -213,7 +210,7 @@
       <div id="tab-profile" hidden style="display:flex;flex-direction:column;gap:18px;">
 
         <!-- Heute: Stand des laufenden Abends + wer direkt vor/hinter mir liegt -->
-        <div class="card card--green" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card" style="display:flex;flex-direction:column;gap:12px;">
           <div class="card-title" style="color:var(--green);">Heute Abend</div>
           <div class="split">
             <div class="cell">
@@ -230,7 +227,7 @@
         </div>
 
         <!-- All-Time: Gesamtstand + Umfeld -->
-        <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:12px;">
+        <div class="card" style="display:flex;flex-direction:column;gap:12px;">
           <div class="card-title" style="color:var(--gold);">All-Time</div>
           <div class="split">
             <div class="cell">
@@ -250,7 +247,7 @@
         <button id="show-board" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
 
         <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung -->
-        <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:16px;">
+        <div class="card" style="display:flex;flex-direction:column;gap:16px;">
           <div class="card-title" style="color:var(--gold);">Deine Statistik</div>
           <div class="split">
             <div class="cell">
@@ -284,7 +281,7 @@
         </div>
 
         <!-- Abzeichen: leuchtet, wenn heute erreicht; die Pill zählt alle Abende -->
-        <div class="card" style="--edge:var(--gold);display:flex;flex-direction:column;gap:12px;">
+        <div class="card" style="display:flex;flex-direction:column;gap:12px;">
           <div class="card-title" style="color:var(--gold);">Abzeichen</div>
           <div class="badges">
             <div id="badge-visits" class="badge earned" hidden>🎖 <span id="badge-visits-label">Stammgast</span> <span class="badge-count">×0</span></div>
@@ -380,6 +377,9 @@ if (!token || !playerId) {
       el.classList.remove('pk-pop');
       void el.offsetWidth;   // Reflow erzwingen, damit die Animation neu startet
       el.classList.add('pk-pop');
+      // Klasse nach dem Lauf entfernen: sonst spielt die Animation erneut,
+      // sobald der Tab-Wechsel das Element wieder sichtbar macht.
+      el.addEventListener('animationend', () => el.classList.remove('pk-pop'), { once: true });
     }
     prev[id] = value;
   }
@@ -454,12 +454,6 @@ if (!token || !playerId) {
     if (meIdx < 0) {
       $(rankEl).textContent = '–';
       $(rankLabelEl).textContent = labelSuffix === 'heute' ? 'Heute noch nichts' : 'Platz';
-      if (labelSuffix === 'heute') {
-        const hint = document.createElement('div');
-        hint.style.cssText = 'font-size:13px;color:var(--ink-muted);text-align:center;';
-        hint.textContent = 'Heute noch nichts getrunken – das erste zählt doppelt schön. 🍺';
-        box.appendChild(hint);
-      }
       return;
     }
     $(rankEl).textContent = `#${meIdx + 1}`;
@@ -469,7 +463,7 @@ if (!token || !playerId) {
     const me = ranking[meIdx];
     // Bei Gleichstand entscheidet die Uhrzeit (D-020) – als „gleichauf" anzeigen
     const gapUp = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} vor dir`);
-    const gapDown = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} zurück`);
+    const gapDown = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} Rückstand`);
     if (!ahead) {
       box.appendChild(rivalRow('👑', 'Du führst!', behind ? `${fmtDrinks(me.total - behind.total)} Vorsprung` : ''));
     } else {
@@ -603,10 +597,7 @@ if (!token || !playerId) {
         return;
       }
       $('player-name').textContent = me.name;
-      $('rank-pill').textContent = `#${me.rank}/${players.length}`;
-      $('rank-pill').hidden = false;
       bump('today-total', me.beersToday + me.shotsToday + me.mixesToday);
-      bump('alltime-total', me.total);
       bump('beers-today', me.beersToday);
       bump('beers-total', me.beers);
       bump('shots-today', me.shotsToday);

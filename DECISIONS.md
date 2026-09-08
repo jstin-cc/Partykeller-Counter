@@ -822,3 +822,44 @@ weiterhin „nicht in der Rangliste", nicht „gesperrt". Zwei Folgen, die man k
 sollte — der Name eines ausgeblendeten Kontos bleibt vergeben („Name ist schon
 vergeben" beim Neuanlegen), und wer sein Konto nach dem Ausblenden am Handy
 abmeldet, kommt ohne den Admin nicht mehr hinein.
+
+## D-038 (2026-09-08): Oberfläche aufgeräumt — weniger Erklärtext, keine Farbkante, ruhigere Zahlen
+
+**Entscheidung:** Eine Runde Feinschliff quer durch alle Screens, nach
+Rückmeldung aus dem Betrieb:
+
+- **Anmeldung:** Überschrift „Wer bist du?" → „Anmeldung", der Untertitel
+  („Wähle deinen Account oder starte neu.") entfällt, der Trenner über dem
+  Anlege-Formular heißt „Registrieren" statt „oder neu anmelden".
+- **Dashboard:** „Gesamt seit Beginn" in der Heute-Karte und die Rang-Pille
+  oben rechts entfallen — beides steht im Profil-Tab. Der Aufmunterungssatz
+  („Heute noch nichts getrunken – …") entfällt. „X Getränke zurück" heißt jetzt
+  „X Getränke Rückstand".
+- **Admin:** „Nur für die Kellermeister." entfällt; „Leer = Adresse dieses
+  Servers." entfällt, wodurch *QR-Adresse* und *Sicherung* in eine Zeile passen
+  (ein Trennstrich zwischen beiden Gruppen).
+- **Abend-Archiv:** Untertitel „Jeder Party-Tag auf einen Blick." und der
+  Hinweis „Spieler mit 0 stehen unten – …" entfallen; der Punkt auf der
+  Spitzenstunde leuchtet nicht mehr.
+- **Karten ohne Farbkante:** `.card` (Dashboard), `.night-card` und `.edit-card`
+  (Archiv) und das Ranglisten-Blatt haben oben keine farbige Kante mehr, nur
+  noch die Glaskante rundum. Damit entfallen `--edge` und die Modifier
+  `.card--green/amber/brick`; die Farbe der Karte trägt jetzt allein ihre
+  Überschrift. `.pill` war danach ungenutzt und ist raus.
+- **TV:** Ab zwei heißt es „Mischen" statt „Mische" (Kopfzeile *und*
+  Podest-Details, `fmtMixes`); alle drei Podestzahlen bekommen dasselbe
+  Leuchten wie bisher nur Platz 1
+  (`text-shadow: 0 0 46px oklch(0.80 0.15 83 / 0.65)`).
+- **Pop-Animation:** `bump()` im Dashboard nimmt die Klasse `pk-pop` nach dem
+  Lauf wieder ab (`animationend`, `{ once: true }`).
+
+**Begründung:** Nutzerwunsch nach einem Abend im echten Betrieb. Die Texte
+erklärten Dinge, die man nach zwei Minuten selbst sieht, und die Zahlen standen
+doppelt — einmal beim Zählen, einmal im Profil; wer sie sucht, findet sie dort.
+Die Farbkante oben stammt aus dem Design-Prototyp (v3); sie wird hier bewusst
+aufgegeben, weil die Kartenfarbe schon in der Überschrift steckt und die
+Oberfläche mit den vielen Karten sonst unruhig wirkt — PLAN.md §8 ist
+entsprechend nachgezogen. Beim Pop war die stehengebliebene Klasse der
+eigentliche Fehler: `display:none` durch den Tab-Wechsel startet eine noch
+gesetzte CSS-Animation neu, also ploppten die Zahlen bei jedem Umschalten
+wieder auf, obwohl sich nichts geändert hatte.
