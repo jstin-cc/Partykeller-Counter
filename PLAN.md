@@ -225,7 +225,8 @@ Aus dem importierten Design extrahierte Tokens → werden 1:1 `public/css/theme.
 - **Typo**: Bitter (Headlines/Zahlen, 400–800) + Work Sans (Text, 400–700),
   als woff2 **lokal vendored** (Design lädt sie von Google Fonts — im
   Offline-WLAN nicht verfügbar).
-- **Sprache/Stil**: dunkler Tannen-Grund, Karten mit 3px-Farbkante oben
+- **Sprache/Stil**: dunkler Tannen-Grund, Karten mit ruhiger Glaskante rundum
+  (die 3px-Farbkante oben ist seit D-038 entfallen)
   (Bier = amber, Shots = brick, Gesamt = green), `tabular-nums` für Zähler,
   Zapfen-Wasserzeichen, Wald-Footer, Gold-Logo.
 - **Nutzer-Dashboard v3 konkret**: Kopfzeile (Wechseln-Link, Logo,

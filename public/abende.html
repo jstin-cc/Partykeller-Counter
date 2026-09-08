@@ -27,7 +27,6 @@
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-edge);
-    border-top: 3px solid var(--green);
     border-radius: var(--radius-lg);
     padding: 18px 20px;
     display: flex;
@@ -105,7 +104,6 @@
   .night-chart .peak-dot {
     position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
     border-radius: 50%; background: var(--gold);
-    box-shadow: 0 0 8px oklch(0.80 0.15 83 / 0.6);
     pointer-events: none;
   }
   .night-chart .hit { fill: transparent; }
@@ -133,7 +131,7 @@
     display: flex; align-items: center; justify-content: center; z-index: 10; padding: 20px;
   }
   .edit-card {
-    background: var(--surface); border-top: 4px solid var(--green); border-radius: var(--radius-lg);
+    background: var(--surface); border-radius: var(--radius-lg);
     padding: 24px; width: 100%; max-width: 640px; max-height: 86vh;
     display: flex; flex-direction: column; gap: 14px;
   }
@@ -176,7 +174,6 @@
         <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:34px;width:auto;object-fit:contain;">
         <div>
           <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0;">Abend-Archiv</h1>
-          <div style="font-size:14px;color:var(--ink-muted);">Jeder Party-Tag auf einen Blick.</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
@@ -204,7 +201,7 @@
       <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Abend bearbeiten: <span id="edit-day-label"></span></h2>
       <button id="close-edit" class="link-btn">Schließen</button>
     </div>
-    <p style="font-size:13px;color:var(--ink-muted);margin:0;line-height:1.5;">Korrekturen ändern das Getränke-Log dieses Abends <strong>und</strong> die All-Time-Zähler. Spieler mit 0 stehen unten – so lässt sich auch nachtragen, wer vergessen wurde.</p>
+    <p style="font-size:13px;color:var(--ink-muted);margin:0;line-height:1.5;">Korrekturen ändern das Getränke-Log dieses Abends <strong>und</strong> die All-Time-Zähler.</p>
     <div id="edit-error" class="error-msg" style="min-height:0;"></div>
 
     <!-- Abend benennen (D-028): erscheint nur hier, also erst nach „Bearbeiten" -->
