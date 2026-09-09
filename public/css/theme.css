@@ -176,25 +176,6 @@ a:hover { color: var(--gold); }
 
 .num { font-variant-numeric: tabular-nums; font-family: 'Bitter', serif; font-weight: 800; }
 
-/* Großer Aktions-Button */
-.btn-big {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  color: var(--bg);
-  border: none;
-  border-radius: var(--radius);
-  padding: 22px;
-  font-family: 'Bitter', serif;
-  font-weight: 800;
-  font-size: 22px;
-  cursor: pointer;
-}
-.btn-big:active { filter: brightness(1.1); }
-.btn-big:disabled { opacity: 0.5; cursor: default; }
-
 /* Heute/Gesamt-Zweispalter */
 .split { display: flex; }
 .split > .cell { text-align: center; flex: 1; }
@@ -232,10 +213,6 @@ button {
   transition: transform 0.09s ease, filter 0.12s ease, box-shadow 0.18s ease, background-color 0.15s ease;
 }
 button:not(:disabled):active { transform: scale(0.95); }
-
-.btn-big { transition: transform 0.1s ease, filter 0.12s ease, box-shadow 0.2s ease; }
-.btn-big:not(:disabled):active { transform: scale(0.97); filter: brightness(1.14); }
-.btn-big:not(:disabled):hover { filter: brightness(1.05); }
 
 /* Flächen wechseln Zustände weich (Hover, Umsortierung, Sichtbarkeit). */
 .card, .user-row { transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease, opacity 0.25s ease; }
