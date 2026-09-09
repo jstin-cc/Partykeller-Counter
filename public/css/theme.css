@@ -157,6 +157,23 @@ a:hover { color: var(--gold); }
   padding: 20px;
 }
 
+/* Rundes Namenszeichen: Anmeldeliste und Dashboard-Kopf */
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-edge);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bitter', serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--gold);
+}
+
 .card-title {
   font-family: 'Bitter', serif;
   font-weight: 700;
