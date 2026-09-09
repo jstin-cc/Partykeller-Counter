@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-09 (D-041, D-042): **Das zuletzt benutzte Konto steht in der
+Anmeldeliste oben** (ohne Kennzeichnung, Reihenfolge dahinter unverändert) und
+das **Abend-Archiv zeichnet in Blöcken von zwölf** mit „Ältere Abende laden".
 Seit 2026-09-09 (D-040): **Profil-Tab neu geordnet** — eine Ranglisten-Karte
 mit Umschalter Heute/All-Time (und „Ganze Rangliste" als Fußzeile darin) statt
 zwei fast gleicher Karten, ein Kopf mit Namenszeichen und „Dabei seit … ·
@@ -230,6 +233,22 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       entfernt (D-039)
 - [x] Profil: eine Ranglisten-Karte mit Umschalter, Kopf mit „Dabei seit",
       Anteil am Haus (D-040)
+- [x] Anmeldeliste: zuletzt benutztes Konto zuerst (D-041)
+- [x] Abend-Archiv: zwölf Karten je Block, „Ältere Abende laden" (D-042)
+
+## Verifikation (2026-09-09, D-041 und D-042)
+
+Archiv mit 60 Abenden (20 Konten, 6 600 Log-Zeilen): die Seite zeichnet 12
+Karten, der Knopf sagt „12 ältere Abende laden (noch 48)", nach vier Klicks
+stehen alle 60 da und der Knopf verschwindet. Messung dazu: `getArchive()`
+braucht für diese Datenmenge 42 ms und liefert 11 KB — die Bremse ist das
+Zeichnen, nicht der Server.
+
+Anmeldeliste: ohne Erinnerung steht dort die Rangliste (Gast 01, 02, 03 …);
+nach dem Merken von „Gast 10" steht dieser oben und die Reihenfolge dahinter
+ist Zeichen für Zeichen dieselbe, bei gleicher Zeilenzahl. Voller Durchlauf
+Anmelden → Abmelden → Liste: das eben abgemeldete Konto steht oben. Keine
+Konsolenfehler.
 
 ## Verifikation (2026-09-09, D-040)
 

@@ -114,7 +114,7 @@
 </div>
 
 <script type="module">
-import { post, fetchState, setSession } from './js/api.js';
+import { post, fetchState, setSession, getLastPlayerId } from './js/api.js';
 
 const $ = (id) => document.getElementById(id);
 let selectedId = null;
@@ -127,8 +127,13 @@ function showError(msg) {
 
 // Im Admin ausgeblendete Konten stehen auch hier nicht mehr in der Auswahl
 // (D-037) — angemeldet bleibt, wer schon ein Token auf dem Handy hat.
+// Wer sich an diesem Handy zuletzt angemeldet hat, steht oben (D-041): ohne
+// Kennzeichnung, die Reihenfolge dahinter bleibt die der Rangliste.
 function renderUsers(all) {
+  const lastId = getLastPlayerId();
   const players = all.filter((p) => !p.hidden);
+  const mine = players.findIndex((p) => p.id === lastId);
+  if (mine > 0) players.unshift(players.splice(mine, 1)[0]);
   const list = $('user-list');
   list.textContent = '';
   $('list-empty').hidden = players.length > 0;

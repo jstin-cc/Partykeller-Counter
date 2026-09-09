@@ -187,6 +187,12 @@
       Noch keine Abende aufgezeichnet – der erste Schluck legt los.
     </div>
     <div id="cards" class="cards"></div>
+
+    <!-- Ältere Abende stehen schon im Speicher, werden aber erst auf Wunsch
+         gezeichnet (D-042): jede Karte bringt ein eigenes SVG mit. -->
+    <div id="more-wrap" hidden style="display:flex;justify-content:center;margin-top:22px;">
+      <button id="more" class="night-btn" type="button" style="flex:none;"></button>
+    </div>
   </div>
 
   <img src="assets/footer-woods.png" alt="" class="footer-woods" style="margin-top:24px;">
@@ -418,6 +424,7 @@ function buildCard(night) {
   const { date, weekday } = fmtDay(night.day);
   const card = document.createElement('div');
   card.className = 'night-card';
+  card.id = `night-${night.day}`;   // Sprungziel beim Nachladen (D-042)
 
   const head = document.createElement('div');
   const wd = document.createElement('div');
@@ -500,15 +507,41 @@ function buildCard(night) {
   return card;
 }
 
+// Wie viele Abende gerade gezeichnet sind. Die Liste kommt komplett vom
+// Server (60 Abende sind rund 11 KB), teuer ist erst das Zeichnen: jede Karte
+// bringt eine eigene SVG-Kurve mit. Darum in Blöcken (D-042).
+const PAGE = 12;
+let shown = PAGE;
+
 function renderCards() {
   const box = $('cards');
   box.textContent = '';
   $('empty').hidden = nights.length > 0;
-  for (const night of nights) box.appendChild(buildCard(night));
+  const visible = nights.slice(0, shown);
+  for (const night of visible) box.appendChild(buildCard(night));
+
+  const rest = nights.length - visible.length;
+  $('more-wrap').hidden = rest <= 0;
+  if (rest > 0) {
+    const next = Math.min(PAGE, rest);
+    $('more').textContent = rest === 1
+      ? 'Einen älteren Abend laden'
+      : `${next} ältere Abende laden (noch ${rest})`;
+  }
+
   $('tv-live').hidden = !(adminToken && board.mode === 'archive');
   // Übergabedatei über alle Abende: nur als Admin und nur wenn es Abende gibt
   $('export-all').hidden = !adminToken || nights.length === 0;
 }
+
+$('more').addEventListener('click', () => {
+  const first = nights.length > shown ? nights[shown].day : null;
+  shown += PAGE;
+  renderCards();
+  // Nach dem Nachzeichnen zur ersten neuen Karte springen, sonst steht man
+  // weiter oben und sieht nicht, dass etwas passiert ist.
+  if (first) document.getElementById(`night-${first}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+});
 
 async function load() {
   const res = await fetch(`${AREA.base}/api/archive`);
