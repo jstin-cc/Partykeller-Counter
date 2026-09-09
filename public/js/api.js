@@ -5,6 +5,9 @@ import { AREA } from './area.js';
 // beiden Bereichen getrennt angemeldet sein.
 const TOKEN_KEY = `${AREA.keyPrefix}_token`;
 const PLAYER_KEY = `${AREA.keyPrefix}_player_id`;
+// Wer sich an diesem Handy zuletzt angemeldet hat — überlebt das Abmelden
+// bewusst, damit die Anmeldeliste den eigenen Namen oben zeigen kann (D-041).
+const LAST_PLAYER_KEY = `${AREA.keyPrefix}_last_player_id`;
 
 export function getSession() {
   return {
@@ -16,11 +19,17 @@ export function getSession() {
 export function setSession(token, playerId) {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(PLAYER_KEY, playerId);
+  localStorage.setItem(LAST_PLAYER_KEY, playerId);
 }
 
+// Abmelden löscht die Sitzung, nicht die Erinnerung ans letzte Konto.
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(PLAYER_KEY);
+}
+
+export function getLastPlayerId() {
+  return localStorage.getItem(LAST_PLAYER_KEY);
 }
 
 export async function post(path, body) {

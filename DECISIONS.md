@@ -927,3 +927,38 @@ gibt der All-Time-Zahl einen Maßstab, ohne ein Ziel zu setzen — bewusst als
 Anteil formuliert und nicht als Rückstand auf irgendwen, und bewusst ohne
 Vergleich zum Hausschnitt, der für alle darunter eine Aufforderung wäre
 aufzuholen.
+
+## D-041 (2026-09-09): Das zuletzt benutzte Konto steht in der Anmeldeliste oben
+
+**Entscheidung:** Die Anmeldeliste zeigt das Konto, mit dem sich dieses Handy
+zuletzt angemeldet hat, an erster Stelle — ohne Kennzeichnung, ohne eigene
+Überschrift, einfach oben. Dahinter bleibt die bisherige Reihenfolge unberührt.
+Dafür schreibt `setSession()` zusätzlich `<prefix>_last_player_id` in den
+`localStorage`; `clearSession()` löscht diesen Schlüssel **nicht**, das Abmelden
+beendet also die Sitzung, nicht die Erinnerung. `renderUsers` in
+`public/index.html` zieht den passenden Eintrag nach vorn, falls er in der
+Liste steht.
+
+**Begründung:** Nutzerwunsch. Die Liste kommt aus `getState` und ist damit nach
+der All-Time-Rangliste sortiert — das steht nirgends und soll auch so bleiben,
+aber es heißt, dass ein neues Konto ganz unten landet und man den eigenen Namen
+bei jedem Besuch sucht. Bewusst ohne Beschriftung („Zuletzt: …" o. ä.): Wer sein
+Handy kennt, findet den Namen sofort oben, und für alle anderen sieht die Liste
+aus wie vorher. Der Schlüssel liegt nur auf dem Gerät, es geht nichts an den
+Server, und ein gelöschtes oder ausgeblendetes Konto fällt einfach durch den
+vorhandenen Filter.
+
+## D-042 (2026-09-09): Das Abend-Archiv zeichnet in Blöcken von zwölf
+
+**Entscheidung:** `public/abende.html` rendert zunächst die zwölf jüngsten
+Abende; ein Knopf darunter („12 ältere Abende laden (noch 48)") zeichnet die
+nächsten zwölf und springt zur ersten neuen Karte. Der Server bleibt
+unverändert und liefert weiterhin alle Abende auf einmal.
+
+**Begründung:** Nutzerwunsch, und die Messung zeigt, wo die Kosten wirklich
+liegen: bei 60 Abenden und 6 600 Log-Zeilen braucht `getArchive()` rund 42 ms
+und liefert 11 KB JSON — serverseitig also kein Problem. Teuer ist das
+Zeichnen, weil jede Karte eine eigene SVG-Kurve mitbringt. Deshalb bleibt die
+Datenseite, wie sie ist (eine Abfrage, kein Paging-Zustand, der mit
+Korrekturen aus dem Bearbeiten-Dialog synchron gehalten werden müsste), und
+begrenzt wird nur, was gemalt wird.
