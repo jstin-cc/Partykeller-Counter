@@ -890,3 +890,40 @@ diesem Bildschirm ist und ein Verzähler ohnehin nur über den Admin
 zurückgeht (kein Minus-Button, PLAN.md §8). Das Plus bleibt als Hinweis, dass
 hier getippt wird, aber ohne Kreis — der Kreis hätte wieder ein Ziel
 suggeriert, obwohl die ganze Fläche eines ist.
+
+## D-040 (2026-09-09): Profil-Tab — eine Rangliste, ein Kopf, Anteil am Haus
+
+**Entscheidung:** Drei Änderungen im Profil-Tab, aus einem Entwurf mit
+Gegenüberstellung gewählt:
+
+- **Eine Ranglisten-Karte statt zwei.** „Heute Abend" und „All-Time" hatten
+  denselben Aufbau und standen untereinander; jetzt gibt es eine Karte
+  „Rangliste" mit demselben gleitenden Umschalter, den Zählen/Profil und das
+  Ranglisten-Blatt schon benutzen. „Ganze Rangliste ansehen" sitzt als
+  Fußzeile (`.card-foot`) in derselben Karte und öffnet das Blatt **im gerade
+  gewählten Zeitraum**. Solange niemand den Schalter angefasst hat, wählt die
+  Karte selbst: „Heute", sobald man heute etwas geloggt hat, sonst „All-Time".
+  Nach der ersten Berührung bleibt die Wahl stehen.
+- **Kopf statt Name.** Über den Tabs steht ein Streifen aus Namenszeichen
+  (dasselbe `.avatar` wie in der Anmeldeliste, dafür nach `theme.css` gezogen),
+  Name und „Dabei seit 16.08.2026 · 13 Abende". `createdAt` stand schon im
+  Zustand und wurde bisher nirgends angezeigt; die Zahl der Abende kommt aus
+  `/stats`. Der Streifen gilt für beide Ansichten — deshalb ersetzt er den
+  zentrierten Namen, statt zusätzlich dazuzukommen.
+- **Anteil am Haus.** Unter „Deine Mischung" ein zweiter Balken auf derselben
+  Spur, darunter „69 von 114 Getränken · 60,5 %". Grundlage ist dieselbe
+  Spielerliste, aus der direkt darüber auch der All-Time-Platz stammt.
+
+Nebenbei heißt „Bestes Ergebnis" jetzt „Bester Abend" (passt in eine Zeile),
+und `bump()` nimmt einen optionalen Schlüssel, damit sich Heute- und
+All-Time-Wert dasselbe Element teilen können, ohne dass das Umschalten als
+Anstieg gilt.
+
+**Begründung:** Der Tab war fünf Blöcke lang und zeigte zweimal dieselbe Form;
+zusammengelegt sind es vier und rund 150 Pixel weniger. Der Kopf gibt dem
+Profil eine Identität, statt sofort mit Zahlen anzufangen, und nutzt endlich
+ein Feld, das seit dem ersten Schema mitgeschleppt wird. Der Anteil am Haus
+gibt der All-Time-Zahl einen Maßstab, ohne ein Ziel zu setzen — bewusst als
+Anteil formuliert und nicht als Rückstand auf irgendwen, und bewusst ohne
+Vergleich zum Hausschnitt, der für alle darunter eine Aufforderung wäre
+aufzuholen.

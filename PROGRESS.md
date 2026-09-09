@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-09 (D-040): **Profil-Tab neu geordnet** — eine Ranglisten-Karte
+mit Umschalter Heute/All-Time (und „Ganze Rangliste" als Fußzeile darin) statt
+zwei fast gleicher Karten, ein Kopf mit Namenszeichen und „Dabei seit … ·
+13 Abende" statt des zentrierten Namens, und „Anteil am Haus" als zweiter
+Balken unter der Mischung.
 Seit 2026-09-09 (D-039): **Getränkefelder sind ganzflächige Knöpfe** — jedes
 Getränk liegt komplett in seiner Farbe (Bier amber, Shots brick, Mischen
 violett), die Schrift darauf wie vorher auf dem Knopf, das Plus ohne Kreis in
@@ -223,6 +228,20 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       Änderung (D-038)
 - [x] Getränkefelder als ganzflächige Knöpfe in der Getränkefarbe, `.btn-big`
       entfernt (D-039)
+- [x] Profil: eine Ranglisten-Karte mit Umschalter, Kopf mit „Dabei seit",
+      Anteil am Haus (D-040)
+
+## Verifikation (2026-09-09, D-040)
+
+Browser-Tests (Chromium, Testdatenbank über den Sicherungs-Import mit vier
+Konten und 13 Abenden Vorgeschichte): Kopf zeigt „A | Anna | Dabei seit
+16.08.2026 · 13 Abende". Anna hat heute gezählt, ihre Karte startet auf
+**Heute** (5 Getränke, #1 von 3 heute); Dora hat heute nichts gezählt, ihre
+startet auf **All-Time** (3 Getränke, #4 von 4). Umschalten löst kein
+Aufploppen aus (`pk-pop` nicht gesetzt). „Ganze Rangliste ansehen" öffnet das
+Blatt im gewählten Zeitraum — „All-Time Rangliste" bzw. „Rangliste heute".
+Anteil am Haus: 69 von 114 Getränken · 60,5 %, Balken 60,5 % breit; bei Dora
+3 von 114 · 2,6 %. Keine Konsolenfehler.
 
 ## Verifikation (2026-09-09, D-039)
 

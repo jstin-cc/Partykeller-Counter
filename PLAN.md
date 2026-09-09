@@ -236,7 +236,9 @@ Aus dem importierten Design extrahierte Tokens → werden 1:1 `public/css/theme.
   Korrekturen macht der Admin.
   (Stand heute: Rang-Pill und All-Time-Zeile sind in den Profil-Tab gewandert,
   D-038; aus den Getränke-Karten sind ganzflächige Knöpfe in der Getränkefarbe
-  geworden, D-039. Der Grundsatz „nur Plus" gilt unverändert.)
+  geworden, D-039; statt des zentrierten Namens steht oben ein Kopf mit
+  Namenszeichen und „Dabei seit …", D-040. Der Grundsatz „nur Plus" gilt
+  unverändert.)
 
 ## 9. Betrieb auf dem Pi (eingeplant, Ausbau in M7)
 

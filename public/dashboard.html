@@ -146,6 +146,24 @@
   .drink .value { color: var(--on); }
   .drink .label { color: var(--on); opacity: 0.68; }
   .drink .split > .sep { background: currentColor; opacity: 0.22; }
+
+  /* Kopf der Seite (D-040): Namenszeichen, Name, Zugehörigkeit — steht über
+     den Tabs und gilt damit für beide Ansichten. */
+  .ident { display: flex; align-items: center; gap: 13px; }
+  .ident .avatar { width: 46px; height: 46px; font-size: 20px; }
+  .ident-name { font-family: 'Bitter', serif; font-weight: 800; font-size: 26px; line-height: 1.1; color: var(--creme); }
+  .ident-since { font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+  /* Fußzeile in einer Karte statt eines eigenen Knopfes darunter (D-040) */
+  .card-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    width: 100%; padding: 12px 0 0; margin-top: 2px;
+    background: none; border: none; border-top: 1px solid var(--glass-edge);
+    color: var(--ink-muted); font-family: 'Work Sans', sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer; text-align: left;
+  }
+  .card-foot:hover { color: var(--ink); }
+  .card-foot .chevron { color: var(--green); font-size: 18px; }
 </style>
 </head>
 <body>
@@ -163,8 +181,12 @@
     </div>
 
     <div id="user-view" hidden style="display:flex;flex-direction:column;gap:18px;">
-      <div style="text-align:center;">
-        <div id="player-name" style="font-family:'Bitter',serif;font-weight:800;font-size:32px;color:var(--creme);"></div>
+      <div class="ident">
+        <div id="player-initial" class="avatar" aria-hidden="true"></div>
+        <div>
+          <div id="player-name" class="ident-name"></div>
+          <div id="player-since" class="ident-since"></div>
+        </div>
       </div>
 
       <!-- Umschalter: Zählen (Eingabe) / Profil (Statistik & Abzeichen) -->
@@ -240,42 +262,32 @@
       <!-- Profil: Statistik, Ranglisten-Umfeld und Abzeichen -->
       <div id="tab-profile" hidden style="display:flex;flex-direction:column;gap:18px;">
 
-        <!-- Heute: Stand des laufenden Abends + wer direkt vor/hinter mir liegt -->
+        <!-- Eine Karte für beide Zeiträume (D-040): oben umschaltbar, darunter
+             Platz und Nachbarn, in der Fußzeile die ganze Liste im selben Zeitraum -->
         <div class="card" style="display:flex;flex-direction:column;gap:12px;">
-          <div class="card-title" style="color:var(--green);">Heute Abend</div>
+          <div class="card-title" style="color:var(--gold);">Rangliste</div>
+          <div id="prof-tabs" class="tabs" role="tablist" data-pos="0">
+            <div class="tab-indicator"></div>
+            <button id="prof-tab-today" class="tab-btn active" type="button">Heute</button>
+            <button id="prof-tab-alltime" class="tab-btn" type="button">All-Time</button>
+          </div>
           <div class="split">
             <div class="cell">
-              <div id="prof-today-total" class="num value" style="font-size:34px;color:var(--green);">0</div>
+              <div id="prof-total" class="num value" style="font-size:34px;">0</div>
               <div class="label">Getränke</div>
             </div>
             <div class="sep"></div>
             <div class="cell">
-              <div id="prof-today-rank" class="num value value--gold" style="font-size:34px;">–</div>
-              <div id="prof-today-rank-label" class="label">Platz heute</div>
+              <div id="prof-rank" class="num value value--gold" style="font-size:34px;">–</div>
+              <div id="prof-rank-label" class="label">Platz</div>
             </div>
           </div>
-          <div id="prof-today-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <div id="prof-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button id="show-board" class="card-foot" type="button">
+            <span>Ganze Rangliste ansehen</span>
+            <span class="chevron" aria-hidden="true">›</span>
+          </button>
         </div>
-
-        <!-- All-Time: Gesamtstand + Umfeld -->
-        <div class="card" style="display:flex;flex-direction:column;gap:12px;">
-          <div class="card-title" style="color:var(--gold);">All-Time</div>
-          <div class="split">
-            <div class="cell">
-              <div id="prof-alltime-total" class="num value value--gold" style="font-size:34px;">0</div>
-              <div class="label">Getränke</div>
-            </div>
-            <div class="sep"></div>
-            <div class="cell">
-              <div id="prof-alltime-rank" class="num value" style="font-size:34px;">–</div>
-              <div id="prof-alltime-rank-label" class="label">Platz</div>
-            </div>
-          </div>
-          <div id="prof-alltime-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
-        </div>
-
-        <!-- Ein Knopf für beide Zeiträume: im Blatt selbst ist umschaltbar -->
-        <button id="show-board" class="show-all" type="button">Ganze Rangliste ansehen ›</button>
 
         <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung -->
         <div class="card" style="display:flex;flex-direction:column;gap:16px;">
@@ -308,6 +320,14 @@
               <span style="color:var(--brick);">Shots <span id="pct-shot" class="num">0%</span></span>
               <span style="color:var(--mix);">Mischen <span id="pct-mix" class="num">0%</span></span>
             </div>
+          </div>
+          <!-- Anteil am Haus (D-040): dieselbe Spur wie die Mischung -->
+          <div>
+            <div class="eyebrow" style="margin-bottom:8px;">Anteil am Haus</div>
+            <div class="dist-bar">
+              <div id="share-bar" style="background:var(--gold);width:0;"></div>
+            </div>
+            <div id="share-note" style="font-size:12px;color:var(--ink-muted);margin-top:8px;font-variant-numeric:tabular-nums;">–</div>
           </div>
         </div>
 
@@ -398,21 +418,24 @@ if (!token || !playerId) {
     errTimer = setTimeout(() => { errEl.textContent = ''; }, 4000);
   }
 
-  // Zahl setzen und bei Anstieg kurz „aufploppen" lassen
+  function popEl(el) {
+    el.classList.remove('pk-pop');
+    void el.offsetWidth;   // Reflow erzwingen, damit die Animation neu startet
+    el.classList.add('pk-pop');
+    // Klasse nach dem Lauf entfernen: sonst spielt die Animation erneut,
+    // sobald der Tab-Wechsel das Element wieder sichtbar macht.
+    el.addEventListener('animationend', () => el.classList.remove('pk-pop'), { once: true });
+  }
+
+  // Zahl setzen und bei Anstieg kurz „aufploppen" lassen. `key` trennt Werte,
+  // die sich dasselbe Element teilen (Rangliste heute/all-time, D-040).
   const prev = {};
-  function bump(id, value) {
+  function bump(id, value, key = id) {
     const el = $(id);
-    const had = id in prev;
+    const had = key in prev;
     el.textContent = value;
-    if (had && value > prev[id]) {
-      el.classList.remove('pk-pop');
-      void el.offsetWidth;   // Reflow erzwingen, damit die Animation neu startet
-      el.classList.add('pk-pop');
-      // Klasse nach dem Lauf entfernen: sonst spielt die Animation erneut,
-      // sobald der Tab-Wechsel das Element wieder sichtbar macht.
-      el.addEventListener('animationend', () => el.classList.remove('pk-pop'), { once: true });
-    }
-    prev[id] = value;
+    if (had && value > prev[key]) popEl(el);
+    prev[key] = value;
   }
 
   // --- Persönliche Statistik + Achievements (REST, aktualisiert bei eigener Änderung) ---
@@ -424,10 +447,12 @@ if (!token || !playerId) {
       const res = await fetch(`${AREA.base}/api/players/${encodeURIComponent(playerId)}/stats`);
       if (!res.ok) return;
       const { days, best, avgPerNight, achievements, visitBadge } = await res.json();
+      statDays = days;
+      renderSince();
       bump('stat-days', days);
       if (best) {
         $('stat-best').textContent = best.total;
-        $('stat-best-label').textContent = `Bestes Ergebnis (${fmtDay(best.day)})`;
+        $('stat-best-label').textContent = `Bester Abend (${fmtDay(best.day)})`;
       }
       $('stat-avg').textContent = days
         ? avgPerNight.toLocaleString('de-DE', { maximumFractionDigits: 1 })
@@ -478,17 +503,17 @@ if (!token || !playerId) {
 
   const fmtDrinks = (n) => (n === 1 ? '1 Getränk' : `${n} Getränke`);
 
-  // ranking: absteigend sortierte Liste [{name,total,me}]; füllt Platz + Nachbarn
-  function renderRanking(ranking, meIdx, rankEl, rankLabelEl, rivalsEl, labelSuffix) {
-    const box = $(rivalsEl);
+  // ranking: absteigend sortierte Liste [{name,total}]; füllt Platz + Nachbarn
+  function renderRanking(ranking, meIdx, labelSuffix) {
+    const box = $('prof-rivals');
     box.textContent = '';
     if (meIdx < 0) {
-      $(rankEl).textContent = '–';
-      $(rankLabelEl).textContent = labelSuffix === 'heute' ? 'Heute noch nichts' : 'Platz';
+      $('prof-rank').textContent = '–';
+      $('prof-rank-label').textContent = labelSuffix === 'heute' ? 'Heute noch nichts' : 'Platz';
       return;
     }
-    $(rankEl).textContent = `#${meIdx + 1}`;
-    $(rankLabelEl).textContent = `von ${ranking.length} ${labelSuffix}`;
+    $('prof-rank').textContent = `#${meIdx + 1}`;
+    $('prof-rank-label').textContent = `von ${ranking.length} ${labelSuffix}`;
     const ahead = ranking[meIdx - 1];
     const behind = ranking[meIdx + 1];
     const me = ranking[meIdx];
@@ -579,7 +604,7 @@ if (!token || !playerId) {
 
   const closeBoard = () => { $('board-modal').hidden = true; };
 
-  $('show-board').addEventListener('click', () => openBoard('alltime'));
+  $('show-board').addEventListener('click', () => openBoard(profScope));
   $('board-tab-today').addEventListener('click', () => setBoardScope('today', true));
   $('board-tab-alltime').addEventListener('click', () => setBoardScope('alltime', true));
   $('board-close').addEventListener('click', closeBoard);
@@ -587,21 +612,77 @@ if (!token || !playerId) {
   $('board-modal').addEventListener('click', (e) => { if (e.target === $('board-modal')) closeBoard(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBoard(); });
 
+  // Rangliste im Profil (D-040): eine Karte, oben umschaltbar. Solange niemand
+  // den Schalter angefasst hat, zeigt sie „Heute", sobald heute etwas von einem
+  // selbst geloggt ist — sonst stünden an einem normalen Dienstag zwei Striche.
+  let profScope = 'alltime';
+  let profScopeManual = false;
+  let profMe = null;
+  const profLists = { today: [], alltime: [] };
+
+  function setProfScope(scope, manual = false) {
+    profScope = scope;
+    if (manual) profScopeManual = true;
+    $('prof-tabs').dataset.pos = scope === 'today' ? '0' : '1';
+    $('prof-tab-today').classList.toggle('active', scope === 'today');
+    $('prof-tab-alltime').classList.toggle('active', scope !== 'today');
+    renderProfile(!manual);
+  }
+
+  function renderProfile(animate) {
+    if (!profMe) return;
+    const today = profScope === 'today';
+    const list = profLists[profScope];
+    const total = today ? todayTotal(profMe) : profMe.total;
+    const el = $('prof-total');
+    el.style.color = today ? 'var(--green)' : 'var(--gold)';
+    // Beim Umschalten nicht aufploppen: der Wert ist nicht gestiegen,
+    // es steht nur ein anderer Zeitraum da.
+    if (animate) bump('prof-total', total, `prof-total-${profScope}`);
+    else { el.textContent = total; prev[`prof-total-${profScope}`] = total; }
+    renderRanking(list, list.findIndex((p) => p.id === profMe.id), today ? 'heute' : 'insgesamt');
+  }
+
   function updateProfile(players, me) {
+    profMe = me;
     // Heute: nur wer heute geloggt hat, Tiebreak wie auf dem TV (D-020)
-    const todayList = players
+    profLists.today = players
       .filter((p) => todayTotal(p) > 0)
       .map((p) => ({ id: p.id, name: p.name, total: todayTotal(p), ts: p.lastDrinkTsToday }))
       .sort((a, b) => b.total - a.total || (a.ts ?? Infinity) - (b.ts ?? Infinity) || a.name.localeCompare(b.name, 'de'));
-    bump('prof-today-total', todayTotal(me));
-    renderRanking(todayList, todayList.findIndex((p) => p.id === me.id),
-      'prof-today-rank', 'prof-today-rank-label', 'prof-today-rivals', 'heute');
-
     // All-Time: Reihenfolge kommt fertig sortiert vom Server (inkl. Tiebreak)
-    const allList = players.map((p) => ({ id: p.id, name: p.name, total: p.total }));
-    bump('prof-alltime-total', me.total);
-    renderRanking(allList, allList.findIndex((p) => p.id === me.id),
-      'prof-alltime-rank', 'prof-alltime-rank-label', 'prof-alltime-rivals', 'insgesamt');
+    profLists.alltime = players.map((p) => ({ id: p.id, name: p.name, total: p.total }));
+
+    if (!profScopeManual) setProfScope(todayTotal(me) > 0 ? 'today' : 'alltime');
+    else renderProfile(true);
+  }
+
+  $('prof-tab-today').addEventListener('click', () => setProfScope('today', true));
+  $('prof-tab-alltime').addEventListener('click', () => setProfScope('alltime', true));
+
+  // Anteil am Haus (D-040): eigener Stand gegen die Summe aller — dieselbe
+  // Spielerliste, aus der direkt darüber auch der All-Time-Platz kommt.
+  function updateShare(players, me) {
+    const house = players.reduce((n, p) => n + p.total, 0);
+    if (!house) {
+      $('share-bar').style.width = '0';
+      $('share-note').textContent = 'Hier wurde noch nichts gezählt.';
+      return;
+    }
+    const share = (me.total / house) * 100;
+    $('share-bar').style.width = `${share}%`;
+    const pct = share.toLocaleString('de-DE', { maximumFractionDigits: 1 });
+    $('share-note').textContent = `${me.total} von ${house} Getränken · ${pct} %`;
+  }
+
+  // Kopfzeile: „Dabei seit …" kommt aus dem Zustand, die Abende aus der Statistik
+  let statDays = null;
+  let joinedAt = null;
+  function renderSince() {
+    const parts = [];
+    if (joinedAt) parts.push(`Dabei seit ${joinedAt}`);
+    if (statDays) parts.push(statDays === 1 ? '1 Abend' : `${statDays} Abende`);
+    $('player-since').textContent = parts.join(' · ');
   }
 
   // Verteilungsbalken aus den All-Time-Zählern
@@ -628,6 +709,11 @@ if (!token || !playerId) {
         return;
       }
       $('player-name').textContent = me.name;
+      $('player-initial').textContent = me.name.charAt(0).toUpperCase();
+      // created_at steht als 'YYYY-MM-DD HH:MM:SS' im Zustand (D-006)
+      const joined = /^\d{4}-\d{2}-\d{2}/.exec(me.createdAt ?? '');
+      const joinedDay = joined ? fmtDay(joined[0]) : null;
+      if (joinedDay !== joinedAt) { joinedAt = joinedDay; renderSince(); }
       bump('today-total', me.beersToday + me.shotsToday + me.mixesToday);
       bump('beers-today', me.beersToday);
       bump('beers-total', me.beers);
@@ -636,6 +722,7 @@ if (!token || !playerId) {
       bump('mixes-today', me.mixesToday);
       bump('mixes-total', me.mixes);
       updateDistribution(me);
+      updateShare(players, me);
       updateProfile(players, me);
       lastPlayers = players;
       if (!$('board-modal').hidden) renderBoard();
