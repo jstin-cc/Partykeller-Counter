@@ -94,6 +94,9 @@ function createHandlers(area) {
         throw new Error('Fun-Fact-Takt muss zwischen 30 und 300 Sekunden liegen');
       }
       db.setSetting('funfact_seconds', String(seconds));
+      // Neuer Takt heißt neue Restzeit — sonst zählt die Admin-Übersicht
+      // gegen die alte Dauer (D-043).
+      area.setFactIndex(area.factIndex);
     },
 
     addFact(auth, { title, text }) {
@@ -154,6 +157,17 @@ function createHandlers(area) {
       requireAdmin(auth);
       db.setSetting('join_url', normalizeJoinUrl(url));
     },
+
+    // Fun-Fact-Band von Hand weiterschalten (D-043). Der Server hält nur eine
+    // laufende Nummer; welcher Fact das ist, rechnen die Clients mit ihrer
+    // eigenen Liste modulo aus — deshalb reicht hier eine Zahl.
+    setFactIndex(auth, { index }) {
+      requireAdmin(auth);
+      if (!Number.isInteger(index) || index < 0 || index > 100000) {
+        throw new Error('Ungültige Fact-Nummer');
+      }
+      area.setFactIndex(index);
+    },
   };
 }
 
@@ -195,8 +209,56 @@ export function setupWs(server, areas) {
       }
     };
 
+    // --- Fun-Fact-Uhr (D-043) ---------------------------------------------
+    // Der Server zählt eine laufende Nummer hoch; Fernseher und Admin rechnen
+    // daraus mit ihrer eigenen (identischen) Liste den aktuellen Fact aus.
+    // Damit zeigen zwei Fernseher dasselbe, und der Admin kann springen.
+    // Die Position ist reine Anzeige und steht bewusst nicht in der DB: nach
+    // einem Neustart fängt das Band wieder vorn an.
+    area.factIndex = 0;
+    area.factSince = Date.now();
+    let factTimer = null;
+
+    const factSeconds = () => {
+      const s = Number(area.db.getSetting('funfact_seconds', '30'));
+      return Number.isFinite(s) && s >= 5 ? s : 30;
+    };
+
+    const factMessage = () => JSON.stringify({
+      type: 'fact', index: area.factIndex, since: area.factSince, seconds: factSeconds(),
+    });
+
+    area.broadcastFact = () => {
+      const msg = factMessage();
+      for (const client of wss.clients) {
+        if (client.readyState === client.OPEN) client.send(msg);
+      }
+    };
+
+    function armFactTimer() {
+      clearTimeout(factTimer);
+      factTimer = setTimeout(() => {
+        area.factIndex += 1;
+        area.factSince = Date.now();
+        area.broadcastFact();
+        armFactTimer();
+      }, factSeconds() * 1000);
+      // Der Takt darf den Prozess nicht am Leben halten
+      factTimer.unref?.();
+    }
+
+    area.setFactIndex = (index) => {
+      area.factIndex = index;
+      area.factSince = Date.now();
+      armFactTimer();
+      area.broadcastFact();
+    };
+
+    armFactTimer();
+
     wss.on('connection', (ws) => {
       ws.send(JSON.stringify({ type: 'state', ...area.db.getState() }));
+      ws.send(factMessage());
 
       ws.on('message', (raw) => {
         let msg;

@@ -962,3 +962,41 @@ Zeichnen, weil jede Karte eine eigene SVG-Kurve mitbringt. Deshalb bleibt die
 Datenseite, wie sie ist (eine Abfrage, kein Paging-Zustand, der mit
 Korrekturen aus dem Bearbeiten-Dialog synchron gehalten werden müsste), und
 begrenzt wird nur, was gemalt wird.
+
+## D-043 (2026-09-09): Der Server gibt den Fun-Fact-Takt vor, der Admin kann blättern
+
+**Entscheidung:** Das Fun-Fact-Band bekommt eine Übersicht im Admin — ein
+eigenes Fenster hinter „Alle Fun-Facts ansehen ›" im vorhandenen Block
+*Eigene Fun-Facts*: oben die Meldung, die gerade auf dem Fernseher steht, mit
+Restzeit-Balken, darunter ‹ Zurück / „7 von 16" / Weiter ›, darunter die
+komplette Liste mit Herkunfts-Chip (Rekord, Eigene, Heute, Statistik, Moment,
+Bilanz); ein Klick auf eine Zeile springt dorthin. Dafür drei Änderungen unter
+der Haube:
+
+1. **`public/js/facts.js`** — `computeFacts()` ist aus `tv.html` heraus in ein
+   gemeinsames Modul gewandert, das TV und Admin importieren. Nur so zeigt die
+   Übersicht garantiert dieselbe Liste in derselben Reihenfolge wie der
+   Fernseher. Jeder Eintrag trägt zusätzlich ein `kind` (die Herkunft); das
+   Band zeigt es nicht, die Übersicht gruppiert danach.
+2. **Der Server ist die Uhr.** Er hält je Bereich eine laufende Nummer
+   (`area.factIndex`) und schaltet sie im eingestellten Takt weiter; welcher
+   Fact das ist, rechnen die Clients mit `index % listenlänge` selbst aus. Die
+   Nummer geht als eigene Nachricht `{ type: 'fact', index, since, seconds }`
+   raus — bewusst **nicht** im State-Broadcast, sonst würde der Fernseher alle
+   30 Sekunden seine ganze Rangliste neu zeichnen.
+3. **`setFactIndex(index)`** ist eine normale Admin-Nachricht mit Token- und
+   Rollenprüfung (CLAUDE.md Regel 6).
+
+Die Position steht bewusst nicht in der Datenbank: nach einem Neustart fängt
+das Band wieder vorn an.
+
+**Begründung:** Nutzerwunsch nach einem Entwurf. Der Weg über den Server war
+die einzige Variante, die ohne Loch auskommt: Der Fernseher hat kein Token —
+ließe man ihn seinen Stand melden, wäre das eine Schreibnachricht ohne
+Anmeldung, und genau das verbietet Regel 6. Umgekehrt braucht der Server die
+Fact-**Texte** nicht zu kennen, um zu zählen, also bleiben die deutschen
+Formulierungen da, wo sie hingehören: im Frontend. Zwei angenehme Nebenwirkungen:
+zwei Fernseher im selben Bereich zeigen jetzt garantiert dieselbe Meldung, und
+der Takt-Regler setzt die Restzeit sofort neu, statt gegen die alte Dauer
+weiterzulaufen. Ist noch kein Fernseher verbunden, zeigt das Fenster trotzdem
+die Liste — die rechnet der Admin selbst — und schaltet die Knöpfe ab.
