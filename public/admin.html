@@ -76,6 +76,47 @@
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center; z-index: 10;
   }
+
+  /* Übersicht der rotierenden Fun-Facts (D-043) */
+  .fact-now {
+    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    border-radius: var(--radius); padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .fact-now .now-text {
+    font-family: 'Bitter', serif; font-weight: 700; font-size: 19px;
+    color: var(--creme); line-height: 1.35;
+  }
+  /* Restzeit bis zum Wechsel; läuft per CSS-Transition, nicht per Timer */
+  .fact-bar { height: 4px; border-radius: 999px; background: oklch(0.92 0.02 160 / 0.12); overflow: hidden; }
+  .fact-bar > div { height: 100%; background: var(--green); width: 0; }
+  .fact-chip {
+    flex: none; font-family: 'Bitter', serif; font-weight: 700; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    border: 1px solid currentColor; border-radius: 999px; padding: 2px 8px;
+  }
+  .k-rekord { color: var(--gold); }
+  .k-eigene { color: var(--green); }
+  .k-heute { color: var(--amber); }
+  .k-statistik { color: var(--brick); }
+  .k-moment { color: var(--mix); }
+  .k-bilanz, .k-leer { color: var(--ink-muted); }
+  .fact-rows { display: flex; flex-direction: column; gap: 5px; max-height: 320px; overflow-y: auto; }
+  .fact-row {
+    display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+    background: var(--surface-2); border: 1px solid var(--glass-edge);
+    border-left: 3px solid transparent; border-radius: var(--radius);
+    padding: 9px 13px; cursor: pointer; color: var(--ink-muted);
+    font-family: 'Work Sans', sans-serif; font-size: 13px;
+  }
+  .fact-row:hover { color: var(--ink); }
+  .fact-row.active { border-left-color: var(--green); color: var(--creme); background: var(--surface); }
+  .fact-row .n {
+    width: 20px; flex: none; font-family: 'Bitter', serif; font-weight: 800;
+    font-variant-numeric: tabular-nums; color: var(--ink-muted);
+  }
+  .fact-row.active .n { color: var(--green); }
+  .fact-row .txt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -158,6 +199,7 @@
     <div class="glass" style="margin-bottom:22px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);display:flex;flex-direction:column;gap:12px;">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">Eigene Fun-Facts</div>
+        <button type="button" id="open-facts" class="btn-flat" style="margin-left:auto;padding:9px 16px;font-size:13px;font-weight:600;">Alle Fun-Facts ansehen ›</button>
       </div>
       <form id="fact-form" style="display:flex;gap:10px;flex-wrap:wrap;">
         <input id="fact-title" class="input-flat" type="text" maxlength="30" placeholder="Titel (z. B. Ansage)" autocomplete="off" required style="width:200px;padding:10px 14px;font-size:14px;">
@@ -243,10 +285,46 @@
   </form>
 </div>
 
+<!-- Alle rotierenden Meldungen auf einen Blick (D-043): welche gerade läuft,
+     vor/zurück und Sprung per Klick. Steht bewusst in einem eigenen Fenster,
+     damit der Hauptbereich schlank bleibt. -->
+<div id="facts-modal" class="modal-backdrop" hidden>
+  <div class="glass" style="background:var(--surface);border-radius:var(--radius-lg);padding:22px;width:720px;max-width:calc(100vw - 40px);max-height:86vh;display:flex;flex-direction:column;gap:16px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+      <div>
+        <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:20px;color:var(--creme);margin:0;">Fun-Facts im Wechsel</h2>
+        <div id="facts-sub" style="font-size:13px;color:var(--ink-muted);font-variant-numeric:tabular-nums;"></div>
+      </div>
+      <button type="button" id="close-facts" class="btn-flat" style="padding:9px 14px;font-size:13px;">Schließen</button>
+    </div>
+
+    <div class="fact-now">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-muted);">Gerade auf dem TV</div>
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span id="facts-chip" class="fact-chip"></span>
+        <div id="facts-text" class="now-text"></div>
+      </div>
+      <div class="fact-bar"><div id="facts-bar"></div></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <button type="button" id="facts-prev" class="btn-flat" style="padding:10px 18px;font-size:14px;">‹ Zurück</button>
+      <div id="facts-pos" style="font-family:'Bitter',serif;font-weight:700;font-size:14px;color:var(--ink-muted);font-variant-numeric:tabular-nums;"></div>
+      <button type="button" id="facts-next" class="btn-flat" style="padding:10px 18px;font-size:14px;">Weiter ›</button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;min-height:0;">
+      <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">Alle Meldungen</div>
+      <div id="facts-rows" class="fact-rows"></div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { AREA } from './js/area.js';
 import { post } from './js/api.js';
 import { connectState } from './js/ws-client.js';
+import { factList, FACT_KIND_LABEL } from './js/facts.js';
 
 const $ = (id) => document.getElementById(id);
 // Getrennte Admin-Sessions pro Bereich (pk_/ys_-Präfix, D-019)
@@ -304,6 +382,8 @@ function enterDashboard() {
   ws = connectState({
     onState(state) {
       players = state.players;
+      lastState = state;
+      renderFactSheet();
       renderRows();
       updateJoinField(state.joinUrl ?? '');
       updateBoardMode(state.boardMode ?? 'alltime', state.boardDay);
@@ -318,9 +398,111 @@ function enterDashboard() {
         setTimeout(() => { $('reset-done').hidden = true; }, 2000);
       }
     },
+    onFact(msg) {
+      factPos = msg;
+      renderFactSheet();
+    },
     onError: showError,
   });
 }
+
+// --- Fun-Facts im Wechsel (D-043) ----------------------------------------
+// Die Liste rechnet js/facts.js aus demselben Zustand, aus dem sie auch der
+// Fernseher baut; welcher Eintrag läuft, sagt der Server. Vor/Zurück und
+// Sprünge gehen als Admin-Nachricht zurück.
+let lastState = null;
+let factPos = null;   // { index, since, seconds } vom Server
+
+function currentFacts() {
+  if (!lastState) return [];
+  return factList(
+    lastState.players.filter((p) => !p.hidden),
+    lastState.records, lastState.customFacts, lastState.funStats
+  );
+}
+
+function renderFactSheet() {
+  if ($('facts-modal').hidden) return;
+  const list = currentFacts();
+  const rows = $('facts-rows');
+  if (!list.length || !factPos) {
+    rows.textContent = '';
+    $('facts-text').textContent = 'Noch keine Meldungen.';
+    $('facts-chip').className = 'fact-chip k-leer';
+    $('facts-chip').textContent = '–';
+    $('facts-pos').textContent = '';
+    $('facts-sub').textContent = 'Kein Fernseher verbunden oder nichts zu zeigen.';
+    $('facts-bar').style.width = '0';
+    $('facts-prev').disabled = $('facts-next').disabled = true;
+    return;
+  }
+  $('facts-prev').disabled = $('facts-next').disabled = false;
+
+  const pos = factPos.index % list.length;
+  const f = list[pos];
+  $('facts-chip').className = `fact-chip k-${f.kind}`;
+  $('facts-chip').textContent = FACT_KIND_LABEL[f.kind] ?? f.kind;
+  $('facts-text').textContent = f.text;
+  $('facts-pos').textContent = `${pos + 1} von ${list.length}`;
+  const round = Math.round(list.length * factPos.seconds);
+  $('facts-sub').textContent =
+    `${list.length} Meldungen · alle ${factPos.seconds} s · ein Durchlauf dauert ${Math.floor(round / 60)}:${String(round % 60).padStart(2, '0')} min`;
+
+  // Der Balken läuft ohne eigenen Timer: Startbreite setzen, dann per
+  // Transition über die Restzeit auf 100 % ziehen.
+  const passed = Math.min(factPos.seconds * 1000, Math.max(0, Date.now() - factPos.since));
+  const bar = $('facts-bar');
+  bar.style.transition = 'none';
+  bar.style.width = `${(passed / (factPos.seconds * 1000)) * 100}%`;
+  void bar.offsetWidth;
+  bar.style.transition = `width ${factPos.seconds * 1000 - passed}ms linear`;
+  bar.style.width = '100%';
+
+  rows.textContent = '';
+  list.forEach((entry, i) => {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'fact-row' + (i === pos ? ' active' : '');
+    const n = document.createElement('span');
+    n.className = 'n';
+    n.textContent = i + 1;
+    const chip = document.createElement('span');
+    chip.className = `fact-chip k-${entry.kind}`;
+    chip.textContent = FACT_KIND_LABEL[entry.kind] ?? entry.kind;
+    const txt = document.createElement('span');
+    txt.className = 'txt';
+    txt.textContent = entry.text;
+    row.append(n, chip, txt);
+    row.addEventListener('click', () => jumpTo(i));
+    rows.appendChild(row);
+  });
+  rows.querySelector('.fact-row.active')?.scrollIntoView({ block: 'nearest' });
+}
+
+// Der Server hält nur eine laufende Nummer; wir schicken die Zeilennummer
+// direkt, dann landet sein `index % länge` genau dort.
+function jumpTo(i) {
+  const list = currentFacts();
+  if (!list.length) return;
+  send({ type: 'setFactIndex', index: (i + list.length) % list.length });
+}
+
+function stepFact(delta) {
+  const list = currentFacts();
+  if (!list.length || !factPos) return;
+  jumpTo((factPos.index % list.length) + delta + list.length);
+}
+
+$('open-facts').addEventListener('click', () => {
+  $('facts-modal').hidden = false;
+  renderFactSheet();
+});
+const closeFacts = () => { $('facts-modal').hidden = true; };
+$('close-facts').addEventListener('click', closeFacts);
+$('facts-modal').addEventListener('click', (e) => { if (e.target === $('facts-modal')) closeFacts(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFacts(); });
+$('facts-prev').addEventListener('click', () => stepFact(-1));
+$('facts-next').addEventListener('click', () => stepFact(1));
 
 // --- TV-Anzeige umschalten (All-Time / Heute / Archiv-Abend) ---
 function updateBoardMode(mode, day) {

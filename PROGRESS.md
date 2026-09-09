@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-09 (D-043): **Fun-Fact-Übersicht im Admin** — ein Fenster zeigt
+alle rotierenden Meldungen, welche gerade auf dem TV läuft (mit Restzeit) und
+erlaubt vor/zurück sowie Sprünge. Dafür rechnen TV und Admin die Liste aus
+demselben Modul `public/js/facts.js`, und der Server gibt als Uhr die Position
+vor (eigene `fact`-Nachricht, Admin-Befehl `setFactIndex`).
 Seit 2026-09-09 (D-041, D-042): **Das zuletzt benutzte Konto steht in der
 Anmeldeliste oben** (ohne Kennzeichnung, Reihenfolge dahinter unverändert) und
 das **Abend-Archiv zeichnet in Blöcken von zwölf** mit „Ältere Abende laden".
@@ -235,6 +240,21 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       Anteil am Haus (D-040)
 - [x] Anmeldeliste: zuletzt benutztes Konto zuerst (D-041)
 - [x] Abend-Archiv: zwölf Karten je Block, „Ältere Abende laden" (D-042)
+- [x] Fun-Fact-Übersicht im Admin, gemeinsames Fact-Modul, Fact-Uhr im Server
+      (D-043)
+
+## Verifikation (2026-09-09, D-043)
+
+Browser-Tests (Chromium, Testdatenbank mit vier Konten und zwei eigenen
+Meldungen, 16 Facts in der Rotation): Das Fenster zeigt „16 Meldungen · alle
+30 s · ein Durchlauf dauert 8:00 min" und markiert die laufende Zeile. Nach
+*Weiter*, nochmal *Weiter*, *Zurück* und einem Sprung auf Zeile 7 zeigen Admin
+und Fernseher jedes Mal denselben Text; die Positionsanzeige steht auf „7 von
+16" bei aktiver Zeile 7. Ein zweiter, später geöffneter Fernseher steigt beim
+selben Fact ein. Takt auf 45 s gestellt: die Zeile rechnet sofort mit „alle
+45 s · 12:00 min". Automatischer Wechsel geprüft: nach 32 Sekunden ohne Zutun
+steht ein anderer Fact da, der Server hat die Indizes 0 → 1 gesendet. Keine
+Konsolenfehler auf TV und Admin.
 
 ## Verifikation (2026-09-09, D-041 und D-042)
 

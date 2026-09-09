@@ -251,6 +251,7 @@
 <script type="module">
 import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
+import { factList, fmtDay } from './js/facts.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -603,11 +604,11 @@ function slideSwap(rebuild) {
 }
 
 connectState({
+  onFact({ index }) { setFactIndex(index); },
   onState(state) {
     const { joinUrl, boardMode } = state;
     renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + AREA.base + '/'));
     applyScrollSpeed(state.scrollSeconds);
-    applyFunfactSpeed(state.funfactSeconds);
     const mode = boardMode === 'today' ? 'today'
       : (boardMode === 'archive' && state.boardDay) ? 'archive'
       : 'alltime';
@@ -626,118 +627,12 @@ connectState({
 });
 
 // --- Fun-Facts (live) ---
-// Jeder Eintrag ist { title, text }: berechnete Facts (Rekorde, Tages-
-// Bestleistungen) plus die vom Admin gepflegten eigenen Meldungen.
-// „Heute" = Party-Tag 06:00–05:59 (kommt schon aggregiert vom Server).
-const FUNFACT_FALLBACK = { title: 'Fun Fact', text: 'Heute noch nichts getrunken – auf geht’s!' };
+// Die Liste kommt aus js/facts.js, damit die Admin-Übersicht dieselbe zeigt;
+// welcher Eintrag gerade dran ist, sagt der Server (D-043).
 let facts = [];
 let factIdx = 0;
 const factEl = $('funfact-text');
 const factTitleEl = $('funfact-title');
-
-function leaderBy(players, key) {
-  let best = null;
-  for (const p of players) {
-    const v = p[key] || 0;
-    if (v > 0 && (!best || v > (best[key] || 0))) best = p;
-  }
-  return best;
-}
-
-// Pausenlänge in Worten: ab zwei Monaten in Monaten, sonst in Tagen
-function fmtGap(days) {
-  if (days >= 60) return `${Math.round(days / 30)} Monaten`;
-  return days === 1 ? 'einem Tag' : `${days} Tagen`;
-}
-
-// Wortform für Meilensteine: 'Max steht jetzt bei 100 Bier insgesamt'
-const MILESTONE_WORDS = { beer: 'Bier', shot: 'Shots', mix: 'Mischen', total: 'Getränken' };
-
-// '2026-09-25' -> '25.09.2026'
-function fmtDay(iso) {
-  if (!iso) return '';
-  const [y, m, d] = iso.split('-');
-  return `${d}.${m}.${y}`;
-}
-
-function computeFacts(players, records, customFacts, funStats) {
-  const out = [];
-  const fact = (text) => out.push({ title: 'Fun Fact', text });
-
-  // All-Time-Rekorde: meiste Getränke an einem einzelnen Abend, schön formuliert
-  if (records) {
-    if (records.beer) fact(`Bier-Rekord: Die meisten Biere an einem Abend hat ${records.beer.name} am ${fmtDay(records.beer.day)} geschafft – ganze ${records.beer.n} Stück.`);
-    if (records.shot) fact(`Shot-Rekord: ${records.shot.name} kippte am ${fmtDay(records.shot.day)} sagenhafte ${records.shot.n} Shots an einem Abend.`);
-    if (records.mix) fact(`Mische-Rekord: ${records.mix.name} mixte am ${fmtDay(records.mix.day)} ${records.mix.n} Mischgetränke an einem Abend.`);
-  }
-
-  // Eigene Meldungen aus dem Admin (mit eigenem Titel)
-  for (const f of customFacts ?? []) out.push({ title: f.title, text: f.text });
-
-  // Tages-Bestleistungen (heute)
-  const b = leaderBy(players, 'beersToday');
-  if (b) fact(`Bier-König des Abends: ${b.name} mit ${b.beersToday} Bier.`);
-  const s = leaderBy(players, 'shotsToday');
-  if (s) fact(`Shot-Meister des Abends: ${s.name} mit ${s.shotsToday} Shots.`);
-  const m = leaderBy(players, 'mixesToday');
-  if (m) fact(`Misch-Meister des Abends: ${m.name} mit ${m.mixesToday} Mischen.`);
-  let top = null, topN = 0;
-  for (const p of players) {
-    const n = (p.beersToday || 0) + (p.shotsToday || 0) + (p.mixesToday || 0);
-    if (n > topN) { topN = n; top = p; }
-  }
-  if (top) fact(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken.`);
-
-  // Statistik-Facts aus dem Archiv (Server: funStats); erst zeigen, wenn die
-  // Zahlen etwas hergeben, damit das Band nicht mit Banalem langweilt.
-  const fs = funStats ?? {};
-  if (fs.firstToday) {
-    const t = new Date(fs.firstToday.ts);
-    const hm = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
-    fact(`Frühstart: Das erste Getränk heute ging um ${hm} Uhr an ${fs.firstToday.name}.`);
-  }
-  if (fs.topHourToday && fs.topHourToday.n >= 3) {
-    fact(`Durstigste Stunde heute: zwischen ${fs.topHourToday.hour} und ${(fs.topHourToday.hour + 1) % 24} Uhr – ${fs.topHourToday.n} Getränke.`);
-  }
-  if (fs.recordNight && fs.nights >= 2) {
-    fact(`Rekord-Abend: Am ${fmtDay(fs.recordNight.day)} flossen zusammen ${fs.recordNight.total} Getränke.`);
-  }
-  if (fs.pace && fs.pace.onPace && fs.pace.todayTotal >= 3) {
-    fact(`Rekordkurs: Schon ${fs.pace.todayTotal} Getränke heute – der Rekord-Abend vom ${fmtDay(fs.pace.recordDay)} stand um diese Uhrzeit erst bei ${fs.pace.recordAtSameTime}.`);
-  }
-  if (fs.regular && fs.regular.nights >= 3) {
-    fact(`Stammgast: ${fs.regular.name} war schon an ${fs.regular.nights} Abenden dabei.`);
-  }
-  if (fs.topWinner && fs.topWinner.wins >= 2) {
-    fact(`Seriensieger: ${fs.topWinner.name} hat schon ${fs.topWinner.wins} Abende gewonnen.`);
-  }
-  // Momente des Abends (D-036): Rückkehr, runde Marken, Führungswechsel
-  if (fs.comeback) {
-    fact(`Comeback: ${fs.comeback.name} ist nach ${fmtGap(fs.comeback.days)} wieder dabei – zuletzt am ${fmtDay(fs.comeback.lastDay)}.`);
-  }
-  if (fs.milestone) {
-    const word = MILESTONE_WORDS[fs.milestone.kind] ?? 'Getränken';
-    fact(`Runde Sache: ${fs.milestone.name} steht jetzt bei ${fs.milestone.n} ${word} insgesamt.`);
-  }
-  if (fs.houseMilestone) {
-    fact(`Hausmarke: Hier wurden insgesamt schon ${fs.houseMilestone.total} Getränke gezählt.`);
-  }
-  if (fs.newLeader) {
-    fact(`Neu an der Spitze: ${fs.newLeader.name} hat ${fs.newLeader.previous} in der All-Time-Liste überholt.`);
-  }
-
-  if (fs.nights >= 2) {
-    const beers = players.reduce((sum, p) => sum + (p.beers || 0), 0);
-    const shots = players.reduce((sum, p) => sum + (p.shots || 0), 0);
-    const mixes = players.reduce((sum, p) => sum + (p.mixes || 0), 0);
-    fact(`Gesamtbilanz: ${beers} Bier, ${shots} Shots und ${mixes} Mischen in ${fs.nights} Abenden.`);
-  }
-  return out;
-}
-
-function currentFactList() {
-  return facts.length ? facts : [FUNFACT_FALLBACK];
-}
 
 // Das Band ist genau eine Ranglistenzeile hoch, der Text also einzeilig. Kurze
 // Facts stehen in Namensgröße da; nur wenn ein Fact breiter ist als das Band,
@@ -766,38 +661,30 @@ function showFact(f) {
   fitFactText();
 }
 
-function updateFacts(players, records, customFacts, funStats) {
-  facts = computeFacts(players, records, customFacts, funStats);
-  const list = currentFactList();
-  factIdx %= list.length;
-  showFact(list[factIdx]);
+function currentFact() {
+  return facts[factIdx % facts.length];
 }
 
-// Wechseltakt des Fun-Fact-Bands, im Admin einstellbar (30–300 s)
-let funfactMs = 30000;
-let funfactTimer = null;
+function updateFacts(players, records, customFacts, funStats) {
+  facts = factList(players, records, customFacts, funStats);
+  showFact(currentFact());
+}
 
-function rotateFact() {
-  const list = currentFactList();
-  factIdx = (factIdx + 1) % list.length;
+// Der Server gibt den Takt vor und sagt, welcher Fact dran ist (D-043).
+// Der Fernseher blendet nur um — so zeigen zwei Bildschirme dasselbe und der
+// Admin kann von Hand weiterschalten.
+function setFactIndex(index) {
+  if (index === factIdx) return;
+  factIdx = index;
+  if (!facts.length) return;
   factEl.style.opacity = '0';
   factTitleEl.style.opacity = '0';
   setTimeout(() => {
-    showFact(list[factIdx]);
+    showFact(currentFact());
     factEl.style.opacity = '1';
     factTitleEl.style.opacity = '1';
   }, 400);
 }
-
-function applyFunfactSpeed(seconds) {
-  const ms = Math.round((Number(seconds) || 30) * 1000);
-  if (ms === funfactMs && funfactTimer) return;
-  funfactMs = ms;
-  if (funfactTimer) clearInterval(funfactTimer);
-  funfactTimer = setInterval(rotateFact, funfactMs);
-}
-
-applyFunfactSpeed(30);
 
 // Bandbreite hängt an der Fenstergröße, die Textbreite am erst nachgeladenen
 // Webfont – in beiden Fällen neu einpassen.

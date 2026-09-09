@@ -132,6 +132,8 @@ Spieler gedrosselt (Token-Bucket ~1/s, Burst 5), Admins ungedrosselt.
   ]
 }
 // Fehler an den Verursacher: { "type": "error", "message": "…" }
+// Stand des Fun-Fact-Bands (D-043), eigene Nachricht statt im State:
+// { "type": "fact", "index": 7, "since": 1788879291585, "seconds": 30 }
 ```
 
 **Client → Server** (Nachrichtennamen aus Prompt.md, `token` in jeder Nachricht):
@@ -151,6 +153,7 @@ Spieler gedrosselt (Token-Bucket ~1/s, Burst 5), Admins ungedrosselt.
 | `setFunfactSpeed(seconds)` | Admin | Wechseltakt des Fun-Fact-Bands, 30–300 s (D-016) |
 | `addFact(title, text)` / `deleteFact(id)` | Admin | eigene Fun-Facts fürs TV-Band (D-015) |
 | `setJoinUrl(url)` | Admin | Ziel des TV-QR-Codes (D-010) |
+| `setFactIndex(index)` | Admin | Fun-Fact-Band von Hand weiterschalten (D-043) |
 
 Der Server validiert jede Nachricht serverseitig (Token, Rolle, Wertebereiche) —
 Clients sind nicht vertrauenswürdig.
