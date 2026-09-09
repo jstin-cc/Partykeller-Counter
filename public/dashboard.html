@@ -121,6 +121,31 @@
   }
   .rival .who { font-family: 'Bitter', serif; font-weight: 700; flex: 1; }
   .rival .gap { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+  /* Getränkefeld (D-039): die ganze Fläche ist der Knopf. --fill ist die
+     Getränkefarbe, --on die Schrift darauf — dieselbe Paarung, die vorher
+     auf dem Knopf saß (dunkler Grund auf Bier/Mischen, Creme auf Shots). */
+  .drink {
+    display: flex; flex-direction: column; gap: 12px;
+    width: 100%; padding: 14px 16px 16px; text-align: left;
+    background: var(--fill); color: var(--on);
+    border: none; border-radius: var(--radius-lg);
+    font-family: inherit; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Große Fläche: weniger einsinken als ein normaler Knopf */
+  .drink:not(:disabled):active { transform: scale(0.985); filter: brightness(1.1); }
+  .drink:not(:disabled):hover { filter: brightness(1.04); }
+  .drink .drink-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .drink .drink-name {
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 16px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .drink .drink-plus { font-family: 'Bitter', serif; font-weight: 800; font-size: 34px; line-height: 1; }
+  /* Zahlen und Beschriftung erben die Schriftfarbe des Feldes */
+  .drink .value { color: var(--on); }
+  .drink .label { color: var(--on); opacity: 0.68; }
+  .drink .split > .sep { background: currentColor; opacity: 0.22; }
 </style>
 </head>
 <body>
@@ -156,9 +181,11 @@
         <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px oklch(0.64 0.15 152 / 0.45);">0</div>
       </div>
 
-      <div id="card-beer" class="card" style="display:flex;flex-direction:column;gap:14px;">
-        <div class="card-title" style="color:var(--amber);">Bier</div>
-        <button id="add-beer" class="btn-big" style="background:var(--amber);">+ Bier hinzufügen</button>
+      <button id="add-beer" class="drink" type="button" aria-label="Bier hinzufügen" style="--fill:var(--amber);--on:var(--bg);">
+        <div class="drink-head">
+          <span class="drink-name">Bier</span>
+          <span class="drink-plus" aria-hidden="true">+</span>
+        </div>
         <div class="split">
           <div class="cell">
             <div id="beers-today" class="num value">0</div>
@@ -166,15 +193,17 @@
           </div>
           <div class="sep"></div>
           <div class="cell">
-            <div id="beers-total" class="num value value--gold">0</div>
+            <div id="beers-total" class="num value">0</div>
             <div class="label">Gesamt</div>
           </div>
         </div>
-      </div>
+      </button>
 
-      <div class="card" style="display:flex;flex-direction:column;gap:14px;">
-        <div class="card-title" style="color:var(--brick);">Shots</div>
-        <button id="add-shot" class="btn-big" style="background:var(--brick);color:var(--ink);">+ Shot hinzufügen</button>
+      <button id="add-shot" class="drink" type="button" aria-label="Shot hinzufügen" style="--fill:var(--brick);--on:var(--ink);">
+        <div class="drink-head">
+          <span class="drink-name">Shots</span>
+          <span class="drink-plus" aria-hidden="true">+</span>
+        </div>
         <div class="split">
           <div class="cell">
             <div id="shots-today" class="num value">0</div>
@@ -182,15 +211,17 @@
           </div>
           <div class="sep"></div>
           <div class="cell">
-            <div id="shots-total" class="num value value--gold">0</div>
+            <div id="shots-total" class="num value">0</div>
             <div class="label">Gesamt</div>
           </div>
         </div>
-      </div>
+      </button>
 
-      <div id="card-mix" class="card" style="display:flex;flex-direction:column;gap:14px;">
-        <div class="card-title" style="color:var(--mix);">Mischen</div>
-        <button id="add-mix" class="btn-big" style="background:var(--mix);">+ Mische hinzufügen</button>
+      <button id="add-mix" class="drink" type="button" aria-label="Mische hinzufügen" style="--fill:var(--mix);--on:var(--bg);">
+        <div class="drink-head">
+          <span class="drink-name">Mischen</span>
+          <span class="drink-plus" aria-hidden="true">+</span>
+        </div>
         <div class="split">
           <div class="cell">
             <div id="mixes-today" class="num value">0</div>
@@ -198,11 +229,11 @@
           </div>
           <div class="sep"></div>
           <div class="cell">
-            <div id="mixes-total" class="num value value--gold">0</div>
+            <div id="mixes-total" class="num value">0</div>
             <div class="label">Gesamt</div>
           </div>
         </div>
-      </div>
+      </button>
 
       </div><!-- /#tab-count -->
 
@@ -341,7 +372,7 @@ const { token, playerId } = getSession();
 const $ = (id) => document.getElementById(id);
 
 // Youngstars: Bier steht in der Auswahl ganz unten (Shots, Mischen, Bier)
-if (AREA.id === 'youngstars') $('card-mix').after($('card-beer'));
+if (AREA.id === 'youngstars') $('add-mix').after($('add-beer'));
 
 if (!token || !playerId) {
   $('no-user-view').hidden = false;

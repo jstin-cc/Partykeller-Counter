@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-09 (D-039): **Getränkefelder sind ganzflächige Knöpfe** — jedes
+Getränk liegt komplett in seiner Farbe (Bier amber, Shots brick, Mischen
+violett), die Schrift darauf wie vorher auf dem Knopf, das Plus ohne Kreis in
+der Kontrastfarbe. Die eigene Knopfzeile entfällt; der Zählen-Tab schrumpft von
+890 auf 567 Pixel und passt damit ohne Scrollen aufs Handy.
 Seit 2026-09-08 (D-038): **Oberfläche aufgeräumt** — Erklärtexte auf
 Anmeldung, Dashboard, Admin und Abend-Archiv entfernt, „Gesamt seit Beginn"
 und die Rang-Pille aus dem Zählen-Tab genommen (steht im Profil), Karten ohne
@@ -216,6 +221,17 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Feinschliff der Oberfläche: Texte gekürzt, doppelte Zahlen entfernt,
       Karten ohne Farbkante, TV-Mehrzahl „Mischen", Pop nur bei echter
       Änderung (D-038)
+- [x] Getränkefelder als ganzflächige Knöpfe in der Getränkefarbe, `.btn-big`
+      entfernt (D-039)
+
+## Verifikation (2026-09-09, D-039)
+
+Browser-Tests (Chromium, Testdatenbank, Konto mit 7 Bier / 3 Shots / 4
+Mischen): Feldhöhe 128 px statt 233 px, Zählen-Tab 567 px statt 890 px — alle
+drei Getränke plus Tageszähler ohne Scrollen sichtbar. Ein Tipp auf die
+*Zahl* (nicht aufs Plus) zählt Bier von 7 auf 8 und heute auf 1, der
+Tageszähler springt mit. Youngstars zeigt weiterhin Shots, Mischen, Bier in
+dieser Reihenfolge. Keine Konsolenfehler.
 
 ## Verifikation (2026-09-08, D-038)
 

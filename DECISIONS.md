@@ -863,3 +863,30 @@ entsprechend nachgezogen. Beim Pop war die stehengebliebene Klasse der
 eigentliche Fehler: `display:none` durch den Tab-Wechsel startet eine noch
 gesetzte CSS-Animation neu, also ploppten die Zahlen bei jedem Umschalten
 wieder auf, obwohl sich nichts geändert hatte.
+
+## D-039 (2026-09-09): Getränkefelder sind ganzflächige Knöpfe in der Getränkefarbe
+
+**Entscheidung:** Im Zählen-Tab ist jedes Getränk jetzt **ein einziger Knopf**,
+der komplett in der Getränkefarbe liegt: Bier amber, Shots brick, Mischen
+violett. Die separate Knopfzeile („+ Bier hinzufügen") entfällt; Name, ein
+Plus-Zeichen und die Heute/Gesamt-Zahlen sitzen direkt auf der Farbe. Die
+Schriftfarbe ist dieselbe Paarung, die vorher auf dem Knopf saß — dunkler
+Grund (`--bg`) auf Bier und Mischen, Creme (`--ink`) auf Shots, weil Brick für
+dunkle Schrift zu dunkel ist. Beides hängt als `--fill`/`--on` am Element, die
+Klasse `.drink` in `public/dashboard.html` bedient sich daraus. Das Plus steht
+ohne Kreis frei in der Kontrastfarbe. `.btn-big` war danach nirgends mehr in
+Gebrauch und ist aus `theme.css` raus; die Youngstars-Umsortierung (Bier
+zuunterst) hängt jetzt an den Feldern selbst statt an eigenen Karten-IDs.
+
+**Begründung:** Nutzerwunsch nach einem Entwurf mit zwei Varianten — ganzes
+Feld als Knopf gegen farbige Karte mit weiterhin eigenem Knopf. Die erste
+gewinnt: ein Feld schrumpft von 233 auf 128 Pixel, der ganze Zählen-Tab von
+890 auf 567, damit passen alle drei Getränke plus Tageszähler ohne Scrollen
+auf ein Handy — und im Keller wird mit einer Hand und schräg gehaltenem
+Display getippt, da ist die größere Fläche mehr wert als die ruhige Karte
+drumherum. Preis dafür: es gibt keine tote Zone mehr, ein Tipper auf die
+Zahlen zählt mit. Das ist vertretbar, weil Hochzählen die einzige Aktion auf
+diesem Bildschirm ist und ein Verzähler ohnehin nur über den Admin
+zurückgeht (kein Minus-Button, PLAN.md §8). Das Plus bleibt als Hinweis, dass
+hier getippt wird, aber ohne Kreis — der Kreis hätte wieder ein Ziel
+suggeriert, obwohl die ganze Fläche eines ist.
