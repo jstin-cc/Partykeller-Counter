@@ -272,6 +272,8 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       Transaktion, Admin-Liste ohne Eingabeverlust (D-046)
 - [x] Leistung: Historien-Cache mit Invalidierung, Index auf `ts`,
       `GET /api/players`, entprellte Statistik, gedrosselte Archiv-Auswahl (D-047)
+- [x] Logo auf Anzeigegröße verkleinert (140 → 42 KB); Cache-Header bewusst
+      nicht (D-048)
 
 ## Verifikation (2026-09-10, D-047)
 
