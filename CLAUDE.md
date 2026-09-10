@@ -42,7 +42,9 @@ mit getrennten Daten und eigenem Theme (D-019): **Partykeller**
 - Quelle: Claude-Design-Projekt „Getränke-Counter Partykeller"
   (`88f5d903-cd4e-489d-9ce7-d904fffe8155`), **immer die v3-Dateien**.
 - Design-Tokens (oklch-Farben, Bitter + Work Sans) in PLAN.md §8 → `public/css/theme.css`.
-- UI-Sprache ist Deutsch. Zähler mit `font-variant-numeric: tabular-nums`.
+- UI-Sprache ist Deutsch, **ohne Gendern** (kein Doppelpunkt, Sternchen oder
+  Binnen-I) — „12 Teilnehmer", nicht „12 Teilnehmer:innen" (D-050).
+  Zähler mit `font-variant-numeric: tabular-nums`.
 
 ## Konventionen
 

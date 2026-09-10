@@ -309,7 +309,7 @@ function curveBlock(timeline, c) {
 }
 
 function footBlock(night, c) {
-  const people = night.participants === 1 ? '1 Teilnehmer:in' : `${night.participants} Teilnehmer:innen`;
+  const people = night.participants === 1 ? '1 Teilnehmer' : `${night.participants} Teilnehmer`;
   return {
     height: 25,
     draw(ctx, y) {

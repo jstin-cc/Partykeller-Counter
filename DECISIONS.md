@@ -1197,3 +1197,14 @@ bekommt keine Bildarbeit ab. Kein direktes Teilen: die App läuft über
 `http://` im WLAN, damit ist die Teilen-Funktion des Browsers (nur in
 sicherem Kontext) nicht verfügbar; das Bild landet in den Downloads und wird
 von dort in die Story gezogen.
+
+## D-050 (2026-09-10): Keine Gendersprache in der Oberfläche
+
+**Entscheidung:** Texte in der App werden nicht gegendert — kein Doppelpunkt,
+Sternchen oder Binnen-I. Betroffen waren „Teilnehmer:innen" auf den
+Abend-Karten und im Story-Bild (jetzt „Teilnehmer") und der Fun-Fact
+„Fleißigste:r heute" (jetzt „Fleißigster heute"). Die Konvention steht in
+CLAUDE.md; ältere DECISIONS-Einträge bleiben im Wortlaut stehen (harte
+Regel: bestehende Einträge nicht umschreiben).
+
+**Begründung:** Vorgabe des Nutzers.

@@ -81,7 +81,7 @@ export function computeFacts(players, records, customFacts, funStats) {
     const n = (p.beersToday || 0) + (p.shotsToday || 0) + (p.mixesToday || 0);
     if (n > topN) { topN = n; top = p; }
   }
-  if (top) fact(`Fleißigste:r heute: ${top.name} mit ${topN} Getränken.`);
+  if (top) fact(`Fleißigster heute: ${top.name} mit ${topN} Getränken.`);
 
   // Statistik-Facts aus dem Archiv (Server: funStats); erst zeigen, wenn die
   // Zahlen etwas hergeben, damit das Band nicht mit Banalem langweilt.
