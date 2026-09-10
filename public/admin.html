@@ -62,12 +62,9 @@
   }
   .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 13px; text-decoration: underline; cursor: pointer; }
-  .mode-btn {
-    background: var(--surface-2); border: 1px solid var(--glass-edge); color: var(--ink-muted);
-    border-radius: var(--radius); padding: 8px 18px; font-weight: 700; cursor: pointer;
-    font-family: 'Work Sans', sans-serif; font-size: 14px;
-  }
-  .mode-btn.active { background: var(--green); color: var(--bg); border-color: var(--green); }
+  /* TV-Anzeige als Umschalter mit gleitendem Balken wie im Profil (D-044) */
+  #tv-mode { --tabs: 3; flex: 0 0 auto; }
+  #tv-mode .tab-btn { flex: 0 0 128px; padding: 8px 12px; font-size: 14px; white-space: nowrap; }
   .vis-check { width: 20px; height: 20px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
   .admin-row { transition: opacity 0.2s ease, background-color 0.2s ease; }
   .admin-row.is-hidden { opacity: 0.5; }
@@ -164,10 +161,13 @@
 
     <div class="glass" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
       <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">TV-Anzeige</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <button id="mode-alltime" class="mode-btn" data-mode="alltime">All-Time</button>
-        <button id="mode-today" class="mode-btn" data-mode="today">Heute</button>
-        <button id="mode-archive" class="mode-btn" data-mode="archive">Archiv-Abend</button>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div id="tv-mode" class="tabs" role="tablist" data-pos="0">
+          <div class="tab-indicator"></div>
+          <button id="mode-alltime" class="tab-btn mode-btn" type="button" data-mode="alltime">All-Time</button>
+          <button id="mode-today" class="tab-btn mode-btn" type="button" data-mode="today">Heute</button>
+          <button id="mode-archive" class="tab-btn mode-btn" type="button" data-mode="archive">Archiv-Abend</button>
+        </div>
         <select id="archive-day" class="input-flat" hidden style="padding:8px 12px;font-size:14px;cursor:pointer;"></select>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -506,9 +506,10 @@ $('facts-next').addEventListener('click', () => stepFact(1));
 
 // --- TV-Anzeige umschalten (All-Time / Heute / Archiv-Abend) ---
 function updateBoardMode(mode, day) {
-  for (const b of document.querySelectorAll('.mode-btn')) {
-    b.classList.toggle('active', b.dataset.mode === mode);
-  }
+  const buttons = [...document.querySelectorAll('.mode-btn')];
+  buttons.forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+  const pos = buttons.findIndex((b) => b.dataset.mode === mode);
+  $('tv-mode').dataset.pos = String(Math.max(0, pos));   // Balken gleitet
   const sel = $('archive-day');
   sel.hidden = mode !== 'archive';
   if (mode === 'archive' && day && document.activeElement !== sel) sel.value = day;

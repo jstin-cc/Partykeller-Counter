@@ -27,38 +27,16 @@
   }
   /* Verteilungsbalken Bier/Shots/Mischen */
   .dist-bar {
-    display: flex; height: 14px; border-radius: 999px; overflow: hidden;
+    display: flex; height: 10px; border-radius: 999px; overflow: hidden;
     background: var(--surface-2); border: 1px solid var(--glass-edge);
   }
   .dist-bar > div { transition: width 0.5s ease; }
   .dist-legend { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; }
 
-  /* Zwei Ansichten: Zählen (Eingabe) und Profil (Statistik) */
-  .tabs {
-    display: flex; gap: 6px; padding: 5px; position: relative;
-    background: var(--surface-alt); border: 1px solid var(--glass-edge);
-    border-radius: 999px;
-  }
-  .tab-btn {
-    flex: 1; padding: 10px; border: none; border-radius: 999px; cursor: pointer;
-    background: transparent; color: var(--ink-muted);
-    font-family: 'Bitter', serif; font-weight: 700; font-size: 15px;
-    transition: color 0.2s ease;
-    position: relative; z-index: 1;   /* über dem gleitenden Balken */
-  }
-  .tab-btn.active { color: var(--bg); }
-  /* Der grüne Balken ist ein eigenes Element und gleitet zur aktiven Seite,
-     statt zwischen den Knöpfen zu springen. Breite/Weg ergeben sich aus dem
-     Innenabstand (5 px) und dem Spalt (6 px) der .tabs-Leiste. */
-  .tab-indicator {
-    position: absolute; top: 5px; bottom: 5px; left: 5px;
-    width: calc(50% - 8px);
-    background: var(--green); border-radius: 999px;
-    transition: transform 0.3s cubic-bezier(0.32, 1.15, 0.4, 1);
-    pointer-events: none;
-  }
-  .tabs[data-pos="1"] .tab-indicator { transform: translateX(calc(100% + 6px)); }
-  @media (prefers-reduced-motion: reduce) { .tab-indicator { transition: none; } }
+  /* Beschriftungen im Profil (D-044): gemischte Schreibung statt Versalien —
+     Versalien bleiben den Abschnittszeilen vorbehalten */
+  .cell .label--plain { text-transform: none; letter-spacing: 0; font-size: 12.5px; color: var(--ink-muted); }
+  .sub-label { font-size: 13px; font-weight: 500; color: var(--ink-muted); margin-bottom: 8px; }
 
   /* „Ganze Rangliste": Knopf unter den Nachbarn + Blatt von unten (D-030) */
   .show-all {
@@ -113,12 +91,14 @@
   }
   .badge.earned .badge-count { color: var(--gold); border-color: oklch(0.80 0.15 83 / 0.4); }
 
-  /* Nachbarn in der Rangliste: wer ist vor/hinter mir */
+  /* Nachbarn in der Rangliste: wer ist vor/hinter mir — Zeilen mit
+     Haarlinie statt eigener Kästchen (D-044) */
   .rival {
     display: flex; align-items: center; gap: 10px;
-    background: var(--surface-2); border: 1px solid var(--glass-edge);
-    border-radius: var(--radius); padding: 10px 14px; font-size: 14px;
+    border-top: 1px solid var(--glass-edge);
+    padding: 10px 0; font-size: 14px;
   }
+  .rival .icon { color: var(--gold); font-size: 11px; width: 14px; text-align: center; }
   .rival .who { font-family: 'Bitter', serif; font-weight: 700; flex: 1; }
   .rival .gap { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 
@@ -265,7 +245,7 @@
         <!-- Eine Karte für beide Zeiträume (D-040): oben umschaltbar, darunter
              Platz und Nachbarn, in der Fußzeile die ganze Liste im selben Zeitraum -->
         <div class="card" style="display:flex;flex-direction:column;gap:12px;">
-          <div class="card-title" style="color:var(--gold);">Rangliste</div>
+          <div class="sec"><span class="sec-title">Rangliste</span><span id="prof-scope-hint" class="sec-hint"></span></div>
           <div id="prof-tabs" class="tabs" role="tablist" data-pos="0">
             <div class="tab-indicator"></div>
             <button id="prof-tab-today" class="tab-btn active" type="button">Heute</button>
@@ -273,43 +253,42 @@
           </div>
           <div class="split">
             <div class="cell">
-              <div id="prof-total" class="num value" style="font-size:34px;">0</div>
-              <div class="label">Getränke</div>
+              <div id="prof-total" class="num value" style="font-size:40px;">0</div>
+              <div class="label label--plain">Getränke</div>
             </div>
-            <div class="sep"></div>
+            <div class="sep" style="background:var(--glass-edge);"></div>
             <div class="cell">
-              <div id="prof-rank" class="num value value--gold" style="font-size:34px;">–</div>
-              <div id="prof-rank-label" class="label">Platz</div>
+              <div id="prof-rank" class="num value value--gold" style="font-size:40px;">–</div>
+              <div id="prof-rank-label" class="label label--plain">Platz</div>
             </div>
           </div>
-          <div id="prof-rivals" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <div id="prof-rivals" style="display:flex;flex-direction:column;"></div>
           <button id="show-board" class="card-foot" type="button">
             <span>Ganze Rangliste ansehen</span>
             <span class="chevron" aria-hidden="true">›</span>
           </button>
         </div>
 
-        <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung -->
-        <div class="card" style="display:flex;flex-direction:column;gap:16px;">
-          <div class="card-title" style="color:var(--gold);">Deine Statistik</div>
+        <!-- Persönliche Statistik: Abende, bestes Ergebnis, Schnitt, Verteilung.
+             Ohne Karte (D-044): die Rangliste ist die Bühne, das hier steht darunter. -->
+        <div style="display:flex;flex-direction:column;gap:16px;padding:0 2px;">
+          <div class="sec"><span class="sec-title">Deine Statistik</span></div>
           <div class="split">
             <div class="cell">
               <div id="stat-days" class="num value" style="font-size:30px;">0</div>
-              <div class="label" style="font-size:12px;color:var(--ink-muted);">Abende</div>
+              <div class="label label--plain">Abende</div>
             </div>
-            <div class="sep"></div>
             <div class="cell">
               <div id="stat-best" class="num value value--gold" style="font-size:30px;color:var(--gold);">–</div>
-              <div id="stat-best-label" class="label" style="font-size:12px;color:var(--ink-muted);">Bestes Ergebnis</div>
+              <div id="stat-best-label" class="label label--plain">Bestes Ergebnis</div>
             </div>
-            <div class="sep"></div>
             <div class="cell">
               <div id="stat-avg" class="num value" style="font-size:30px;">–</div>
-              <div class="label" style="font-size:12px;color:var(--ink-muted);">Ø pro Abend</div>
+              <div class="label label--plain">Ø pro Abend</div>
             </div>
           </div>
           <div>
-            <div class="eyebrow" style="margin-bottom:8px;">Deine Mischung</div>
+            <div class="sub-label">Deine Mischung</div>
             <div class="dist-bar">
               <div id="dist-beer" style="background:var(--amber);width:0;"></div>
               <div id="dist-shot" style="background:var(--brick);width:0;"></div>
@@ -323,7 +302,7 @@
           </div>
           <!-- Anteil am Haus (D-040): dieselbe Spur wie die Mischung -->
           <div>
-            <div class="eyebrow" style="margin-bottom:8px;">Anteil am Haus</div>
+            <div class="sub-label">Anteil am Haus</div>
             <div class="dist-bar">
               <div id="share-bar" style="background:var(--gold);width:0;"></div>
             </div>
@@ -332,8 +311,8 @@
         </div>
 
         <!-- Abzeichen: leuchtet, wenn heute erreicht; die Pill zählt alle Abende -->
-        <div class="card" style="display:flex;flex-direction:column;gap:12px;">
-          <div class="card-title" style="color:var(--gold);">Abzeichen</div>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:0 2px;">
+          <div class="sec"><span class="sec-title">Abzeichen</span><span id="badge-hint" class="sec-hint"></span></div>
           <div class="badges">
             <div id="badge-visits" class="badge earned" hidden>🎖 <span id="badge-visits-label">Stammgast</span> <span class="badge-count">×0</span></div>
             <div id="badge-winner" class="badge" title="Gesamt-Tagessieger des Abends">👑 Tagessieger <span class="badge-count">×0</span></div>
@@ -468,7 +447,9 @@ if (!token || !playerId) {
           : `${visitBadge.days} Abende dabei – höchste Stufe erreicht.`;
       }
 
-      // Abzeichen: leuchtet bei „heute geschafft", Pill zählt alle Abende
+      // Abzeichen: leuchtet bei „heute geschafft", Pill zählt alle Abende;
+      // die Abschnittszeile nennt, wie viele davon heute schon leuchten
+      let earnedToday = 0;
       for (const [id, key] of [
         ['badge-winner', 'dayWinner'],
         ['badge-first', 'firstDrinker'],
@@ -479,7 +460,9 @@ if (!token || !playerId) {
         const a = achievements[key] ?? { count: 0, today: false };
         $(id).classList.toggle('earned', a.today);
         $(id).querySelector('.badge-count').textContent = `×${a.count}`;
+        if (a.today) earnedToday += 1;
       }
+      $('badge-hint').textContent = earnedToday ? `${earnedToday} von 5 heute` : '';
     } catch { /* Offline-Moment: nächster State-Broadcast versucht es erneut */ }
   }
 
@@ -490,6 +473,7 @@ if (!token || !playerId) {
     const row = document.createElement('div');
     row.className = 'rival';
     const ic = document.createElement('span');
+    ic.className = 'icon';
     ic.textContent = icon;
     const who = document.createElement('span');
     who.className = 'who';
@@ -626,6 +610,7 @@ if (!token || !playerId) {
     $('prof-tabs').dataset.pos = scope === 'today' ? '0' : '1';
     $('prof-tab-today').classList.toggle('active', scope === 'today');
     $('prof-tab-alltime').classList.toggle('active', scope !== 'today');
+    $('prof-scope-hint').textContent = scope === 'today' ? 'Heute' : 'All-Time';
     renderProfile(!manual);
   }
 

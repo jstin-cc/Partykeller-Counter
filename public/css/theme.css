@@ -33,6 +33,7 @@
   --surface-alt: oklch(0.19 0.018 160 / 0.47);
   --surface-2: oklch(0.29 0.022 160 / 0.60);
   --glass-edge: oklch(0.92 0.02 160 / 0.12);   /* feine helle Glaskante */
+  --hair-gold: oklch(0.80 0.15 83 / 0.55);       /* Gold-Haarlinie der Abschnittszeilen (D-044) */
   --glass-blur: 16px;
 
   /* Eckenradien – Kanten sind bewusst leicht abgerundet */
@@ -56,6 +57,7 @@ html[data-area="youngstars"] {
   --surface-alt: oklch(0.19 0.022 260 / 0.47);
   --surface-2: oklch(0.29 0.028 260 / 0.60);
   --glass-edge: oklch(0.92 0.02 260 / 0.12);
+  --hair-gold: oklch(0.80 0.14 75 / 0.55);
 }
 
 /* Zapfen-Wasserzeichen in Navy (gleiche Form, hellere Navy-Füllung) */
@@ -190,6 +192,54 @@ a:hover { color: var(--gold); }
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
+
+/* Abschnittszeile (D-044): Gold-Eyebrow, dahinter eine Haarlinie, die nach
+   rechts ausläuft. Ein optionaler Hinweis (.sec-hint) steht vor der Linie. */
+.sec { display: flex; align-items: baseline; gap: 12px; }
+.sec-title {
+  font-family: 'Bitter', serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.sec-hint { font-size: 13px; color: var(--ink-muted); }
+.sec::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hair-gold), transparent);
+  transform: translateY(-3px);
+}
+
+/* Umschalter mit gleitendem grünen Balken (Dashboard, Ranglisten-Blatt,
+   Admin). --tabs ist die Anzahl der Segmente; Breite und Weg des Balkens
+   ergeben sich aus dem Innenabstand (5 px) und dem Spalt (6 px). */
+.tabs {
+  display: flex; gap: 6px; padding: 5px; position: relative;
+  background: var(--surface-alt); border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+}
+.tab-btn {
+  flex: 1; padding: 10px; border: none; border-radius: 999px; cursor: pointer;
+  background: transparent; color: var(--ink-muted);
+  font-family: 'Bitter', serif; font-weight: 700; font-size: 15px;
+  transition: color 0.2s ease;
+  position: relative; z-index: 1;   /* über dem gleitenden Balken */
+}
+.tab-btn.active { color: var(--bg); }
+.tab-indicator {
+  position: absolute; top: 5px; bottom: 5px; left: 5px;
+  width: calc((100% - 10px - (var(--tabs, 2) - 1) * 6px) / var(--tabs, 2));
+  background: var(--green); border-radius: 999px;
+  transition: transform 0.3s cubic-bezier(0.32, 1.15, 0.4, 1);
+  pointer-events: none;
+}
+.tabs[data-pos="1"] .tab-indicator { transform: translateX(calc(100% + 6px)); }
+.tabs[data-pos="2"] .tab-indicator { transform: translateX(calc(200% + 12px)); }
+@media (prefers-reduced-motion: reduce) { .tab-indicator { transition: none; } }
 
 .num { font-variant-numeric: tabular-nums; font-family: 'Bitter', serif; font-weight: 800; }
 

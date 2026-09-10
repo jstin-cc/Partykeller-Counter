@@ -7,6 +7,13 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-10 (D-044): **Design-Feinschliff** — Abschnittszeilen mit
+Gold-Eyebrow und auslaufender Haarlinie (`.sec`) auf Anmeldung und Profil,
+die Anmeldeliste als eine Glas-Tafel mit Zeilen, im Profil nur noch die
+Ranglisten-Karte als Karte (Statistik und Abzeichen rahmenlos darunter),
+Fun-Fact-Band ohne Gold-Oberkante mit Etikett links, Archiv-Sieger ohne
+Kästchen, TV-Umschalter im Admin mit gleitendem Balken. Farben, Knöpfe,
+Zählen-Ansicht und Bereichsauswahl unverändert.
 Seit 2026-09-09 (D-043): **Fun-Fact-Übersicht im Admin** — ein Fenster zeigt
 alle rotierenden Meldungen, welche gerade auf dem TV läuft (mit Restzeit) und
 erlaubt vor/zurück sowie Sprünge. Dafür rechnen TV und Admin die Liste aus
@@ -242,6 +249,22 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Abend-Archiv: zwölf Karten je Block, „Ältere Abende laden" (D-042)
 - [x] Fun-Fact-Übersicht im Admin, gemeinsames Fact-Modul, Fact-Uhr im Server
       (D-043)
+- [x] Design-Feinschliff: Abschnittszeilen mit Gold-Haarlinie, Anmeldeliste
+      als Tafel, Profil mit einer Karte, Fun-Fact-Etikett, Archiv-Sieger ohne
+      Kasten, Admin-Umschalter (D-044)
+
+## Verifikation (2026-09-10, D-044)
+
+Browser-Tests (Chromium, Testdatenbank mit acht Konten): Anmeldung zeigt die
+Konten als Zeilen in einer Tafel, das gemerkte Konto oben; die PIN-Zeile
+öffnet sich innerhalb der Tafel unter dem Konto. Profil (Heute und All-Time):
+Abschnittszeile mit Hinweis „Heute"/„All-Time", Nachbarn als Zeilen,
+Beschriftungen „Getränke / von 4 heute / Abende / Bester Abend / Ø pro Abend"
+in gemischter Schreibung, Abzeichen-Zeile „3 von 5 heute". Admin: Umschalter
+All-Time → Heute → Archiv-Abend gleitet, Archiv-Auswahl erscheint daneben in
+einer Zeile. TV: Fun-Fact-Band mit Etikett und senkrechter Haarlinie, Podium
+und Tabelle unverändert. Youngstars-Anmeldung erbt die Abschnittszeile im
+Orange-Gold. Keine Konsolenfehler auf allen Seiten.
 
 ## Verifikation (2026-09-09, D-043)
 

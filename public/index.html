@@ -22,15 +22,23 @@
     pointer-events: none;
     z-index: 0;
   }
-  .user-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+  /* Anmeldeliste (D-044): eine Glas-Tafel, die Konten als Zeilen mit
+     Haarlinie dazwischen — statt einer Kachel je Konto */
+  .user-list {
     background: var(--surface);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-edge);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .user-list > div + div { border-top: 1px solid var(--glass-edge); }
+  .user-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: transparent;
+    border: none;
     padding: 13px 16px;
     cursor: pointer;
     text-align: left;
@@ -38,7 +46,7 @@
     font-family: 'Work Sans', sans-serif;
   }
   .user-row:hover { background: var(--surface-2); }
-  .pin-row { display: flex; gap: 8px; padding: 10px 4px 4px 4px; }
+  .pin-row { display: flex; gap: 8px; padding: 0 16px 14px 16px; }
   .input-flat {
     background: var(--surface-2);
     backdrop-filter: blur(var(--glass-blur));
@@ -86,8 +94,8 @@
     <div id="error-banner" class="error-banner" hidden></div>
 
     <div>
-      <div style="font-family:'Bitter',serif;font-weight:600;font-size:14px;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid var(--green);padding-bottom:8px;margin-bottom:12px;">Dein Konto</div>
-      <div id="user-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div class="sec" style="margin-bottom:12px;"><span class="sec-title">Dein Konto</span></div>
+      <div id="user-list" class="user-list"></div>
       <div id="list-empty" hidden style="color:var(--ink-muted);font-size:14px;">Noch niemand da – leg unten los.</div>
     </div>
 
@@ -136,6 +144,7 @@ function renderUsers(all) {
   if (mine > 0) players.unshift(players.splice(mine, 1)[0]);
   const list = $('user-list');
   list.textContent = '';
+  list.hidden = players.length === 0;   // leere Tafel wäre nur ein Rahmen
   $('list-empty').hidden = players.length > 0;
 
   for (const p of players) {
