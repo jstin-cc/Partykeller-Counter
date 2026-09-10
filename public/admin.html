@@ -686,8 +686,25 @@ $('join-save').addEventListener('click', () => {
   $('join-hint').textContent = '✓ Gespeichert';
 });
 
+// Tippt der Admin gerade in ein Feld der Liste (Name, Zählerwert), darf ein
+// Broadcast — irgendwer trinkt — die Liste nicht neu bauen, sonst ist das Feld
+// samt Eingabe weg (D-046). Dann wird der Neuaufbau nachgeholt, sobald das Feld
+// den Fokus verliert.
+let renderPending = false;
+$('rows').addEventListener('focusout', () => {
+  setTimeout(() => {
+    if (renderPending && !$('rows').contains(document.activeElement)) renderRows();
+  }, 0);
+});
+
 function renderRows() {
   const box = $('rows');
+  const active = document.activeElement;
+  if (active && active.tagName === 'INPUT' && box.contains(active)) {
+    renderPending = true;
+    return;
+  }
+  renderPending = false;
   box.textContent = '';
 
   // Admin-Liste alphabetisch nach Name (nicht nach Punktestand)

@@ -1080,3 +1080,35 @@ die Pille den Abend (mit Gesamtzahl) und die Dauer nennt, macht den
 Vergleich nachvollziehbar. Ausgeblendete Personen zählen für den Rekord-Abend
 mit, weil der Nutzer den Rekord-Abend aus dem Archiv kennt und die beiden
 Anzeigen sonst verschiedene Abende nennen.
+
+## D-046 (2026-09-10): Stabilität — WebSocket-Fehler, Heartbeat, atomares Getränk, Admin-Eingaben
+
+**Entscheidung:** Vier Härtungen ohne Funktionsänderung:
+
+1. Jede WebSocket-Verbindung bekommt einen `error`-Listener (Warnung ins
+   Log), der `WebSocketServer` ebenso; `maxPayload` ist 16 KB (Standard
+   100 MB).
+2. Heartbeat: alle 30 s ein Ping an jeden Client; wer bis zum nächsten Ping
+   nicht geantwortet hat, wird beendet.
+3. `db.logDrink(id, drink)`: Zähler +1 und Log-Eintrag als eine Transaktion;
+   der WS-Handler `increment` nutzt sie für Spieler (Admin-Korrekturen bleiben
+   ohne Log, D-005).
+4. Admin-Nutzerliste: steht der Fokus in einem Eingabefeld der Liste (Name,
+   Zählerwert), wird ein State-Broadcast nicht sofort gerendert, sondern
+   nachgeholt, sobald das Feld den Fokus verliert.
+
+**Begründung:** Ein Test mit einem ungültigen UTF-8-Frame hat den Server
+reproduzierbar beendet („Unhandled 'error' event") — systemd startet neu,
+aber alle Handys und der TV verlieren die Verbindung und die Fact-Uhr
+springt zurück. Ein alter Browser oder ein Handy mit Funkloch reicht dafür.
+Handys im Standby bleiben ohne Heartbeat minutenlang als tote Verbindungen
+in `wss.clients` und füllen bei jedem Broadcast ihre Sendepuffer; im Test
+räumt der Server eine stumme Verbindung nach 50 s weg. Zähler und Log waren
+zwei getrennte Commits: bei einem Absturz genau dazwischen hätte der
+All-Time-Wert gestimmt, der Heute-Wert gefehlt. Die Admin-Liste wurde bei
+jedem Broadcast komplett neu gebaut, was ein gerade bearbeitetes Feld samt
+Eingabe verwarf, sobald irgendein Gast trank.
+
+Nicht umgesetzt: `synchronous = NORMAL` für SQLite. Der Gewinn pro Commit
+ist klein, und beim gezogenen Stecker am Ende des Abends könnten die letzten
+Sekunden fehlen — Persistenz geht vor (D-006).
