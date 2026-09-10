@@ -104,6 +104,7 @@ CREATE TABLE facts (                       -- eigene Fun-Facts/Meldungen (D-015)
 | `POST /api/login` | `{playerId, pin}` | `{player, token}` |
 | `POST /api/admin/login` | `{password}` | `{token}` |
 | `GET /api/state` | – | kompletter State (Initial-Load/Fallback) |
+| `GET /api/players` | – | nur die Konten `{id, name, hidden, hasPin}` in Ranglisten-Reihenfolge — für die Anmeldeliste (D-047) |
 | `GET /api/archive` | – | `{days: […]}` — Abend-Archiv: je Party-Tag Sieger, Teilnehmer, Mengen (D-015) |
 | `GET /api/archive/:day` | – | `{day, players}` — Detail eines Party-Tags, alle Spieler (auch mit 0) für die Archiv-Bearbeitung (D-022) |
 | `GET /api/export/archive` | – | CSV über alle Abende, `Content-Disposition: attachment`; **nur Admin** (Token im `Authorization`-Header, sonst 403 — D-025, D-027) |

@@ -1112,3 +1112,39 @@ Eingabe verwarf, sobald irgendein Gast trank.
 Nicht umgesetzt: `synchronous = NORMAL` für SQLite. Der Gewinn pro Commit
 ist klein, und beim gezogenen Stecker am Ende des Abends könnten die letzten
 Sekunden fehlen — Persistenz geht vor (D-006).
+
+## D-047 (2026-09-10): Historien-Cache — konstante Antwortzeit statt „mit jedem Getränk langsamer"
+
+**Entscheidung:** Alle Tages-Aggregate über *vergangene* Party-Tage (Rekorde
+je Sorte, Getränke je Spieler und Abend, Verlauf je Stunde, erstes Getränk je
+Abend, Stand vor dem heutigen 06:00-Start, letzter Zeitstempel je Spieler)
+liest `db.js` einmal in einen Speicher-Cache (`getHistory()`), gebunden an
+den Tagesstart. Der laufende Party-Tag kommt aus eigenen Abfragen mit
+`ts >= Tagesstart` dazu, die über den neuen Index `idx_drink_log_ts` laufen.
+Helfer wie `rowsDayPlayerTotals()` liefern dieselben Zeilen wie vorher die
+Abfragen über das ganze Log, sodass die Auswertungen (Rekorde, Fun-Facts,
+Archiv, Statistik, Export) unverändert bleiben. Der Cache wird verworfen bei
+Tageswechsel (automatisch), Archiv-Korrektur, Log-Eintrag in der
+Vergangenheit, Import, Reset und Löschen eines Nutzers. Namen und
+Ausblendungen werden weiterhin beim Lesen aufgelöst.
+
+Dazu drei kleine Entlastungen der Clients:
+- `GET /api/players` liefert nur die Konten (id, Name, ausgeblendet, PIN
+  gesetzt) in Ranglisten-Reihenfolge; die Anmeldeseite nutzt ihn statt des
+  ganzen States. Dafür ist der Ranglisten-Aufbau als `rankedPlayers()` aus
+  `getState()` herausgelöst.
+- Das Dashboard lädt die persönliche Statistik nach einem Getränk entprellt
+  (0,8–2 s, zufällig gestreut) statt sofort auf allen Handys gleichzeitig.
+- Der Admin lädt die Archiv-Auswahl beim Öffnen höchstens alle 10 s neu.
+
+**Begründung:** Messung mit realistischen Daten (60 Konten, 40 Abende,
+19.000 Log-Zeilen): ein State-Broadcast kostete 95 ms, das Archiv 96 ms, die
+persönliche Statistik 47 ms — bei jedem Getränk, auf jedem Handy, auf einem
+Pi etwa das Vier- bis Fünffache. Mit 180.000 Zeilen war es eine Sekunde pro
+Getränk. Ursache: fünf komplette Log-Durchläufe mit Datumsformatierung pro
+Zeile je Broadcast, obwohl sich davon nur der laufende Tag ändert. Nach der
+Änderung: 6,5 ms / 3,6 ms / 1,3 ms (19k) bzw. 54 / 40 / 10 ms (180k), und die
+Ausgaben sind gegen den alten Code Zeile für Zeile identisch (Ausnahme:
+mehrere Einträge in derselben Millisekunde, wo der alte Code bei „Erster
+Trinker" einen beliebigen nahm, der neue den ältesten). Kein Schema-Umbau,
+keine neue Dependency; der Cache belegt bei 150 Abenden wenige MB.

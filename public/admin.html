@@ -517,8 +517,12 @@ function updateBoardMode(mode, day) {
   if (mode === 'archive' && day && document.activeElement !== sel) sel.value = day;
 }
 
-// Auswahl der Archiv-Abende füllen (neueste zuerst, wie /abende)
+// Auswahl der Archiv-Abende füllen (neueste zuerst, wie /abende). Beim Öffnen
+// des Menüs höchstens alle 10 s neu laden — Abende kommen nicht im Sekundentakt.
+let archiveLoadedAt = 0;
 async function loadArchiveDays() {
+  if (Date.now() - archiveLoadedAt < 10_000) return;
+  archiveLoadedAt = Date.now();
   try {
     const res = await fetch(`${AREA.base}/api/archive`);
     if (!res.ok) return;

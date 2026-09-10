@@ -683,6 +683,7 @@ if (!token || !playerId) {
   }
 
   let lastLogSum = null; // Getränke-Summe des Abends aller Spieler (für „Erster Trinker")
+  let statsTimer = null;
 
   const ws = connectState({
     onState({ players }) {
@@ -716,7 +717,16 @@ if (!token || !playerId) {
       // Statistik nachladen, wenn heute irgendwo etwas dazukam (Achievements
       // wie „Erster Trinker" hängen auch von den anderen ab) oder beim Start.
       const logSum = players.reduce((s, p) => s + p.beersToday + p.shotsToday + p.mixesToday, 0);
-      if (logSum !== lastLogSum) { lastLogSum = logSum; loadStats(); }
+      if (logSum !== lastLogSum) {
+        // Beim Start sofort; danach entprellt und leicht gestreut, damit nicht
+        // alle Handys im selben Moment nach jedem Getränk beim Server anklopfen
+        // (D-047). Kommen mehrere Getränke kurz hintereinander, reicht ein Aufruf.
+        const first = lastLogSum === null;
+        lastLogSum = logSum;
+        clearTimeout(statsTimer);
+        if (first) loadStats();
+        else statsTimer = setTimeout(loadStats, 800 + Math.random() * 1200);
+      }
     },
     onError: showError,
   });

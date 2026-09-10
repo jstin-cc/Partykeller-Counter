@@ -64,6 +64,7 @@ export function createDb(dbPath) {
       ts        INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_drink_log_player_ts ON drink_log(player_id, ts);
+    CREATE INDEX IF NOT EXISTS idx_drink_log_ts ON drink_log(ts);
 
     CREATE TABLE IF NOT EXISTS settings (
       key   TEXT PRIMARY KEY,
@@ -111,6 +112,7 @@ export function createDb(dbPath) {
       DROP TABLE drink_log;
       ALTER TABLE drink_log_new RENAME TO drink_log;
       CREATE INDEX IF NOT EXISTS idx_drink_log_player_ts ON drink_log(player_id, ts);
+      CREATE INDEX IF NOT EXISTS idx_drink_log_ts ON drink_log(ts);
     `);
   }
 
@@ -134,30 +136,32 @@ export function createDb(dbPath) {
     todayCounts: db.prepare(
       'SELECT player_id, drink, COUNT(*) AS n FROM drink_log WHERE ts >= ? GROUP BY player_id, drink'
     ),
-    // All-Time-Rekorde: meiste Getränke je Sorte an einem einzelnen Party-Tag.
+    // Tages-Aggregate über VERGANGENE Party-Tage (ts < Tagesstart), D-047:
+    // sie laufen einmal in den Historien-Cache; der laufende Tag kommt aus den
+    // *Today-Abfragen (ts >= Tagesstart, über idx_drink_log_ts) dazu.
     // Party-Tag beginnt 06:00, daher ts um 6 h (21600 s) zurückschieben, bevor
     // das Datum gebildet wird (entspricht partyDayStartMs, aber in SQL).
-    dayCounts: db.prepare(
+    // Rekorde: Getränke je Sorte, Spieler und Party-Tag
+    pastDayCounts: db.prepare(
       `SELECT drink, player_id,
               date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
               COUNT(*) AS n
-       FROM drink_log
+       FROM drink_log WHERE ts < ?
        GROUP BY drink, player_id, day`
     ),
-    // Abend-Archiv: Getränke je Party-Tag, Spieler und Sorte (Party-Tag ab 06:00)
-    archiveCounts: db.prepare(
-      `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
-              player_id, drink, COUNT(*) AS n
-       FROM drink_log
-       GROUP BY day, player_id, drink`
-    ),
     // Verlauf eines Abends: Getränke je Party-Tag und Uhr-Stunde (alle zusammen)
-    archiveHours: db.prepare(
+    pastArchiveHours: db.prepare(
       `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
               CAST(strftime('%H', ts/1000, 'unixepoch', 'localtime') AS INTEGER) AS hour,
               COUNT(*) AS n
-       FROM drink_log
+       FROM drink_log WHERE ts < ?
        GROUP BY day, hour`
+    ),
+    todayHours: db.prepare(
+      `SELECT CAST(strftime('%H', ts/1000, 'unixepoch', 'localtime') AS INTEGER) AS hour,
+              COUNT(*) AS n
+       FROM drink_log WHERE ts >= ?
+       GROUP BY hour`
     ),
     // Abend-Namen liegen als settings-Zeilen 'night_name:<tag>' (D-028)
     listNightNames: db.prepare(
@@ -180,17 +184,22 @@ export function createDb(dbPath) {
        GROUP BY player_id, drink`
     ),
     // Gesamt je Spieler und Party-Tag inkl. letztem Zeitstempel (Tagessieger-Tiebreak)
-    dayPlayerTotals: db.prepare(
+    pastDayPlayerTotals: db.prepare(
       `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
               player_id, COUNT(*) AS n, MAX(ts) AS last_ts
-       FROM drink_log
+       FROM drink_log WHERE ts < ?
        GROUP BY day, player_id`
     ),
+    todayPlayerTotals: db.prepare(
+      `SELECT player_id, COUNT(*) AS n, MAX(ts) AS last_ts
+       FROM drink_log WHERE ts >= ?
+       GROUP BY player_id`
+    ),
     // Erstes Getränk jedes Party-Tags (SQLite: bare column folgt MIN(ts))
-    dayFirstLogs: db.prepare(
+    pastDayFirstLogs: db.prepare(
       `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
               player_id, MIN(ts) AS ts
-       FROM drink_log
+       FROM drink_log WHERE ts < ?
        GROUP BY day`
     ),
     // Alle Logs eines Spielers (Abzeichen-Historie über alle Abende)
@@ -229,7 +238,9 @@ export function createDb(dbPath) {
     ),
     // Zeitpunkt des jeweils letzten Getränks: Tiebreak bei Punktegleichstand
     // (wer zuerst auf den Stand kam, steht in der Rangliste vorne)
-    lastLogTs: db.prepare('SELECT player_id, MAX(ts) AS ts FROM drink_log GROUP BY player_id'),
+    pastLastLogTs: db.prepare(
+      'SELECT player_id, MAX(ts) AS ts FROM drink_log WHERE ts < ? GROUP BY player_id'
+    ),
     lastLogTsToday: db.prepare(
       'SELECT player_id, MAX(ts) AS ts FROM drink_log WHERE ts >= ? GROUP BY player_id'
     ),
@@ -281,6 +292,78 @@ export function createDb(dbPath) {
     stmts.setSetting.run(key, value);
   }
 
+  // --- Historien-Cache (D-047) -----------------------------------------------
+  // Alle Tages-Aggregate über VERGANGENE Party-Tage hängen nur an Log-Zeilen
+  // vor dem heutigen 06:00-Start. Die ändern sich nur beim Tageswechsel, bei
+  // Archiv-Korrekturen, Import, Reset oder Löschen eines Nutzers — nicht bei
+  // jedem Getränk. Deshalb werden sie einmal gelesen und im Speicher gehalten;
+  // pro Getränk kommen nur noch die (indizierten) Heute-Abfragen dazu. Ohne
+  // den Cache las jeder Broadcast das komplette Log fünfmal, und die App
+  // wurde mit jedem gezählten Getränk langsamer.
+  let history = null;
+
+  function invalidateHistory() {
+    history = null;
+  }
+
+  function getHistory() {
+    const dayStart = partyDayStartMs();
+    if (history && history.dayStart === dayStart) return history;
+    const lastTs = new Map();
+    for (const row of stmts.pastLastLogTs.all(dayStart)) lastTs.set(row.player_id, row.ts);
+    history = {
+      dayStart,
+      dayCounts: stmts.pastDayCounts.all(dayStart),
+      dayPlayerTotals: stmts.pastDayPlayerTotals.all(dayStart),
+      archiveHours: stmts.pastArchiveHours.all(dayStart),
+      dayFirstLogs: stmts.pastDayFirstLogs.all(dayStart),
+      countsBefore: stmts.countsBefore.all(dayStart),
+      lastTs,
+    };
+    return history;
+  }
+
+  // Die folgenden Helfer liefern dieselben Zeilen wie früher die Abfragen über
+  // das ganze Log: Cache (Vergangenheit) plus laufender Party-Tag.
+  function rowsDayCounts() {
+    const h = getHistory();
+    const today = partyDayString();
+    const rows = stmts.todayCounts.all(h.dayStart)
+      .map((r) => ({ drink: r.drink, player_id: r.player_id, day: today, n: r.n }));
+    return h.dayCounts.concat(rows);
+  }
+
+  function rowsDayPlayerTotals() {
+    const h = getHistory();
+    const today = partyDayString();
+    const rows = stmts.todayPlayerTotals.all(h.dayStart)
+      .map((r) => ({ day: today, player_id: r.player_id, n: r.n, last_ts: r.last_ts }));
+    return h.dayPlayerTotals.concat(rows);
+  }
+
+  function rowsArchiveHours() {
+    const h = getHistory();
+    const today = partyDayString();
+    const rows = stmts.todayHours.all(h.dayStart).map((r) => ({ day: today, hour: r.hour, n: r.n }));
+    return h.archiveHours.concat(rows);
+  }
+
+  function rowsDayFirstLogs() {
+    const h = getHistory();
+    const first = stmts.firstLogToday.get(h.dayStart);
+    return first
+      ? h.dayFirstLogs.concat([{ day: partyDayString(), player_id: first.player_id, ts: first.ts }])
+      : h.dayFirstLogs;
+  }
+
+  // playerId -> Zeitpunkt des letzten Getränks (all-time)
+  function lastLogTsMap() {
+    const h = getHistory();
+    const map = new Map(h.lastTs);
+    for (const row of stmts.lastLogTsToday.all(h.dayStart)) map.set(row.player_id, row.ts);
+    return map;
+  }
+
   function createPlayer(name, pinHash) {
     const id = crypto.randomUUID();
     stmts.insertPlayer.run(id, name, pinHash);
@@ -308,6 +391,8 @@ export function createDb(dbPath) {
 
   function addLogEntry(id, drink, ts = Date.now()) {
     stmts.insertLog.run(id, drink, ts);
+    // Ein Eintrag in der Vergangenheit (Seed, Archiv-Korrektur) ändert die Historie
+    if (ts < partyDayStartMs()) invalidateHistory();
   }
 
   // Echtes Getränk eines Spielers: Zähler +1 und Log-Eintrag in EINER
@@ -342,7 +427,7 @@ export function createDb(dbPath) {
       stmts.listPlayers.all().filter((p) => p.hidden).map((p) => p.id)
     );
     const best = { beer: null, shot: null, mix: null };
-    for (const row of stmts.dayCounts.all()) {
+    for (const row of rowsDayCounts()) {
       if (hiddenIds.has(row.player_id)) continue;
       const cur = best[row.drink];
       if (!cur || row.n > cur.n) {
@@ -382,7 +467,7 @@ export function createDb(dbPath) {
   // Stand war (D-020 gilt auch hier). Map day -> { playerId, n }
   function getDayWinners() {
     const byDay = new Map();
-    for (const row of stmts.dayPlayerTotals.all()) {
+    for (const row of rowsDayPlayerTotals()) {
       const cur = byDay.get(row.day);
       if (!cur || row.n > cur.n || (row.n === cur.n && row.last_ts < cur.last_ts)) {
         byDay.set(row.day, { playerId: row.player_id, n: row.n, last_ts: row.last_ts });
@@ -421,7 +506,7 @@ export function createDb(dbPath) {
   // und nicht 24 Stunden, von denen 16 leer sind.
   function buildTimelines() {
     const raw = new Map();   // day -> number[24]
-    for (const row of stmts.archiveHours.all()) {
+    for (const row of rowsArchiveHours()) {
       let slots = raw.get(row.day);
       if (!slots) { slots = new Array(24).fill(0); raw.set(row.day, slots); }
       slots[(row.hour - 6 + 24) % 24] += row.n;
@@ -440,7 +525,7 @@ export function createDb(dbPath) {
   // --- Abend-Archiv: jeder Party-Tag mit Sieger, Teilnehmern und Gesamtmengen ---
   function getArchive() {
     const days = new Map(); // day -> { totals, perPlayer: Map }
-    for (const row of stmts.archiveCounts.all()) {
+    for (const row of rowsDayCounts()) {
       let d = days.get(row.day);
       if (!d) {
         d = { day: row.day, beers: 0, shots: 0, mixes: 0, perPlayer: new Map() };
@@ -517,7 +602,7 @@ export function createDb(dbPath) {
     const names = new Map(stmts.listPlayers.all().map((p) => [p.id, p.name]));
     const byDay = new Map();  // day -> Map(playerId -> { beers, shots, mixes })
 
-    for (const row of stmts.archiveCounts.all()) {
+    for (const row of rowsDayCounts()) {
       if (day && row.day !== day) continue;
       let players = byDay.get(row.day);
       if (!players) { players = new Map(); byDay.set(row.day, players); }
@@ -548,6 +633,7 @@ export function createDb(dbPath) {
   // Rekorde und Archiv konsistent bleiben.
   const adjustArchiveDrink = db.transaction((playerId, day, drink, delta) => {
     if (!getPlayer(playerId)) throw new Error('Nutzer nicht gefunden');
+    invalidateHistory();
     const [start, end] = partyDayRangeMs(day);
     if (delta === -1) {
       if (stmts.deleteNewestDayLog.run(playerId, drink, start, end).changes === 0) {
@@ -631,7 +717,7 @@ export function createDb(dbPath) {
       }
     }
 
-    for (const row of stmts.dayFirstLogs.all()) {
+    for (const row of rowsDayFirstLogs()) {
       if (row.player_id === id) award('firstDrinker', row.day);
     }
     for (const [day, w] of getDayWinners()) {
@@ -656,10 +742,12 @@ export function createDb(dbPath) {
   }
 
   function deletePlayer(id) {
+    invalidateHistory();   // ON DELETE CASCADE nimmt die Log-Einträge mit
     return stmts.deletePlayer.run(id).changes > 0;
   }
 
   const resetAll = db.transaction(() => {
+    invalidateHistory();
     stmts.resetCounters.run();
     stmts.clearLog.run();
   });
@@ -683,6 +771,7 @@ export function createDb(dbPath) {
   // Bestand dieses Bereichs. Als eine Transaktion — schlägt irgendetwas fehl
   // (z. B. ein doppelter Name), bleibt der alte Stand unverändert stehen.
   const importBackup = db.transaction((data) => {
+    invalidateHistory();
     stmts.clearLog.run();
     stmts.clearPlayers.run();
     stmts.clearSettings.run();
@@ -700,8 +789,10 @@ export function createDb(dbPath) {
     };
   });
 
-  // Kompletter Client-State: Rangliste + Heute-Werte (ohne pin_hash!)
-  function getState() {
+  // Rangliste + Heute-Werte je Spieler (ohne pin_hash!), sortiert wie auf
+  // dem TV. Eigenständig, damit die Anmeldeseite nur die Namen holen kann,
+  // ohne dass der Server Rekorde und Fun-Facts mitrechnet (D-047).
+  function rankedPlayers() {
     const today = new Map();
     for (const row of stmts.todayCounts.all(partyDayStartMs())) {
       const entry = today.get(row.player_id) ?? { beer: 0, shot: 0, mix: 0 };
@@ -709,8 +800,7 @@ export function createDb(dbPath) {
       today.set(row.player_id, entry);
     }
 
-    const lastTs = new Map();
-    for (const row of stmts.lastLogTs.all()) lastTs.set(row.player_id, row.ts);
+    const lastTs = lastLogTsMap();
     const lastTsToday = new Map();
     for (const row of stmts.lastLogTsToday.all(partyDayStartMs())) lastTsToday.set(row.player_id, row.ts);
 
@@ -746,6 +836,12 @@ export function createDb(dbPath) {
       );
 
     players.forEach((p, i) => { p.rank = i + 1; });
+    return players;
+  }
+
+  // Kompletter Client-State: Rangliste + Einstellungen + Rekorde + Fun-Fact-Zahlen
+  function getState() {
+    const players = rankedPlayers();
 
     // joinUrl: vom Admin gesetzte Beitritts-Adresse für den TV-QR-Code
     // (leer => TV nutzt die eigene Server-Adresse als Fallback)
@@ -792,7 +888,7 @@ export function createDb(dbPath) {
     const perDrink = new Map();    // 'playerId:drink' -> Anzahl
     const perPlayer = new Map();   // playerId -> Anzahl gesamt
     let house = 0;
-    for (const row of stmts.countsBefore.all(dayStart)) {
+    for (const row of getHistory().countsBefore) {
       if (hiddenIds.has(row.player_id)) continue;
       perDrink.set(`${row.player_id}:${row.drink}`, row.n);
       perPlayer.set(row.player_id, (perPlayer.get(row.player_id) ?? 0) + row.n);
@@ -850,8 +946,7 @@ export function createDb(dbPath) {
   // Sichtbarer Platz 1 der Rangliste (All-Time-Zähler, gleiche Sortierung wie
   // in getState) — Gegenprobe für den Führungswechsel.
   function boardLeaderId(players) {
-    const lastTs = new Map();
-    for (const row of stmts.lastLogTs.all()) lastTs.set(row.player_id, row.ts);
+    const lastTs = lastLogTsMap();
     let best = null;
     for (const p of players) {
       if (p.hidden) continue;
@@ -889,7 +984,7 @@ export function createDb(dbPath) {
     const daysBy = new Map();        // playerId -> Party-Tage (fürs Comeback)
     const allTotals = new Map();     // playerId -> { n, last } über alle Abende
     const beforeTotals = new Map();  // dasselbe ohne den laufenden Abend
-    for (const row of stmts.dayPlayerTotals.all()) {
+    for (const row of rowsDayPlayerTotals()) {
       dayTotalsAll.set(row.day, (dayTotalsAll.get(row.day) ?? 0) + row.n);
       if (hiddenIds.has(row.player_id)) continue;
       dayTotals.set(row.day, (dayTotals.get(row.day) ?? 0) + row.n);
@@ -1005,7 +1100,7 @@ export function createDb(dbPath) {
     getRecords, listFacts, addFact, updateFact, deleteFact,
     getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
     getNightName, setNightName,
-    setPinHash, deletePlayer, resetAll, getState,
+    setPinHash, deletePlayer, resetAll, getState, rankedPlayers,
     exportBackup, importBackup,
   };
 }
