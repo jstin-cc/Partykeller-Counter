@@ -122,7 +122,7 @@
 </div>
 
 <script type="module">
-import { post, fetchState, setSession, getLastPlayerId } from './js/api.js';
+import { post, fetchPlayers, setSession, getLastPlayerId } from './js/api.js';
 
 const $ = (id) => document.getElementById(id);
 let selectedId = null;
@@ -236,7 +236,7 @@ $('create-form').addEventListener('submit', async (e) => {
   }
 });
 
-fetchState()
+fetchPlayers()
   .then(({ players }) => renderUsers(players))
   .catch(() => showError('Server nicht erreichbar.'));
 </script>

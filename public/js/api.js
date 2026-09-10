@@ -47,6 +47,13 @@ export async function get(path) {
   return fetch(AREA.base + path);
 }
 
+// Anmeldeliste: nur die Konten, nicht der ganze State (D-047)
+export async function fetchPlayers() {
+  const res = await get('/api/players');
+  if (!res.ok) throw new Error('Konten konnten nicht geladen werden');
+  return res.json();
+}
+
 export async function fetchState() {
   const res = await get('/api/state');
   if (!res.ok) throw new Error('State konnte nicht geladen werden');

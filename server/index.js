@@ -48,6 +48,12 @@ function createApiRouter(area) {
 
   router.get('/state', (_req, res) => res.json(db.getState()));
 
+  // Nur die Konten für die Anmeldeliste (D-047): id, Name, ausgeblendet, PIN
+  // gesetzt — in Ranglisten-Reihenfolge, ohne den Rest des States.
+  router.get('/players', (_req, res) => res.json({
+    players: db.rankedPlayers().map((p) => ({ id: p.id, name: p.name, hidden: p.hidden, hasPin: p.hasPin })),
+  }));
+
   // Abend-Archiv: alle Party-Tage mit Sieger, Teilnehmern und Gesamtmengen
   router.get('/archive', (_req, res) => res.json({ days: db.getArchive() }));
 

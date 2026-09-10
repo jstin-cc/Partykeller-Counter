@@ -22,6 +22,12 @@ Seit 2026-09-10 (D-046): **Stabilität** — WebSocket-Fehler beenden den
 Server nicht mehr, Heartbeat räumt tote Verbindungen weg, Nachrichten sind
 auf 16 KB begrenzt, Zähler und Log werden als eine Transaktion geschrieben,
 die Admin-Liste verwirft keine laufende Eingabe mehr.
+Seit 2026-09-10 (D-047): **Historien-Cache** — Aggregate über vergangene
+Abende werden einmal gelesen und im Speicher gehalten, pro Getränk laufen nur
+noch indizierte Heute-Abfragen; Broadcast, Archiv und Statistik sind damit
+unabhängig von der Log-Größe schnell (95 → 6,5 ms bei 19k Zeilen, 1.040 → 54
+ms bei 180k). Dazu `GET /api/players` für die Anmeldeliste, entprellte
+Statistik im Dashboard und gedrosselte Archiv-Auswahl im Admin.
 Seit 2026-09-09 (D-043): **Fun-Fact-Übersicht im Admin** — ein Fenster zeigt
 alle rotierenden Meldungen, welche gerade auf dem TV läuft (mit Restzeit) und
 erlaubt vor/zurück sowie Sprünge. Dafür rechnen TV und Admin die Liste aus
@@ -264,6 +270,23 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       Admin-Umschalter in Firefox, Band-Strich auf Texthöhe (D-045)
 - [x] Stabilität: WS-Fehler abgefangen, maxPayload, Heartbeat, Getränk als
       Transaktion, Admin-Liste ohne Eingabeverlust (D-046)
+- [x] Leistung: Historien-Cache mit Invalidierung, Index auf `ts`,
+      `GET /api/players`, entprellte Statistik, gedrosselte Archiv-Auswahl (D-047)
+
+## Verifikation (2026-09-10, D-047)
+
+Zwei Testdatenbanken (60 Konten / 40 Abende / 19.000 Zeilen und 120 / 150 /
+180.000). Alter und neuer Code auf Kopien derselben DB: `getState`,
+`getArchive`, `getRecords`, `getExportNights` identisch; ebenso nach einer
+Archiv-Korrektur an einem alten Tag, einem Getränk heute und dem Löschen
+eines Nutzers (Cache-Invalidierung). `getPlayerStats` weicht nur bei
+„Erster Trinker" ab, weil die Testdaten 20 Einträge in derselben
+Millisekunde haben (alt: beliebiger, neu: ältester Eintrag). Zeiten (19k /
+180k): State 95 → 6,5 ms / 1.039 → 54 ms; Archiv 96 → 3,6 / 942 → 40;
+Statistik 47 → 1,3 / 437 → 10. Browser (Chromium): Anmeldeliste über
+`/api/players`, Anmeldung und Dashboard funktionieren, zwei schnelle
+Getränke lösen genau einen Statistik-Aufruf aus, Archiv-Seite zeigt die
+Abende, keine Konsolenfehler.
 
 ## Verifikation (2026-09-10, D-046)
 
