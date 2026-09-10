@@ -18,6 +18,10 @@ Seit 2026-09-10 (D-045): **Rekordkurs** vergleicht ab dem ersten Getränk des
 Abends (statt nach Uhrzeit seit 06:00) und nennt Dauer und Gesamtzahl des
 Rekord-Abends; Admin-Umschalter läuft in Firefox nicht mehr über; Strich im
 Fun-Fact-Band auf Texthöhe.
+Seit 2026-09-10 (D-046): **Stabilität** — WebSocket-Fehler beenden den
+Server nicht mehr, Heartbeat räumt tote Verbindungen weg, Nachrichten sind
+auf 16 KB begrenzt, Zähler und Log werden als eine Transaktion geschrieben,
+die Admin-Liste verwirft keine laufende Eingabe mehr.
 Seit 2026-09-09 (D-043): **Fun-Fact-Übersicht im Admin** — ein Fenster zeigt
 alle rotierenden Meldungen, welche gerade auf dem TV läuft (mit Restzeit) und
 erlaubt vor/zurück sowie Sprünge. Dafür rechnen TV und Admin die Liste aus
@@ -258,6 +262,18 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       Kasten, Admin-Umschalter (D-044)
 - [x] Rekordkurs ab dem ersten Getränk mit Dauer und Rekord-Gesamtzahl,
       Admin-Umschalter in Firefox, Band-Strich auf Texthöhe (D-045)
+- [x] Stabilität: WS-Fehler abgefangen, maxPayload, Heartbeat, Getränk als
+      Transaktion, Admin-Liste ohne Eingabeverlust (D-046)
+
+## Verifikation (2026-09-10, D-046)
+
+Vorher reproduziert: ein WebSocket-Frame mit ungültigem UTF-8 beendete den
+Prozess. Nachher: derselbe Frame und eine 64-KB-Nachricht werden als Warnung
+geloggt, `/health` antwortet weiter. Ein Roh-Socket, der Pings nicht
+beantwortet, wird nach 50 s vom Server beendet. Ein Spieler-Increment über WS
+erhöht `beers` und `beersToday` zusammen. Admin (Chromium): Zählerfeld
+fokussiert und „42" getippt, dann trinkt ein anderer Client — das Feld bleibt
+fokussiert mit „42"; nach Tab wird die Liste nachgezogen (Shots 1, Bier 42).
 
 ## Verifikation (2026-09-10, D-045)
 

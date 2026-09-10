@@ -23,9 +23,13 @@ function createHandlers(area) {
         if (Math.abs(delta) > 1000) throw new Error('delta außerhalb des erlaubten Bereichs');
       }
 
-      if (!db.incrementDrink(playerId, drink, delta)) throw new Error('Nutzer nicht gefunden');
-      // Nur echte Getränke landen im Log; Admin-Korrekturen nicht (D-005)
-      if (auth.role === 'player') db.addLogEntry(playerId, drink);
+      // Nur echte Getränke landen im Log; Admin-Korrekturen nicht (D-005).
+      // Zähler und Log-Eintrag als eine Transaktion (D-046): nie das eine
+      // ohne das andere, auch nicht bei einem Absturz genau dazwischen.
+      const ok = auth.role === 'player'
+        ? db.logDrink(playerId, drink)
+        : db.incrementDrink(playerId, drink, delta);
+      if (!ok) throw new Error('Nutzer nicht gefunden');
     },
 
     addPlayer(auth, { name, pin }) {
@@ -197,7 +201,10 @@ function createIncrementThrottle() {
 // die Clients des eigenen Bereichs; area.broadcast wird hier gesetzt.
 export function setupWs(server, areas) {
   for (const area of areas) {
-    const wss = new WebSocketServer({ noServer: true });
+    // maxPayload: die größte legitime Nachricht (Fact-Text) ist unter 1 KB;
+    // Standard wären 100 MB, die ein Client dem Server aufdrücken könnte.
+    const wss = new WebSocketServer({ noServer: true, maxPayload: 16 * 1024 });
+    wss.on('error', (err) => console.error(`[${area.id}] WebSocket-Server: ${err.message}`));
     const handlers = createHandlers(area);
     const allowIncrement = createIncrementThrottle();
     area.wss = wss;
@@ -256,7 +263,28 @@ export function setupWs(server, areas) {
 
     armFactTimer();
 
+    // Heartbeat (D-046): Handys im Standby oder ohne WLAN verschwinden nicht
+    // von selbst aus wss.clients — erst das TCP-Timeout nach Minuten räumt sie
+    // weg, bis dahin füllt jeder Broadcast ihre Sendepuffer. Deshalb alle 30 s
+    // ein Ping; wer bis zum nächsten nicht geantwortet hat, fliegt raus.
+    const HEARTBEAT_MS = 30_000;
+    const heartbeat = setInterval(() => {
+      for (const client of wss.clients) {
+        if (client.isAlive === false) { client.terminate(); continue; }
+        client.isAlive = false;
+        client.ping();
+      }
+    }, HEARTBEAT_MS);
+    heartbeat.unref?.();
+
     wss.on('connection', (ws) => {
+      // Ohne 'error'-Listener wirft Node bei einem kaputten Frame (ungültiges
+      // UTF-8, zu große Nachricht) eine unbehandelte Exception und der ganze
+      // Server stirbt (D-046). ws schließt die Verbindung danach selbst.
+      ws.on('error', (err) => console.warn(`[${area.id}] WebSocket-Client: ${err.message}`));
+      ws.isAlive = true;
+      ws.on('pong', () => { ws.isAlive = true; });
+
       ws.send(JSON.stringify({ type: 'state', ...area.db.getState() }));
       ws.send(factMessage());
 

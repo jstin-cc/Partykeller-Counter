@@ -310,6 +310,14 @@ export function createDb(dbPath) {
     stmts.insertLog.run(id, drink, ts);
   }
 
+  // Echtes Getränk eines Spielers: Zähler +1 und Log-Eintrag in EINER
+  // Transaktion (D-046). false, wenn es den Spieler nicht gibt.
+  const logDrink = db.transaction((id, drink, ts = Date.now()) => {
+    if (!incrementDrink(id, drink, 1)) return false;
+    addLogEntry(id, drink, ts);
+    return true;
+  });
+
   function setCounter(id, drink, value) {
     const p = getPlayer(id);
     if (!p) return false;
@@ -993,7 +1001,7 @@ export function createDb(dbPath) {
   return {
     getSetting, setSetting,
     createPlayer, getPlayer, getPlayerByName, countPlayers,
-    incrementDrink, addLogEntry, setCounter, renamePlayer, setHidden,
+    incrementDrink, addLogEntry, logDrink, setCounter, renamePlayer, setHidden,
     getRecords, listFacts, addFact, updateFact, deleteFact,
     getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
     getNightName, setNightName,
