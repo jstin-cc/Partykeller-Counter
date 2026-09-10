@@ -154,8 +154,8 @@
   #funfact-title {
     font-family: 'Bitter', serif; font-weight: 700; font-size: 16px; color: var(--gold);
     text-transform: uppercase; letter-spacing: 0.14em; flex-shrink: 0; transition: opacity 0.4s;
-    align-self: stretch; display: flex; align-items: center;
-    padding-right: 22px; border-right: 1px solid var(--hair-gold);
+    align-self: center; display: flex; align-items: center;
+    padding: 4px 22px 4px 0; border-right: 1px solid var(--hair-gold);
   }
   #funfact-text {
     font-family: 'Bitter', serif; font-weight: 600; font-size: 28px; color: var(--creme);
@@ -567,12 +567,21 @@ function applyState(state, mode) {
 // --- Rekordkurs (Bier-Pace): Pill im Kopf, sobald der Abend vor dem besten
 // bisherigen Abend liegt (ab 3 Getränken, nicht im Archiv-Modus). Zwischen
 // zwei Getränken „altert" der Vergleich — deshalb unten der 5-Minuten-Refresh.
+// 45 -> '45 min', 120 -> '2 h', 150 -> '2,5 h'
+function fmtElapsed(min) {
+  if (min < 60) return `${min} min`;
+  const h = Math.round(min / 30) / 2;
+  return `${h.toLocaleString('de-DE')} h`;
+}
+
 function updatePace(pace, mode) {
   const el = $('pace-pill');
   const show = mode !== 'archive' && !!pace && pace.onPace && pace.todayTotal >= 3;
   el.hidden = !show;
   if (show) {
-    el.textContent = `🔥 Auf Rekordkurs! ${pace.todayTotal} : ${pace.recordAtSameTime} vs. ${fmtDay(pace.recordDay)}`;
+    // „27 : 9 nach 2 h" = heute 27 Getränke, der Rekord-Abend hatte nach derselben
+    // Zeit seit seinem ersten Getränk erst 9 (D-045)
+    el.textContent = `🔥 Auf Rekordkurs! ${pace.todayTotal} : ${pace.recordAtSameTime} nach ${fmtElapsed(pace.elapsedMin)} · Rekord-Abend ${fmtDay(pace.recordDay)} (${pace.recordTotal})`;
   }
 }
 

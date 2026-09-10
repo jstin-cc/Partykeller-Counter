@@ -214,13 +214,10 @@ export function createDb(dbPath) {
        FROM drink_log WHERE ts >= ?
        GROUP BY hour ORDER BY n DESC, hour LIMIT 1`
     ),
-    // Getränke (sichtbarer Spieler) in einem Zeitfenster — für den Rekordkurs-
-    // Vergleich „Rekord-Abend zum gleichen Zeitpunkt"
-    countLogsRange: db.prepare(
-      `SELECT COUNT(*) AS n FROM drink_log dl
-       JOIN players p ON p.id = dl.player_id
-       WHERE p.hidden = 0 AND dl.ts >= ? AND dl.ts < ?`
-    ),
+    // Rekordkurs (D-045): erstes Getränk und Anzahl Getränke in einem
+    // Zeitfenster — wie im Archiv zählen hier alle Personen mit.
+    firstLogInRange: db.prepare('SELECT MIN(ts) AS ts FROM drink_log WHERE ts >= ? AND ts < ?'),
+    countLogsRange: db.prepare('SELECT COUNT(*) AS n FROM drink_log WHERE ts >= ? AND ts < ?'),
     // Getränke je Spieler und Sorte VOR einem Zeitpunkt plus alle Einträge
     // seither in Reihenfolge: zusammen ergeben sie den Stand nach jedem
     // Getränk des laufenden Abends (Meilensteine, D-036)
@@ -878,12 +875,14 @@ export function createDb(dbPath) {
     // Abende gesamt + Rekord-Abend (meiste Getränke aller zusammen) +
     // Stammgast (meiste Abende) + meiste Tagessiege + Log-Bilanz je Spieler,
     // einmal komplett und einmal ohne den laufenden Abend (Führungswechsel)
-    const dayTotals = new Map();     // day -> Getränke gesamt
+    const dayTotals = new Map();     // day -> Getränke gesamt (ohne Ausgeblendete)
+    const dayTotalsAll = new Map();  // day -> Getränke gesamt aller Personen (wie im Archiv)
     const nightsBy = new Map();      // playerId -> Anzahl Abende
     const daysBy = new Map();        // playerId -> Party-Tage (fürs Comeback)
     const allTotals = new Map();     // playerId -> { n, last } über alle Abende
     const beforeTotals = new Map();  // dasselbe ohne den laufenden Abend
     for (const row of stmts.dayPlayerTotals.all()) {
+      dayTotalsAll.set(row.day, (dayTotalsAll.get(row.day) ?? 0) + row.n);
       if (hiddenIds.has(row.player_id)) continue;
       dayTotals.set(row.day, (dayTotals.get(row.day) ?? 0) + row.n);
       nightsBy.set(row.player_id, (nightsBy.get(row.player_id) ?? 0) + 1);
@@ -915,27 +914,35 @@ export function createDb(dbPath) {
     const first = stmts.firstLogToday.get(dayStart);
     const topHour = stmts.topHourToday.get(dayStart);
 
-    // Rekordkurs (Bier-Pace): läuft der laufende Abend schneller als der beste
-    // BISHERIGE Abend? Vergleich: Getränke heute gesamt vs. Getränke des
-    // Rekord-Abends bis zur gleichen Uhrzeit (gleiche Zeit seit 06:00-Start).
+    // Rekordkurs (D-045): läuft der laufende Abend schneller als der beste
+    // BISHERIGE Abend? Verglichen wird ab dem jeweils ERSTEN Getränk des Abends
+    // (nicht nach Uhrzeit seit 06:00 — sonst „gewinnt" jeder Nachmittag gegen
+    // einen Abend, der erst um 21 Uhr begann). Rekord-Abend = meiste Getränke
+    // aller Personen, wie das Archiv ihn zeigt. Erst ab 30 Minuten und nur,
+    // wenn der Rekord-Abend zu dem Zeitpunkt selbst schon Getränke hatte.
+    const PACE_MIN_MS = 30 * 60 * 1000;
     let bestPrev = null;
-    for (const [day, total] of dayTotals) {
+    for (const [day, total] of dayTotalsAll) {
       if (day === today) continue;
       if (!bestPrev || total > bestPrev.total) bestPrev = { day, total };
     }
-    const todayTotal = dayTotals.get(today) ?? 0;
+    const todayTotal = dayTotalsAll.get(today) ?? 0;
     let pace = null;
-    if (bestPrev && todayTotal > 0) {
-      const [recStart] = partyDayRangeMs(bestPrev.day);
-      const elapsed = Math.max(0, Date.now() - dayStart);
-      const recordAtSameTime = stmts.countLogsRange.get(recStart, recStart + elapsed).n;
-      pace = {
-        todayTotal,
-        recordDay: bestPrev.day,
-        recordTotal: bestPrev.total,
-        recordAtSameTime,
-        onPace: todayTotal > recordAtSameTime,
-      };
+    if (bestPrev && first && todayTotal > 0) {
+      const elapsed = Math.max(0, Date.now() - first.ts);
+      const [recStart, recEnd] = partyDayRangeMs(bestPrev.day);
+      const recFirst = stmts.firstLogInRange.get(recStart, recEnd)?.ts ?? null;
+      if (recFirst != null && elapsed >= PACE_MIN_MS) {
+        const recordAtSameTime = stmts.countLogsRange.get(recFirst, recFirst + elapsed).n;
+        pace = {
+          todayTotal,
+          recordDay: bestPrev.day,
+          recordTotal: bestPrev.total,
+          recordAtSameTime,
+          elapsedMin: Math.floor(elapsed / 60000),
+          onPace: recordAtSameTime > 0 && todayTotal > recordAtSameTime,
+        };
+      }
     }
 
     // Comeback: heute wieder dabei, davor lange weg. Es gewinnt die längste Pause.
