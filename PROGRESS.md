@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-10 (D-049): **Abendrückblick als Story-Bild** — jede Karte im
+Abend-Archiv hat einen Knopf „⬇ Story", der den Abend als PNG 1080 × 1920
+speichert (Datum, Sieger und Plätze 2/3, Bilanz, Verlauf pro Stunde). Für
+alle sichtbar, gezeichnet im Browser auf einem Canvas, Theme und Logos je
+Bereich. Kurvenformel liegt jetzt gemeinsam in `public/js/curve.js`.
 Seit 2026-09-10 (D-044): **Design-Feinschliff** — Abschnittszeilen mit
 Gold-Eyebrow und auslaufender Haarlinie (`.sec`) auf Anmeldung und Profil,
 die Anmeldeliste als eine Glas-Tafel mit Zeilen, im Profil nur noch die
@@ -274,6 +279,24 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       `GET /api/players`, entprellte Statistik, gedrosselte Archiv-Auswahl (D-047)
 - [x] Logo auf Anzeigegröße verkleinert (140 → 42 KB); Cache-Header bewusst
       nicht (D-048)
+- [x] Abendrückblick als Story-Bild (1080 × 1920) aus dem Abend-Archiv, für
+      alle, gezeichnet im Browser; gemeinsame Kurvenformel (D-049)
+
+## Verifikation (2026-09-10, D-049)
+
+Testdatenbank mit drei Abenden (voller Samstag mit 12 Personen und Verlauf
+19–02 Uhr, kurzer Abend mit zwei Personen in einer Stunde, ein Abend mit nur
+einer Person). Browser-Tests (Chromium, 430 px Handy-Breite): Story-Knopf ist
+ohne Login sichtbar, der Download heißt `partykeller-abend-2026-09-05.png`
+und liefert 1080 × 1920; das Bild zeigt Sieger, Platz 2 und 3, Bilanz und
+Verlauf mit Spitze 22 Uhr; beim kurzen Abend entfällt der Verlauf und der
+Inhalt bleibt zusammen; beim Solo-Abend bleibt nur die Siegerzeile; ein
+39-stelliger Abendname wird automatisch kleiner gesetzt statt abgeschnitten.
+Youngstars: Navy-Grund, orange Kurve, beide Logos, kein Baum-Footer,
+Dateiname `youngstars-abend-…`. Als Admin stehen Story-Zeile und die drei
+Admin-Knöpfe untereinander, deren Layout ist unverändert. Die Kurve auf den
+Archiv-Karten sieht nach dem Umbau auf `js/curve.js` unverändert aus. Keine
+Konsolenfehler.
 
 ## Verifikation (2026-09-10, D-047)
 

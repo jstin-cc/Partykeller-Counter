@@ -205,7 +205,8 @@ Partykeller-Counter/
 │   ├── tv.html           # TV-Scoreboard
 │   ├── admin.html        # Admin-Login + -Dashboard
 │   ├── css/theme.css     # Design-Tokens (siehe Abschnitt 8)
-│   ├── js/               # shared: ws-client.js, api.js, qrcode (vendored)
+│   ├── js/               # shared: ws-client.js, api.js, facts.js, curve.js,
+│   │                     #   story.js (Story-Bild, D-049), qrcode (vendored)
 │   └── assets/           # logo-gold.png, footer-woods.png, zapfen-raw.svg, fonts/
 ├── deploy/
 │   ├── partykeller.service   # systemd-Unit für den Pi

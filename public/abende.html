@@ -229,6 +229,7 @@
 <script type="module">
 import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
+import { buildCurve } from './js/curve.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -284,6 +285,24 @@ async function downloadCsv(path, filename) {
   }
 }
 
+// Abendrückblick als Bild im Story-Format (D-049). Das Zeichenmodul wird erst
+// beim Klick geladen — wer nur im Archiv blättert, holt es gar nicht.
+async function saveStory(night, btn) {
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Bild wird erstellt …';
+  try {
+    const { downloadStory } = await import('./js/story.js');
+    await downloadStory(night);
+    showToast('Story gespeichert – sie liegt bei deinen Downloads.', true);
+  } catch (err) {
+    showToast(err.message || 'Story konnte nicht erstellt werden.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
+}
+
 const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
 // '2026-09-25' -> { date: '25.09.2026', weekday: 'Freitag' }
@@ -306,33 +325,9 @@ function buildChart(timeline) {
   if (!timeline?.counts?.length) return null;
   const { startHour, counts } = timeline;
   const n = counts.length;
-  const max = Math.max(...counts);
-  const peak = counts.indexOf(max);
   const W = 100, H = 40, PAD_T = 4;   // PAD_T: Luft, damit die Spitze nicht anstößt
-  const xAt = (i) => (n === 1 ? W / 2 : (i / (n - 1)) * W);
-  const yAt = (v) => PAD_T + (1 - v / max) * (H - PAD_T);
-  const points = counts.map((v, i) => [xAt(i), yAt(v)]);
-
-  // Catmull-Rom in kubische Béziers: weiche Kurve ohne Chart-Bibliothek. Die
-  // Kontrollpunkte werden auf die Fläche geklemmt, damit die Kurve bei großen
-  // Sprüngen nicht unter die Grundlinie ausschlägt.
-  function curvePath(pts) {
-    if (pts.length === 1) return `M0 ${pts[0][1]} L${W} ${pts[0][1]}`;
-    const clamp = (y) => Math.min(H, Math.max(0, y));
-    let d = `M${pts[0][0]} ${pts[0][1]}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[Math.max(i - 1, 0)];
-      const p1 = pts[i];
-      const p2 = pts[i + 1];
-      const p3 = pts[Math.min(i + 2, pts.length - 1)];
-      const c1x = p1[0] + (p2[0] - p0[0]) / 6;
-      const c1y = clamp(p1[1] + (p2[1] - p0[1]) / 6);
-      const c2x = p2[0] - (p3[0] - p1[0]) / 6;
-      const c2y = clamp(p2[1] - (p3[1] - p1[1]) / 6);
-      d += ` C${c1x.toFixed(2)} ${c1y.toFixed(2)} ${c2x.toFixed(2)} ${c2y.toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
-    }
-    return d;
-  }
+  // Kurve wie im Story-Bild — dieselbe Formel liegt in js/curve.js
+  const { max, peak, xAt, yAt, d: line } = buildCurve(counts, W, H, PAD_T);
 
   const el = (name, attrs, cls) => {
     const node = document.createElementNS(SVG_NS, name);
@@ -361,7 +356,6 @@ function buildChart(timeline) {
     'aria-label':
       `Getränke pro Stunde von ${hourLabel(startHour)} bis ${hourLabel(startHour + n)}, Spitze ${max}`,
   });
-  const line = curvePath(points);
   svg.append(
     el('path', { d: `${line} L${W} ${H} L0 ${H} Z` }, 'area'),
     el('line', { x1: 0, y1: H, x2: W, y2: H }, 'base'),
@@ -477,7 +471,19 @@ function buildCard(night) {
   if (chart) card.appendChild(chart);
   card.appendChild(meta);
 
-  // Admin: Übergabedatei laden, Abend korrigieren oder nochmal auf dem TV zeigen
+  // Story kann jede:r speichern — eigene Zeile, damit die Admin-Werkzeuge
+  // darunter so breit bleiben wie bisher
+  const shareRow = document.createElement('div');
+  shareRow.className = 'night-actions';
+  const story = document.createElement('button');
+  story.className = 'night-btn';
+  story.title = `Abendrückblick vom ${date} als Bild fürs Handy`;
+  story.textContent = '⬇ Story';
+  story.addEventListener('click', () => saveStory(night, story));
+  shareRow.appendChild(story);
+  card.appendChild(shareRow);
+
+  // Übergabedatei, Korrekturen und TV-Anzeige bleiben dem Admin vorbehalten
   if (adminToken) {
     const actions = document.createElement('div');
     actions.className = 'night-actions';
