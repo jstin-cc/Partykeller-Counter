@@ -1166,3 +1166,34 @@ Update auf dem Pi bis zum Ablauf alte CSS-/JS-Dateien auf den Handys lassen
 **Begründung:** Abschluss der Effizienz-Analyse (Paket 3): das Logo war das
 einzige Asset, das gegenüber seiner Anzeigegröße deutlich überdimensioniert
 war. Alles Weitere aus der Analyse ist mit D-045 bis D-047 umgesetzt.
+
+## D-049 (2026-09-10): Abendrückblick als Story-Bild aus dem Archiv
+
+**Entscheidung:** Jede Abend-Karte im Archiv hat einen Knopf „⬇ Story", der
+den Abend als PNG im Hochformat 1080 × 1920 herunterlädt: Datum, Abendname,
+Abendsieger und die Plätze 2 und 3 als Zeilen über Haarlinien, die Bilanz
+(Gesamt/Bier/Shots/Mischen) als Kacheln und darunter der Verlauf pro Stunde.
+Der Knopf ist für **alle** sichtbar; CSV, Korrekturen und TV-Anzeige bleiben
+wie bisher dem Admin vorbehalten und stehen in einer eigenen Zeile darunter.
+
+Gezeichnet wird im Browser auf einem `<canvas>` (`public/js/story.js`), aus
+denselben Daten wie die Karte selbst plus `GET /api/archive/:day` für die
+Plätze. Farben kommen über `getComputedStyle` aus den Theme-Tokens, deshalb
+gilt das Bereichs-Theme automatisch — Youngstars bekommt Navy/Orange, sein
+Neon-Logo neben dem Vereinslogo und keinen Baum-Footer (D-019). Das Modul
+wird erst beim Klick geladen (dynamischer `import`).
+
+Der Verlauf kommt nur aufs Bild, wenn er etwas erzählt: mindestens drei
+Stunden mit unterschiedlichen Werten, sonst wäre es eine flache Linie. Fehlt
+er, rücken die übrigen Blöcke zusammen (Lücken auf 130 px gedeckelt) statt
+über die Seite zu fliegen. Die Kurvenformel liegt jetzt einmal in
+`public/js/curve.js` und wird von der Archiv-Karte (SVG) und vom Story-Bild
+(Canvas) gemeinsam benutzt.
+
+**Begründung:** Gewünscht war ein teilbarer Rückblick fürs Handy. Canvas
+statt Server-Rendering hält die Regeln des Projekts ein: keine neue
+Dependency, kein Build-Step, funktioniert offline im WLAN — und der Pi
+bekommt keine Bildarbeit ab. Kein direktes Teilen: die App läuft über
+`http://` im WLAN, damit ist die Teilen-Funktion des Browsers (nur in
+sicherem Kontext) nicht verfügbar; das Bild landet in den Downloads und wird
+von dort in die Story gezogen.
