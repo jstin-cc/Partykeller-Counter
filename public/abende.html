@@ -463,7 +463,7 @@ function buildCard(night) {
   const meta = document.createElement('div');
   meta.className = 'night-meta';
   const part = document.createElement('span');
-  part.textContent = night.participants === 1 ? '1 Teilnehmer:in' : `${night.participants} Teilnehmer:innen`;
+  part.textContent = night.participants === 1 ? '1 Teilnehmer' : `${night.participants} Teilnehmer`;
   meta.append(part);
 
   card.append(head, winner, stats);
@@ -471,7 +471,7 @@ function buildCard(night) {
   if (chart) card.appendChild(chart);
   card.appendChild(meta);
 
-  // Story kann jede:r speichern — eigene Zeile, damit die Admin-Werkzeuge
+  // Story kann jeder speichern — eigene Zeile, damit die Admin-Werkzeuge
   // darunter so breit bleiben wie bisher
   const shareRow = document.createElement('div');
   shareRow.className = 'night-actions';

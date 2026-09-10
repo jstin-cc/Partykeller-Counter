@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-10 (D-050): **Keine Gendersprache** in der Oberfläche —
+„Teilnehmer" statt „Teilnehmer:innen" (Abend-Karten und Story-Bild),
+„Fleißigster heute" statt „Fleißigste:r heute" im Fun-Fact-Band.
 Seit 2026-09-10 (D-049): **Abendrückblick als Story-Bild** — jede Karte im
 Abend-Archiv hat einen Knopf „⬇ Story", der den Abend als PNG 1080 × 1920
 speichert (Datum, Sieger und Plätze 2/3, Bilanz, Verlauf pro Stunde). Für
@@ -281,6 +284,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
       nicht (D-048)
 - [x] Abendrückblick als Story-Bild (1080 × 1920) aus dem Abend-Archiv, für
       alle, gezeichnet im Browser; gemeinsame Kurvenformel (D-049)
+- [x] Gendersprache aus der Oberfläche entfernt, Konvention in CLAUDE.md (D-050)
 
 ## Verifikation (2026-09-10, D-049)
 

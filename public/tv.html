@@ -309,7 +309,7 @@ function fillPodium(el, p, slot) {
   if (!modeSwitching && prev && prev.id === p.id && p.total > prev.total) {
     pop(totalEl);                                    // gleicher Mensch, mehr Getränke
   } else if (!modeSwitching && prev && prev.id !== p.id) {
-    flash(el.querySelector('.podium-card'));         // neue:r auf diesem Podestplatz
+    flash(el.querySelector('.podium-card'));         // neuer Name auf diesem Podestplatz
   }
   prevPod[slot] = { id: p.id, total: p.total };
 }
