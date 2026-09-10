@@ -14,6 +14,10 @@ Ranglisten-Karte als Karte (Statistik und Abzeichen rahmenlos darunter),
 Fun-Fact-Band ohne Gold-Oberkante mit Etikett links, Archiv-Sieger ohne
 Kästchen, TV-Umschalter im Admin mit gleitendem Balken. Farben, Knöpfe,
 Zählen-Ansicht und Bereichsauswahl unverändert.
+Seit 2026-09-10 (D-045): **Rekordkurs** vergleicht ab dem ersten Getränk des
+Abends (statt nach Uhrzeit seit 06:00) und nennt Dauer und Gesamtzahl des
+Rekord-Abends; Admin-Umschalter läuft in Firefox nicht mehr über; Strich im
+Fun-Fact-Band auf Texthöhe.
 Seit 2026-09-09 (D-043): **Fun-Fact-Übersicht im Admin** — ein Fenster zeigt
 alle rotierenden Meldungen, welche gerade auf dem TV läuft (mit Restzeit) und
 erlaubt vor/zurück sowie Sprünge. Dafür rechnen TV und Admin die Liste aus
@@ -252,6 +256,19 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Design-Feinschliff: Abschnittszeilen mit Gold-Haarlinie, Anmeldeliste
       als Tafel, Profil mit einer Karte, Fun-Fact-Etikett, Archiv-Sieger ohne
       Kasten, Admin-Umschalter (D-044)
+- [x] Rekordkurs ab dem ersten Getränk mit Dauer und Rekord-Gesamtzahl,
+      Admin-Umschalter in Firefox, Band-Strich auf Texthöhe (D-045)
+
+## Verifikation (2026-09-10, D-045)
+
+Testdatenbank: Rekord-Abend vor 15 Tagen mit 30 Getränken ab 21:00, ein
+kleinerer Abend mit 13, heute 27 Getränke seit 2 Stunden. `funStats.pace`
+liefert `27 : 11 nach 120 min`, Rekord-Abend mit 30 gesamt, `onPace: true`;
+die TV-Pille zeigt „🔥 Auf Rekordkurs! 27 : 11 nach 2 h · Rekord-Abend
+26.08.2026 (30)". Fun-Fact-Band: Trennstrich etwa 28 px hoch, mittig.
+Admin-Umschalter in Chromium 408 px breit mit drei 128-px-Segmenten (Firefox
+ist in der Testumgebung nicht installiert; die Ursache — `flex-basis` zählt
+dort nicht zur Containerbreite — ist durch `width` behoben).
 
 ## Verifikation (2026-09-10, D-044)
 

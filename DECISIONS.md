@@ -1048,3 +1048,35 @@ Abschnittsgliederung, ohne Farben oder Knöpfe anzufassen. Alles, was den
 Look in Richtung eines neuen Stils geschoben hätte, hat der Nutzer in der
 Entwurfsrunde abgelehnt; das ist hier festgehalten, damit es nicht erneut
 vorgeschlagen wird.
+
+## D-045 (2026-09-10): Rekordkurs ab dem ersten Getränk, Umschalter-Breite, Band-Strich
+
+**Entscheidung:** Drei Korrekturen nach Nutzer-Rückmeldung:
+
+1. **Rekordkurs** (ergänzt D-024): Der Vergleich läuft nicht mehr nach
+   Uhrzeit seit dem 06:00-Start, sondern ab dem **ersten Getränk** des
+   jeweiligen Abends: Heute seit dem ersten Getränk vergangene Zeit → Getränke
+   des Rekord-Abends in derselben Zeitspanne nach *seinem* ersten Getränk.
+   Rekord-Abend ist der bisherige Abend mit den meisten Getränken **aller**
+   Personen (wie das Archiv ihn zeigt; D-024 zählte nur sichtbare Spieler).
+   Die Pille erscheint erst nach 30 Minuten und nur, wenn der Rekord-Abend zu
+   dem Zeitpunkt selbst schon Getränke hatte. Sie nennt jetzt Vergleichsdauer
+   und Gesamtzahl des Rekord-Abends:
+   „🔥 Auf Rekordkurs! 27 : 11 nach 2 h · Rekord-Abend 26.08.2026 (30)".
+   `funStats.pace` bekommt dafür `elapsedMin`; `recordTotal` gab es schon.
+2. **Admin-Umschalter**: die feste Segmentbreite steht als `width`, nicht
+   als `flex-basis` — Firefox rechnet `flex-basis` nicht in die Breite des
+   Umschalters ein, der dritte Knopf lief über den Rand und kollidierte mit
+   dem Rotations-Regler.
+3. **TV-Fun-Fact-Band**: der Trennstrich neben „Fun Fact" ist auf Texthöhe
+   plus 4 px Luft gekürzt statt auf volle Bandhöhe.
+
+**Begründung:** Beim Testen am Nachmittag zeigte die Pille „27 : 0 vs.
+26.08.2026": Der Rekord-Abend hatte um diese Uhrzeit noch nicht begonnen,
+deshalb stand er bei 0 und jeder Nachmittag war „auf Rekordkurs" — technisch
+korrekt gerechnet, aber ohne Aussage. Der Vergleich ab dem ersten Getränk
+misst, was gemeint ist: ob *dieser* Abend schneller läuft als der beste. Dass
+die Pille den Abend (mit Gesamtzahl) und die Dauer nennt, macht den
+Vergleich nachvollziehbar. Ausgeblendete Personen zählen für den Rekord-Abend
+mit, weil der Nutzer den Rekord-Abend aus dem Archiv kennt und die beiden
+Anzeigen sonst verschiedene Abende nennen.

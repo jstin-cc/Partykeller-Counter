@@ -99,7 +99,7 @@ export function computeFacts(players, records, customFacts, funStats) {
     fact(`Rekord-Abend: Am ${fmtDay(fs.recordNight.day)} flossen zusammen ${fs.recordNight.total} Getränke.`);
   }
   if (fs.pace && fs.pace.onPace && fs.pace.todayTotal >= 3) {
-    fact(`Rekordkurs: Schon ${fs.pace.todayTotal} Getränke heute – der Rekord-Abend vom ${fmtDay(fs.pace.recordDay)} stand um diese Uhrzeit erst bei ${fs.pace.recordAtSameTime}.`);
+    fact(`Rekordkurs: Schon ${fs.pace.todayTotal} Getränke heute – der Rekord-Abend vom ${fmtDay(fs.pace.recordDay)} (${fs.pace.recordTotal} gesamt) stand nach der gleichen Zeit erst bei ${fs.pace.recordAtSameTime}.`);
   }
   if (fs.regular && fs.regular.nights >= 3) {
     fact(`Stammgast: ${fs.regular.name} war schon an ${fs.regular.nights} Abenden dabei.`);

@@ -64,7 +64,9 @@
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 13px; text-decoration: underline; cursor: pointer; }
   /* TV-Anzeige als Umschalter mit gleitendem Balken wie im Profil (D-044) */
   #tv-mode { --tabs: 3; flex: 0 0 auto; }
-  #tv-mode .tab-btn { flex: 0 0 128px; padding: 8px 12px; font-size: 14px; white-space: nowrap; }
+  /* Feste Breite als width, nicht als flex-basis: Firefox rechnet flex-basis
+     nicht in die Breite des Umschalters ein, der dritte Knopf lief über. */
+  #tv-mode .tab-btn { flex: 0 0 auto; width: 128px; padding: 8px 12px; font-size: 14px; white-space: nowrap; }
   .vis-check { width: 20px; height: 20px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
   .admin-row { transition: opacity 0.2s ease, background-color 0.2s ease; }
   .admin-row.is-hidden { opacity: 0.5; }
