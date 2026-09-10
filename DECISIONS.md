@@ -1148,3 +1148,21 @@ Ausgaben sind gegen den alten Code Zeile für Zeile identisch (Ausnahme:
 mehrere Einträge in derselben Millisekunde, wo der alte Code bei „Erster
 Trinker" einen beliebigen nahm, der neue den ältesten). Kein Schema-Umbau,
 keine neue Dependency; der Cache belegt bei 150 Abenden wenige MB.
+
+## D-048 (2026-09-10): Logo verkleinert; keine Cache-Header für Statics
+
+**Entscheidung:** `public/assets/logo.png` ist von 2004 × 1697 px (140 KB)
+auf 567 × 480 px (42 KB) verkleinert — das Vierfache der größten
+Anzeigehöhe (120 px auf der TV-Bühne), also auch auf einem 4K-Fernseher
+scharf. Das Youngstars-Logo bleibt: verlustfrei ist nichts zu holen, und es
+wird ohnehin durch die Original-PNG des Nutzers ersetzt (siehe PROGRESS).
+
+Bewusst **nicht** eingeführt: `Cache-Control: max-age` für Statics. Express
+liefert die Dateien mit ETag, ein zweiter Aufruf kostet im WLAN nur eine
+Rückfrage von wenigen Millisekunden. Ein `max-age` würde dagegen nach einem
+Update auf dem Pi bis zum Ablauf alte CSS-/JS-Dateien auf den Handys lassen
+(genau das vermeidet auch der bewusst cache-freie Service Worker).
+
+**Begründung:** Abschluss der Effizienz-Analyse (Paket 3): das Logo war das
+einzige Asset, das gegenüber seiner Anzeigegröße deutlich überdimensioniert
+war. Alles Weitere aus der Analyse ist mit D-045 bis D-047 umgesetzt.
