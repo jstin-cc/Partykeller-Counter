@@ -45,14 +45,13 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
+  /* Sieger als Zeile über einer Haarlinie, kein Kästchen in der Karte (D-044) */
   .night-winner {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: var(--surface-2);
-    border: 1px solid var(--glass-edge);
-    border-radius: var(--radius);
-    padding: 10px 14px;
+    padding: 4px 0 10px;
+    border-bottom: 1px solid var(--glass-edge);
   }
   .night-winner .name { font-family:'Bitter',serif; font-weight:700; font-size:17px; color:var(--gold); flex:1; }
   .night-winner .count { font-family:'Bitter',serif; font-weight:700; font-size:15px; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
@@ -172,14 +171,14 @@
       <div style="display:flex;align-items:center;gap:16px;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:56px;width:auto;object-fit:contain;">
         <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:34px;width:auto;object-fit:contain;">
-        <div>
-          <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0;">Abend-Archiv</h1>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0;line-height:1.1;">Abend-Archiv</h1>
+          <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <button id="tv-live" class="night-btn" hidden style="flex:none;">TV zurück zur Live-Ansicht</button>
         <button id="export-all" class="night-btn" hidden style="flex:none;">⬇ Alle Abende als CSV</button>
-        <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
       </div>
     </div>
 

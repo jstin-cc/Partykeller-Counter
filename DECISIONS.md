@@ -1000,3 +1000,51 @@ zwei Fernseher im selben Bereich zeigen jetzt garantiert dieselbe Meldung, und
 der Takt-Regler setzt die Restzeit sofort neu, statt gegen die alte Dauer
 weiterzulaufen. Ist noch kein Fernseher verbunden, zeigt das Fenster trotzdem
 die Liste — die rechnet der Admin selbst — und schaltet die Knöpfe ab.
+
+## D-044 (2026-09-10): Design-Feinschliff — Abschnittszeilen mit Gold-Haarlinie, weniger Kästchen
+
+**Entscheidung:** Nach einer Analyse aller Screens und einer Entwurfsrunde mit
+Freigabe bleibt das Grunddesign (Farben, Knöpfe, Glas, Zapfen, Wald, Zählen-
+Ansicht, Bereichsauswahl) unverändert. Umgesetzt werden nur die freigegebenen
+Punkte:
+
+1. **Abschnittszeile** `.sec` in `theme.css`: Gold-Eyebrow, dahinter eine
+   Haarlinie in Gold, die nach rechts ausläuft (`--hair-gold`, für Youngstars
+   im Orange-Gold). Ersetzt die grüne Vollunterstreichung auf der Anmeldung
+   und die `.card-title`-Zeilen im Profil; ein optionaler Hinweis (`.sec-hint`,
+   z. B. „All-Time", „3 von 5 heute") steht vor der Linie.
+2. **Anmeldeliste als eine Tafel**: die Konten sind Zeilen mit Haarlinie in
+   einer Glasfläche (`.user-list`) statt einer Kachel je Konto; die
+   PIN-Eingabe bleibt in der Zeile des Kontos.
+3. **Profil-Tab**: die Ranglisten-Karte ist die einzige Karte (die Bühne);
+   „Deine Statistik" und „Abzeichen" stehen darunter rahmenlos unter
+   Abschnittszeilen. Nachbarn (vor/hinter dir) sind Zeilen mit Haarlinie statt
+   Kästchen, Beschriftungen in gemischter Schreibung (`.label--plain`), die
+   Balken 10 statt 14 px hoch. Getränkenamen in der Legende bleiben Wörter.
+4. **TV-Fun-Fact-Band**: keine Gold-Oberkante mehr; das Etikett „Fun Fact"
+   steht links mit einer senkrechten Gold-Haarlinie, der Text folgt
+   linksbündig. Der Rest des TV-Bilds bleibt.
+5. **Abend-Archiv**: der Sieger ist eine Zeile über einer Haarlinie statt
+   eines Kästchens in der Karte; im Kopf steht „‹ Zur Anmeldung" unter dem
+   Titel neben dem Logo.
+6. **Admin**: der TV-Anzeige-Umschalter ist ein Segment-Umschalter mit
+   gleitendem grünen Balken wie im Profil. Dafür sind `.tabs`, `.tab-btn` und
+   `.tab-indicator` aus `dashboard.html` nach `theme.css` gezogen und über
+   `--tabs` (Anzahl Segmente) verallgemeinert.
+
+**Verworfen** nach der Entwurfsrunde: Körnung und Vignette im Hintergrund,
+Lichtkante auf Karten, Verlaufs-Knöpfe mit Creme-Schrift, Icon-Wasserzeichen
+auf den Getränkefeldern, Linien-Icons in Legenden und Spaltenköpfen, ein
+wärmeres Mischen-Violett, Punktleitlinien und neuer Titel auf dem TV,
+±-Knöpfe als Umrisse im Admin.
+
+**Begründung:** Nutzerwunsch, das Design „hochwertiger, einzigartiger" zu
+machen, ausdrücklich ohne Stilbruch. Die Schwächen aus der Analyse waren
+Karte-in-Karte (Archiv-Sieger, Nachbarn, drei gleich schwere Profil-Karten),
+Versalien mit Sperrung auf fast jedem Label und acht einzelne Glaskacheln auf
+der Anmeldung, durch die das Wasserzeichen durchschien. Die Gold-Haarlinie
+ist der eine neue, wiederkehrende Baustein — sie gibt jedem Screen dieselbe
+Abschnittsgliederung, ohne Farben oder Knöpfe anzufassen. Alles, was den
+Look in Richtung eines neuen Stils geschoben hätte, hat der Nutzer in der
+Entwurfsrunde abgelehnt; das ist hier festgehalten, damit es nicht erneut
+vorgeschlagen wird.

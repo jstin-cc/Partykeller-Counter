@@ -241,7 +241,10 @@ Aus dem importierten Design extrahierte Tokens → werden 1:1 `public/css/theme.
   D-038; aus den Getränke-Karten sind ganzflächige Knöpfe in der Getränkefarbe
   geworden, D-039; statt des zentrierten Namens steht oben ein Kopf mit
   Namenszeichen und „Dabei seit …", D-040. Der Grundsatz „nur Plus" gilt
-  unverändert.)
+  unverändert. Seit D-044 gliedern Abschnittszeilen mit Gold-Eyebrow und
+  auslaufender Haarlinie (`.sec`) Anmeldung und Profil; im Profil ist nur
+  noch die Rangliste eine Karte, Statistik und Abzeichen stehen rahmenlos
+  darunter.)
 
 ## 9. Betrieb auf dem Pi (eingeplant, Ausbau in M7)
 
