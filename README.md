@@ -214,6 +214,7 @@ statisches Frontend ohne Build-Step. Ein Prozess serviert alles.
 - [DECISIONS.md](DECISIONS.md) — Entscheidungen mit Begründung
 - [CLAUDE.md](CLAUDE.md) — Projektregeln und Konventionen
 - [Prompt.md](Prompt.md) — ursprüngliche Aufgabenstellung
+- [ideen.md](ideen.md) — Ideensammlung; [docs/BIERPONG.md](docs/BIERPONG.md) — zwei Entwürfe für einen Bierpong-Counter mit Mockups (nicht umgesetzt)
 
 ## Betrieb auf dem Raspberry Pi
 
