@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-18: **Bierpong-Counter als Entwurf** in `docs/BIERPONG.md` —
+zwei Ausbaustufen (Sieg-Zähler, Live-Match-Tracker) mit Mockups und
+Schritt-für-Schritt-Anleitung; **noch nicht umgesetzt**, wartet auf Entscheidung.
 Seit 2026-09-10 (D-050): **Keine Gendersprache** in der Oberfläche —
 „Teilnehmer" statt „Teilnehmer:innen" (Abend-Karten und Story-Bild),
 „Fleißigster heute" statt „Fleißigste:r heute" im Fun-Fact-Band.
