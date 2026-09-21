@@ -7,6 +7,14 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-21 (D-051): **TV-Podest neu** — Namen stehen über dem Podest in
+der Rangfarbe, die Felder sind Vollflächen in Gold/Silber/Bronze mit dunkler
+Schrift (Rangkreis wie gehabt auf der Kante, freigestellt durch einen Ring in
+der Hintergrundfarbe). Die Gesamt-Spalte der Rangliste ist eine gefüllte
+Gold-Pille; Rangliste und Fun-Fact-Band haben keinen äußeren Rahmen und keine
+Füllung mehr (Zeilen behalten ihre Glaskante, QR-Rahmen bleibt). Silber und
+Bronze sind jetzt Tokens in `theme.css`. Neues `logo.png` in Creme (#eee4cd)
+überall im Einsatz.
 Seit 2026-09-18: **Bierpong-Counter als Entwurf** in `docs/BIERPONG.md` —
 zwei Ausbaustufen (Sieg-Zähler, Live-Match-Tracker) mit Mockups und
 Schritt-für-Schritt-Anleitung; **noch nicht umgesetzt**, wartet auf Entscheidung.
