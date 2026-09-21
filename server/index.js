@@ -231,6 +231,7 @@ for (const area of areas) {
     res.redirect(`${area.base}/`);
   });
   app.get(`${area.base}/dashboard`, (_req, res) => res.sendFile(path.join(publicDir, 'dashboard.html')));
+  app.get(`${area.base}/onboarding`, (_req, res) => res.sendFile(path.join(publicDir, 'onboarding.html')));
   app.get(`${area.base}/tv`, (_req, res) => res.sendFile(path.join(publicDir, 'tv.html')));
   app.get(`${area.base}/admin`, (_req, res) => res.sendFile(path.join(publicDir, 'admin.html')));
   app.get(`${area.base}/abende`, (_req, res) => res.sendFile(path.join(publicDir, 'abende.html')));
@@ -247,7 +248,7 @@ app.use(youngstars.base, express.static(publicDir));
 
 // Alt-Pfade aus der Zeit vor der Auswahlseite -> Partykeller-Bereich
 // (gespeicherte QR-Codes, Lesezeichen, TV-Kiosk auf dem Pi).
-for (const p of ['/dashboard', '/tv', '/admin', '/abende']) {
+for (const p of ['/dashboard', '/onboarding', '/tv', '/admin', '/abende']) {
   app.get(p, (_req, res) => res.redirect(`${partykeller.base}${p}`));
 }
 

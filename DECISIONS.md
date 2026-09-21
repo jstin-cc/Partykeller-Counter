@@ -1260,3 +1260,36 @@ Kästen um Rangliste und Fun-Fact-Band waren doppelt (Kasten im Kasten, wie
 schon bei D-044 abgeräumt) und kosteten Platz. Entwürfe A–O mit Mockups
 wurden durchgespielt; gewählt hat der Nutzer O.
 
+## D-052 (2026-09-21): Onboarding für neue Konten
+
+**Entscheidung:** „Konto erstellen & los" führt nicht mehr direkt ins
+Dashboard, sondern auf `/<bereich>/onboarding` — drei Vollbild-Seiten, danach
+das Dashboard:
+
+1. **Getränke Tracken** — „Tippe auf ein Getränkefeld um es zu tracken.",
+   darunter die drei Getränkefelder als Schaubild (gleiche Anatomie wie im
+   Dashboard, D-039, nur kleiner und ohne Funktion). Der Eyebrow begrüßt mit
+   dem gerade angelegten Namen.
+2. **Rangliste** — was auf dem Fernseher läuft: Podest in Gold/Silber/Bronze
+   (D-051) mit dem eigenen Namen auf Platz 1, zwei Ranglistenzeilen und das
+   Fun-Fact-Band.
+3. **Platz, Abende, Abzeichen** — was im Profil-Tab steht: Ranglisten-Karte,
+   Statistik und Abzeichen.
+
+Unten drei Punkte und ein Knopf („Weiter", zuletzt „Los geht's"), oben rechts
+„Überspringen" (auf der letzten Seite ausgeblendet). Beide Wege gehen per
+`location.replace` weiter, damit die Zurück-Taste aus dem Dashboard nicht ins
+Onboarding zurückfällt. Ohne Anmeldung leitet die Seite auf die Anmeldung.
+
+Die Zahlen in den Schaubildern sind Beispielwerte, kein echter Stand — die
+Seiten sollen zeigen, wie die Oberfläche aussieht, bevor sie leer ist.
+
+**Begründung:** Bisher landete ein neues Konto ohne ein Wort direkt im
+Dashboard. Drei Dinge erfährt man dort nicht von selbst: dass ein Tipp auf das
+Feld zählt, dass der eigene Name im Keller auf dem Fernseher steht und dass es
+neben dem Zählen einen Profil-Tab gibt. Der Ablauf hängt bewusst an der
+Kontoerstellung und nicht am Anmelden — wer sich zum zwanzigsten Mal anmeldet,
+sieht ihn nie. Alternativen waren eine geführte Ersteinrichtung (Name → PIN →
+fertig) und Hinweise direkt im Dashboard; beide hätten Seiten angefasst, die
+täglich benutzt werden (Anmeldung bzw. Zählen-Tab, D-044). Entwürfe A, B und C
+mit Mockups wurden durchgespielt; gewählt hat der Nutzer A.
