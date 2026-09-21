@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-21 (D-052): **Onboarding für neue Konten** — nach „Konto
+erstellen & los" kommen drei Willkommens-Seiten (`/<bereich>/onboarding`):
+Getränke tracken, Rangliste auf dem Fernseher, Profil-Tab. Mit Punkten,
+„Weiter" und „Überspringen"; danach geht es ins Dashboard. Beim Anmelden eines
+bestehenden Kontos erscheint sie nicht.
 Seit 2026-09-21 (D-051): **TV-Podest neu** — Namen stehen über dem Podest in
 der Rangfarbe, die Felder sind Vollflächen in Gold/Silber/Bronze mit dunkler
 Schrift (Rangkreis wie gehabt auf der Kante, freigestellt durch einen Ring in

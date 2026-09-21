@@ -230,7 +230,8 @@ $('create-form').addEventListener('submit', async (e) => {
   try {
     const { token, player } = await post('/api/players', { name: $('create-name').value, pin: $('create-pin').value });
     setSession(token, player.id);
-    location.href = 'dashboard';
+    // Neues Konto: erst die drei Willkommens-Seiten, dann das Dashboard (D-052)
+    location.href = 'onboarding';
   } catch (err) {
     showError(err.message);
   }

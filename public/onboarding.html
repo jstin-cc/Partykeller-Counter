@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SV Partykeller – Willkommen</title>
+<script>document.documentElement.dataset.area = location.pathname.startsWith('/youngstars') ? 'youngstars' : 'partykeller';</script>
+<link rel="icon" href="assets/cones-flat.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#010f05">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  /* Wasserzeichen wie auf der Anmeldeseite (links oben) */
+  .login-watermark {
+    position: fixed;
+    left: -140px; top: -100px;
+    width: 520px; height: 520px;
+    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
+    opacity: 0.22;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .skip {
+    position: absolute; top: 20px; right: 20px; z-index: 2;
+    background: none; border: none; padding: 6px 4px; cursor: pointer;
+    font-family: 'Work Sans', sans-serif; font-size: 13px; color: var(--ink-muted);
+  }
+  .skip:hover { color: var(--ink); }
+
+  .step-title {
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 29px; line-height: 1.15;
+    color: var(--creme); margin: 0; text-wrap: balance;
+  }
+  .step-lead { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink-muted); }
+  .step { display: flex; flex-direction: column; gap: 18px; }
+  .step:not([hidden]) { animation: ob-in 0.32s ease both; }
+  @keyframes ob-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .step:not([hidden]) { animation: none; } }
+
+  /* Fußzeile: Punkte + Knopf, kleben unten */
+  .ob-foot { margin-top: auto; display: flex; flex-direction: column; gap: 16px; padding-top: 18px; }
+  .dots { display: flex; gap: 7px; justify-content: center; }
+  .dots i { display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--surface-2); transition: width 0.25s ease, background-color 0.25s ease; }
+  .dots i.on { background: var(--gold); width: 20px; border-radius: 999px; }
+  .btn-green {
+    background: var(--green); color: var(--bg); border: none; border-radius: var(--radius);
+    font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 16px; padding: 15px;
+    width: 100%; cursor: pointer;
+  }
+
+  /* Getränkefelder als Schaubild — gleiche Anatomie wie im Dashboard (D-039),
+     nur etwas kleiner und ohne Funktion. */
+  .drink-demo {
+    display: flex; flex-direction: column; gap: 9px;
+    padding: 11px 14px 12px; border-radius: var(--radius-lg);
+    background: var(--fill); color: var(--on);
+  }
+  .drink-demo .drink-head { display: flex; align-items: center; justify-content: space-between; }
+  .drink-demo .drink-name { font-family: 'Bitter', serif; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .drink-demo .drink-plus { font-family: 'Bitter', serif; font-weight: 800; font-size: 28px; line-height: 1; }
+  .drink-demo .value { color: var(--on); font-size: 24px; }
+  .drink-demo .label { color: var(--on); opacity: 0.68; font-size: 11px; }
+  .drink-demo .split > .sep { background: currentColor; opacity: 0.22; }
+
+  /* Fernseher als Schaubild: Podest in Rangfarben (D-051) plus zwei Zeilen */
+  .tv-demo { background: var(--bg-hi); border: 1px solid var(--glass-edge); border-radius: var(--radius-lg); padding: 14px 14px 12px; }
+  .tv-demo .pod { display: flex; align-items: flex-end; justify-content: center; gap: 9px; }
+  .tv-demo .pod > div { display: flex; flex-direction: column; align-items: center; }
+  .tv-demo .pod .name { font-family: 'Bitter', serif; font-weight: 800; font-size: 11px; color: var(--rank); margin-bottom: 3px; }
+  .tv-demo .pod .bar {
+    width: 100%; background: var(--rank); color: var(--bg); border-radius: 8px;
+    font-family: 'Bitter', serif; font-weight: 800; font-variant-numeric: tabular-nums;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tv-demo .row {
+    display: flex; align-items: center; gap: 10px; margin-top: 9px; padding: 7px 10px;
+    background: var(--surface); border: 1px solid var(--glass-edge); border-radius: 10px; font-size: 12px;
+  }
+  .tv-demo .row .rank { width: 14px; font-family: 'Bitter', serif; font-weight: 800; color: var(--ink-muted); }
+  .tv-demo .row .who { flex: 1; font-weight: 600; }
+  .tv-demo .row .total {
+    background: var(--gold); color: var(--bg); border-radius: 999px; padding: 1px 9px;
+    font-family: 'Bitter', serif; font-weight: 800; font-variant-numeric: tabular-nums;
+  }
+  .tv-demo .band {
+    display: flex; align-items: center; gap: 9px; margin-top: 11px; padding-top: 9px;
+    border-top: 1px solid var(--glass-edge); font-size: 11px; color: var(--ink-muted);
+  }
+  .tv-demo .band b {
+    font-family: 'Bitter', serif; font-weight: 700; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .hint { font-size: 13px; line-height: 1.45; color: var(--ink-muted); }
+
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px; padding: 5px 11px; border-radius: 999px;
+    border: 1px solid var(--glass-edge); background: var(--surface-alt); color: var(--ink-muted);
+  }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="login-watermark"></div>
+  <button id="skip" class="skip" type="button">Überspringen</button>
+
+  <div class="screen-inner" style="padding:26px 24px 24px;">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <img src="assets/logo.png" alt="SV Partykeller" style="height:44px;width:auto;object-fit:contain;">
+      <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:30px;width:auto;object-fit:contain;">
+    </div>
+
+    <!-- Schritt 1: zählen -->
+    <section id="step-1" class="step" style="margin-top:14px;">
+      <div class="sec"><span id="welcome" class="sec-title">Willkommen</span></div>
+      <h1 class="step-title">Getränke Tracken</h1>
+      <p class="step-lead">Tippe auf ein Getränkefeld um es zu tracken.</p>
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:-4px;">
+        <div class="drink-demo" style="--fill:var(--amber);--on:var(--bg);">
+          <div class="drink-head"><span class="drink-name">Bier</span><span class="drink-plus" aria-hidden="true">+</span></div>
+          <div class="split">
+            <div class="cell"><div class="num value">3</div><div class="label">Heute</div></div>
+            <div class="sep"></div>
+            <div class="cell"><div class="num value">128</div><div class="label">Gesamt</div></div>
+          </div>
+        </div>
+        <div class="drink-demo" style="--fill:var(--brick);--on:var(--ink);">
+          <div class="drink-head"><span class="drink-name">Shots</span><span class="drink-plus" aria-hidden="true">+</span></div>
+          <div class="split">
+            <div class="cell"><div class="num value">1</div><div class="label">Heute</div></div>
+            <div class="sep"></div>
+            <div class="cell"><div class="num value">44</div><div class="label">Gesamt</div></div>
+          </div>
+        </div>
+        <div class="drink-demo" style="--fill:var(--mix);--on:var(--bg);">
+          <div class="drink-head"><span class="drink-name">Mischen</span><span class="drink-plus" aria-hidden="true">+</span></div>
+          <div class="split">
+            <div class="cell"><div class="num value">0</div><div class="label">Heute</div></div>
+            <div class="sep"></div>
+            <div class="cell"><div class="num value">12</div><div class="label">Gesamt</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Schritt 2: der Fernseher -->
+    <section id="step-2" class="step" style="margin-top:14px;" hidden>
+      <div class="sec"><span class="sec-title">Im Keller</span></div>
+      <h1 class="step-title">Rangliste</h1>
+      <p class="step-lead">Auf dem Fernseher steht die Rangliste, Podest oben, alle anderen darunter. Sie wechselt zwischen Heute und All-Time.</p>
+      <div class="tv-demo" style="margin-top:-4px;">
+        <div class="pod">
+          <div style="width:31%;--rank:var(--silver);"><div class="name">Lena</div><div class="bar" style="height:46px;font-size:19px;">41</div></div>
+          <div style="width:37%;--rank:var(--gold);"><div class="name" id="pod-me">Du</div><div class="bar" style="height:62px;font-size:24px;">58</div></div>
+          <div style="width:30%;--rank:var(--bronze);"><div class="name">Tim</div><div class="bar" style="height:38px;font-size:18px;">33</div></div>
+        </div>
+        <div class="row"><span class="rank">4</span><span class="who">Marie</span><span class="total">29</span></div>
+        <div class="row"><span class="rank">5</span><span class="who">Jonas</span><span class="total">24</span></div>
+        <div class="band"><b>Fun-Fact</b><span>Heute sind zwölf Leute dabei.</span></div>
+      </div>
+      <p class="hint">Unten im Band laufen Fun-Facts durch — Tagesbestwerte, Comebacks, Jubiläen.</p>
+    </section>
+
+    <!-- Schritt 3: das Profil -->
+    <section id="step-3" class="step" style="margin-top:14px;" hidden>
+      <div class="sec"><span class="sec-title">Profil-Tab</span></div>
+      <h1 class="step-title">Platz, Abende, Abzeichen</h1>
+      <p class="step-lead">Im Profil stehen dein Platz heute und all-time, deine Mischung und die Abzeichen, die du über die Abende sammelst.</p>
+      <div class="card" style="margin-top:-4px;">
+        <div class="sec" style="margin-bottom:12px;"><span class="sec-title">Rangliste</span></div>
+        <div class="split">
+          <div class="cell"><div class="num value" style="font-size:36px;">58</div><div class="label label--plain">Getränke</div></div>
+          <div class="sep" style="background:var(--glass-edge);"></div>
+          <div class="cell"><div class="num value value--gold" style="font-size:36px;">1</div><div class="label label--plain">Platz</div></div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="sec"><span class="sec-title">Deine Statistik</span></div>
+        <div class="split">
+          <div class="cell"><div class="num value" style="font-size:26px;">13</div><div class="label label--plain">Abende</div></div>
+          <div class="cell"><div class="num value value--gold" style="font-size:26px;">11</div><div class="label label--plain">Bestes</div></div>
+          <div class="cell"><div class="num value" style="font-size:26px;">4,5</div><div class="label label--plain">Ø pro Abend</div></div>
+        </div>
+        <div class="badges"><span class="badge">👑 Tagessieger</span><span class="badge">🏅 10 Abende</span></div>
+      </div>
+    </section>
+
+    <div class="ob-foot">
+      <div id="dots" class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+      <button id="next" class="btn-green" type="button">Weiter</button>
+    </div>
+
+  </div>
+
+  <img src="assets/footer-woods.png" alt="" class="footer-woods">
+</div>
+
+<script type="module">
+import { getSession, fetchPlayers } from './js/api.js';
+
+const $ = (id) => document.getElementById(id);
+const STEPS = 3;
+let step = 1;
+
+// Ohne Anmeldung gibt es hier nichts zu sehen (die Seite wird direkt nach dem
+// Anlegen eines Kontos aufgerufen).
+if (!getSession().token) location.replace('./');
+
+function show(n) {
+  step = n;
+  for (let i = 1; i <= STEPS; i++) $('step-' + i).hidden = i !== n;
+  [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i === n - 1));
+  $('next').textContent = n === STEPS ? 'Los geht\'s' : 'Weiter';
+  $('skip').hidden = n === STEPS;   // auf der letzten Seite führt der Knopf sowieso weiter
+}
+
+$('next').addEventListener('click', () => {
+  if (step < STEPS) show(step + 1);
+  else location.replace('dashboard');
+});
+$('skip').addEventListener('click', () => location.replace('dashboard'));
+
+// Name des frisch angelegten Kontos: in der Begrüßung und auf dem Podest des
+// Schaubilds. Klappt der Abruf nicht, bleiben „Willkommen“ und „Du“ stehen.
+const { playerId } = getSession();
+fetchPlayers()
+  .then(({ players }) => {
+    const me = players.find((p) => String(p.id) === String(playerId));
+    if (!me) return;
+    $('welcome').textContent = `Willkommen, ${me.name}`;
+    $('pod-me').textContent = me.name;
+  })
+  .catch(() => {});
+
+show(1);
+</script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>
