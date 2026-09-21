@@ -12,10 +12,6 @@
 <link rel="stylesheet" href="css/theme.css">
 <script src="js/vendor/qrcode.js"></script>
 <style>
-  :root {
-    --bg-lo: oklch(0.11 0.03 155);
-    --surface-hi: oklch(0.30 0.022 160 / 0.58);
-  }
   html, body { height: 100%; }
   body { overflow: hidden; }
   .tv {
@@ -42,18 +38,20 @@
     position: absolute;
     background: url('assets/zapfen-bg.svg') no-repeat center / contain;
   }
-  .podium-card {
-    background: linear-gradient(180deg, var(--surface-hi), var(--surface));
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-edge);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
+  /* Podest (D-051): Der Name steht über dem Podium in der Rangfarbe, darunter
+     der Rangkreis auf der Feldkante und das vollflächig gefüllte Feld mit
+     Gesamtzahl und Getränkezeile — dieselbe Behandlung wie die Getränkefelder
+     im Dashboard (D-039), nur ohne Antippen. Farben sind die Rangfarben
+     --gold/--silver/--bronze aus theme.css. */
+  #podium { display: flex; align-items: flex-end; justify-content: center; gap: 30px; flex-shrink: 0; height: 240px; }
+  .slot { display: flex; flex-direction: column; align-items: center; }
+  .slot-name {
+    color: var(--rank); font-family: 'Bitter', serif; font-weight: 800; line-height: 1.1;
+    text-align: center; width: 100%; margin-bottom: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  /* Der Kreis liegt auf der Feldkante und hat dieselbe Farbe wie das Feld —
+     ein Ring in der Hintergrundfarbe stellt ihn frei. */
   .podium-badge {
     border-radius: 50%;
     display: flex;
@@ -61,17 +59,60 @@
     justify-content: center;
     font-family: 'Bitter', serif;
     font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    background: var(--rank);
     color: var(--bg);
+    box-shadow: 0 0 0 7px var(--bg);
     z-index: 1;
   }
+  .podium-card {
+    width: 100%;
+    background: var(--rank);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 0 18px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    /* Aufleuchten beim Platzwechsel in der Farbe des Platzes statt immer Gold */
+    --pk-flash: color-mix(in oklab, var(--rank) 55%, transparent);
+  }
+  .podium-card .total { font-family: 'Bitter', serif; font-weight: 800; line-height: 0.85; font-variant-numeric: tabular-nums; }
+  /* Getränkezeile wie bisher, aber einfarbig auf der Fläche — die Mittelpunkte
+     trennen, ohne mitgelesen zu werden. */
+  .podium-card .drinks { font-family: 'Work Sans', sans-serif; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .podium-card .drinks .sep { opacity: 0.42; padding: 0 7px; }
+  /* Größenstaffel je Platz */
+  #pod-1 { width: 372px; --rank: var(--gold); }
+  #pod-2 { width: 312px; --rank: var(--silver); }
+  #pod-3 { width: 300px; --rank: var(--bronze); }
+  #pod-1 .slot-name { font-size: 32px; }
+  #pod-2 .slot-name { font-size: 26px; }
+  #pod-3 .slot-name { font-size: 24px; }
+  #pod-1 .podium-badge { width: 70px; height: 70px; font-size: 30px; margin-bottom: -35px; }
+  #pod-2 .podium-badge { width: 56px; height: 56px; font-size: 22px; margin-bottom: -28px; }
+  #pod-3 .podium-badge { width: 52px; height: 52px; font-size: 21px; margin-bottom: -26px; }
+  #pod-1 .podium-card { height: 160px; padding-top: 44px; }
+  #pod-2 .podium-card { height: 130px; padding-top: 38px; }
+  #pod-3 .podium-card { height: 118px; padding-top: 36px; }
+  #pod-1 .total { font-size: 74px; }
+  #pod-2 .total { font-size: 54px; }
+  #pod-3 .total { font-size: 48px; }
+  #pod-1 .drinks { font-size: 21px; }
+  #pod-2 .drinks { font-size: 18px; }
+  #pod-3 .drinks { font-size: 17px; }
   /* Rangliste ab Platz 4: großes gerundetes Panel, darin einzeln
      abgerundete Zeilen, die als Fenster durchscrollen. */
+  /* Rangliste ohne äußeren Rahmen und ohne Füllung (D-051): die Zeilen selbst
+     sind die Karten, der Kasten drumherum entfällt. */
   .table-panel {
     flex: 1; min-height: 0;
     display: flex; flex-direction: column;
-    background: var(--surface-alt);
-    border-radius: var(--radius-lg);
-    padding: 12px 14px;
+    padding: 12px 0 0;
     overflow: hidden;
   }
   .rest-viewport { flex: 1; min-height: 0; overflow: hidden; position: relative; }
@@ -112,7 +153,14 @@
   .col-beer { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--amber); font-variant-numeric:tabular-nums; }
   .col-shot { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--brick); font-variant-numeric:tabular-nums; }
   .col-mix { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--mix); font-variant-numeric:tabular-nums; }
-  .col-total { width:140px; text-align:right; font-family:'Bitter',serif; font-weight:800; font-size:34px; color:var(--gold); text-shadow:0 0 10px oklch(0.80 0.15 83 / 0.25); font-variant-numeric:tabular-nums; }
+  /* Gesamt als gefüllte Pille (D-051) — dieselbe Vollfläche wie auf dem Podest,
+     damit das Podium kein Einzelfall auf dem Board ist. */
+  .col-total { width:140px; display:flex; justify-content:flex-end; }
+  .col-total > span {
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--gold); color:var(--bg); border-radius:999px; padding:3px 16px;
+    font-family:'Bitter',serif; font-weight:800; font-size:30px; font-variant-numeric:tabular-nums;
+  }
   /* Rekordkurs (Bier-Pace): glüht auf, wenn der Abend schneller läuft als der
      Rekord-Abend zur gleichen Uhrzeit */
   .pace-pill {
@@ -145,9 +193,7 @@
     align-items: center;
     gap: 22px;
     height: 64px;
-    padding: 0 28px;
-    background: var(--surface-alt);
-    border-radius: var(--radius);
+    padding: 0 24px;
     overflow: hidden;
   }
   /* Etikett links mit senkrechter Gold-Haarlinie (D-044) statt Gold-Oberkante */
@@ -197,34 +243,34 @@
 
     <div id="board" style="display:flex;flex-direction:column;gap:16px;flex:1;min-height:0;">
 
-    <div id="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:32px;flex-shrink:0;height:224px;">
-      <div id="pod-2" hidden style="width:250px;display:flex;flex-direction:column;align-items:center;">
-        <div class="podium-badge" style="width:56px;height:56px;font-size:22px;background:oklch(0.78 0.015 240);margin-bottom:-28px;box-shadow:0 0 16px oklch(0.78 0.015 240 / 0.4);">2</div>
-        <div class="podium-card" style="border-top:3px solid oklch(0.78 0.015 240);padding:40px 18px 14px 18px;height:148px;gap:2px;">
-          <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:23px;"></div>
-          <div data-f="total" class="num" style="font-size:46px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
-          <div style="font-size:13px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
+    <div id="podium">
+      <div id="pod-2" class="slot" hidden>
+        <div class="slot-name" data-f="name"></div>
+        <div class="podium-badge">2</div>
+        <div class="podium-card">
+          <div data-f="total" class="total"></div>
+          <div class="drinks"><span data-f="beers"></span><span class="sep">·</span><span data-f="shots"></span><span class="sep">·</span><span data-f="mixes"></span></div>
         </div>
       </div>
-      <div id="pod-1" hidden style="width:300px;display:flex;flex-direction:column;align-items:center;">
-        <div class="podium-badge" style="width:70px;height:70px;font-size:30px;background:var(--gold);margin-bottom:-35px;box-shadow:0 0 28px oklch(0.80 0.15 83 / 0.6);">1</div>
-        <div class="podium-card" style="border-top:4px solid var(--gold);padding:46px 20px 14px 20px;height:196px;gap:4px;">
-          <div data-f="name" style="font-family:'Bitter',serif;font-weight:800;font-size:28px;"></div>
-          <div data-f="total" class="num" style="font-size:66px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
-          <div style="font-size:14px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
+      <div id="pod-1" class="slot" hidden>
+        <div class="slot-name" data-f="name"></div>
+        <div class="podium-badge">1</div>
+        <div class="podium-card">
+          <div data-f="total" class="total"></div>
+          <div class="drinks"><span data-f="beers"></span><span class="sep">·</span><span data-f="shots"></span><span class="sep">·</span><span data-f="mixes"></span></div>
         </div>
       </div>
-      <div id="pod-3" hidden style="width:240px;display:flex;flex-direction:column;align-items:center;">
-        <div class="podium-badge" style="width:52px;height:52px;font-size:21px;background:oklch(0.64 0.09 45);margin-bottom:-26px;box-shadow:0 0 16px oklch(0.64 0.09 45 / 0.4);">3</div>
-        <div class="podium-card" style="border-top:3px solid oklch(0.64 0.09 45);padding:38px 18px 12px 18px;height:130px;gap:2px;">
-          <div data-f="name" style="font-family:'Bitter',serif;font-weight:700;font-size:21px;"></div>
-          <div data-f="total" class="num" style="font-size:38px;line-height:1;color:var(--gold);text-shadow:0 0 46px oklch(0.80 0.15 83 / 0.65);"></div>
-          <div style="font-size:12px;"><span data-f="beers" style="color:var(--amber);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="shots" style="color:var(--brick);"></span> <span style="color:var(--ink-muted);">·</span> <span data-f="mixes" style="color:var(--mix);"></span></div>
+      <div id="pod-3" class="slot" hidden>
+        <div class="slot-name" data-f="name"></div>
+        <div class="podium-badge">3</div>
+        <div class="podium-card">
+          <div data-f="total" class="total"></div>
+          <div class="drinks"><span data-f="beers"></span><span class="sep">·</span><span data-f="shots"></span><span class="sep">·</span><span data-f="mixes"></span></div>
         </div>
       </div>
     </div>
 
-    <div class="glass table-panel">
+    <div class="table-panel">
       <div style="display:flex;align-items:center;gap:28px;padding:0 24px 12px 24px;text-transform:uppercase;letter-spacing:0.08em;font-size:14px;color:var(--gold);flex-shrink:0;">
         <div style="width:70px;">Rang</div>
         <div style="flex:1;">Name</div>
@@ -239,7 +285,7 @@
     </div><!-- /#board -->
 
     <!-- Fun-Facts (live): Band direkt über den Bäumen, eine Zeile hoch (Styles oben) -->
-    <div id="funfacts" class="glass">
+    <div id="funfacts">
       <span id="funfact-title">Fun Fact</span>
       <span id="funfact-text">Bald gibt's hier Statistiken.</span>
     </div>
@@ -360,8 +406,15 @@ function buildRow(p, prev) {
   ]) {
     const cell = document.createElement('div');
     cell.className = cls;
-    cell.textContent = text;
-    if (key && prev && p[key] > prev[key]) cell.classList.add('pk-pop');
+    // Die Gesamtzahl steht in der gefüllten Pille, alles andere direkt in der Zelle
+    if (cls === 'col-total') {
+      const pill = document.createElement('span');
+      pill.textContent = text;
+      cell.appendChild(pill);
+    } else {
+      cell.textContent = text;
+    }
+    if (key && prev && p[key] > prev[key]) (cell.firstElementChild ?? cell).classList.add('pk-pop');
     row.appendChild(cell);
   }
   if (prev && p.total > prev.total) row.classList.add('pk-rowflash');
@@ -417,8 +470,9 @@ function updateRowsInPlace(list) {
     const prev = prevVals[p.id];
     const set = (cls, val, key) => {
       const cell = el.querySelector('.' + cls);
-      if (cell.textContent !== String(val)) cell.textContent = val;
-      if (key && prev && val > prev[key]) popEl(cell);
+      const target = cell.firstElementChild ?? cell;   // Gesamt steht in der Pille
+      if (target.textContent !== String(val)) target.textContent = val;
+      if (key && prev && val > prev[key]) popEl(target);
     };
     set('col-rank', p.rank);
     set('col-name', p.name);

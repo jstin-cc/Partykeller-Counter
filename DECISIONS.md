@@ -1208,3 +1208,55 @@ CLAUDE.md; ältere DECISIONS-Einträge bleiben im Wortlaut stehen (harte
 Regel: bestehende Einträge nicht umschreiben).
 
 **Begründung:** Vorgabe des Nutzers.
+
+## D-051 (2026-09-21): TV-Podest gefüllt in Rangfarben, Board ohne Kästen, neues Logo
+
+**Entscheidung:** Das TV-Podest wird neu gestaltet (Entwurf „O" aus einer
+Entwurfsreihe mit Mockups):
+
+1. **Namen über dem Podest**: Der Name steht über dem Feld auf dem
+   Boardgrund, in der jeweiligen Rangfarbe (Bitter 800, 32/26/24 px). Die
+   Felder werden entsprechend flacher (160/130/118 px statt 196/148/130), der
+   Podiumsblock misst 240 px. Die Aufstellung 2 · 1 · 3 mit gestaffelten
+   Höhen bleibt.
+2. **Gefüllte Felder statt Glaskarten**: Das Feld ist eine Vollfläche in der
+   Rangfarbe mit dunkler Schrift — dieselbe Behandlung wie die Getränkefelder
+   im Dashboard (D-039). Darin zentriert die Gesamtzahl und die Getränkezeile,
+   einfarbig; die Mittelpunkte trennen bei `opacity .42`. Der Gold-Schein auf
+   den Zahlen entfällt (auf heller Fläche nur Matsch).
+3. **Rangkreis wie gehabt** auf der Feldkante, vollfarbig in der Rangfarbe.
+   Da Kreis und Feld dieselbe Farbe haben, stellt ihn ein Ring in der
+   Hintergrundfarbe frei (`box-shadow: 0 0 0 7px var(--bg)`) statt des
+   bisherigen farbigen Scheins. Das Aufleuchten beim Platzwechsel
+   (`--pk-flash`) nimmt jetzt die Farbe des Platzes statt immer Gold.
+4. **Silber und Bronze sind Tokens**: `--silver: oklch(0.78 0.015 240)` und
+   `--bronze: oklch(0.64 0.09 45)` stehen in `theme.css` statt hart in
+   `tv.html`. Es sind dieselben Werte wie bisher; sie gelten in beiden
+   Bereichen, Gold kippt im Youngstars-Bereich wie gehabt ins Orange-Gold.
+5. **Gesamt-Spalte als gefüllte Pille**: In der Rangliste sitzt die
+   Gesamtzahl in einer gefüllten Gold-Pille. Damit wiederholt sich die
+   Vollfläche im ganzen Board, das Podest ist kein Einzelfall.
+6. **Weniger Kästen**: Die Rangliste verliert den äußeren Rahmen und die
+   Füllung, das Fun-Fact-Band ebenfalls. Die Zeilen behalten ihre Glaskante
+   samt `backdrop-filter`, der Rahmen um den QR-Code bleibt.
+
+Außerdem: **neues `logo.png`** (Creme `#eee4cd` statt Weiß, transparent,
+1181 × 1000 bei gleichem Seitenverhältnis) — wird überall verwendet, wo das
+Logo schon eingebunden war (alle Seiten und das Story-Bild), ohne Änderung
+an den Einbindungen. Die Datei des Nutzers wird unverändert übernommen; sie
+ist mit 247 KB größer als die nach D-048 verkleinerte Fassung (42 KB, 567 ×
+480) und entspricht dem Achtfachen der größten Anzeigehöhe. Im WLAN fällt das
+nicht ins Gewicht; falls doch, lässt sie sich jederzeit auf 567 × 480
+herunterrechnen.
+
+**Begründung:** Das bisherige Podest unterschied die Plätze fast nur über die
+Größe — alle drei Zahlen waren Gold mit demselben Leuchten —, war mit 822 px
+deutlich schmaler als die Tabelle darunter und stapelte Badge auf Karte auf
+Glas. Die Vollfläche macht den Rang auf einen Blick lesbar. Weil „gefüllte
+Fläche" im Projekt bisher „Knopf" hieß (D-039) und auf dem TV nichts
+angetippt wird, übernimmt die Rangliste die Füllung in der Gesamt-Spalte mit;
+dadurch ist es eine Board-Sprache und kein geborgtes Handy-Element. Die
+Kästen um Rangliste und Fun-Fact-Band waren doppelt (Kasten im Kasten, wie
+schon bei D-044 abgeräumt) und kosteten Platz. Entwürfe A–O mit Mockups
+wurden durchgespielt; gewählt hat der Nutzer O.
+
