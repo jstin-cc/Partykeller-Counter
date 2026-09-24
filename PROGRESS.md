@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-24 (D-060): **Admin-Namenszeilen ohne Rahmen** — das Panel um
+die Namenszeilen ist weg, die Zeilen stehen frei und fluchten mit den
+Panels darüber.
 Seit 2026-09-24 (D-059): **TV-Kopf umsortiert** — Teilnehmerzahl, Summen
 und Rekordkurs-Pille stehen rechtsbündig direkt links neben der QR-Pille,
 die QR-Pille sitzt ganz rechts (nach D-057/D-058).
@@ -332,6 +335,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] TV-Kopf: Teilnehmerzahl linksbündig neben der QR-Pille (D-057)
 - [x] TV-Kopf: Teilnehmerzahl rechtsbündig rechts neben der QR-Pille (D-058)
 - [x] TV-Kopf: Teilnehmerzahl rechtsbündig links neben der QR-Pille (D-059)
+- [x] Admin: Panel um die Namenszeilen entfernt (D-060)
 - [x] Design-Analyse: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5) (D-054)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest, E6 (warten auf Auswahl)
 
