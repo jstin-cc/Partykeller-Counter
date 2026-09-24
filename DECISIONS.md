@@ -1399,3 +1399,14 @@ die halbe Gesamt-Pille, weiter als Kante zu sehen. Solange eine
 angeschnittene Zeile überhaupt sichtbar ist, bleibt eine Kante. Deshalb
 zeigt das Fenster jetzt nur ganze Zeilen und legt den Verlauf auf deren
 Deckkraft.
+
+## D-057 (2026-09-24): TV-Teilnehmerzahl links neben der QR-Pille
+
+**Entscheidung:** Im TV-Kopf steht der Block aus Teilnehmerzahl, Summen und
+Rekordkurs-Pille nicht mehr oben in der Mitte. Er sitzt jetzt linksbündig
+direkt links neben der QR-Pille, und beide bilden rechts eine Gruppe. Die
+Kopfzeile besteht damit aus zwei Gruppen: links Logo und Titel, rechts
+Zahlen und QR-Code.
+
+**Begründung:** Wunsch des Nutzers. Die Mitte bleibt frei, und die
+Kennzahlen stehen beim QR-Code gebündelt.
