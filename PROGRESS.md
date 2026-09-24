@@ -8,7 +8,8 @@ funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
 Seit 2026-09-24: **Entwurf E7 für den Admin** in `docs/DESIGN-REVIEW.md`
-(zwei Spalten, `.sec-title`-Abschnitte, Namenskreise, ⋯-Menü, Gefahrenzone).
+(zwei Spalten, `.sec-title`-Abschnitte, Namenskreise, ⋯-Menü, Gefahrenzone;
+auf dem Handy Umschalter *Konten | TV | Mehr* und zweizeilige Konto-Karten).
 Er ersetzt E6 und wartet auf eine Entscheidung.
 Seit 2026-09-24 (D-060): **Admin-Namenszeilen ohne Rahmen** — das Panel um
 die Namenszeilen ist weg, die Zeilen stehen frei und fluchten mit den
