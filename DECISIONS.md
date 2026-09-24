@@ -1293,3 +1293,22 @@ sieht ihn nie. Alternativen waren eine geführte Ersteinrichtung (Name → PIN �
 fertig) und Hinweise direkt im Dashboard; beide hätten Seiten angefasst, die
 täglich benutzt werden (Anmeldung bzw. Zählen-Tab, D-044). Entwürfe A, B und C
 mit Mockups wurden durchgespielt; gewählt hat der Nutzer A.
+
+## D-053 (2026-09-24): TV-Rangliste läuft unten in einem Verlauf aus
+
+**Entscheidung:** Wenn die Rangliste ab Platz 4 rotiert, blendet sie unten
+über 120 Design-Pixel (knapp zwei Zeilen) weich aus, statt am Rand hart
+abzubrechen. Der Verlauf hat eine Zwischenstufe (45 % Deckkraft auf halber
+Höhe) und ist 8 px vor dem Rand schon ganz durchsichtig, damit von der
+angeschnittenen Zeile keine Kante stehen bleibt. Die Rotation zählt jetzt
+nur die Zeilen oberhalb des Verlaufs als sichtbar: Am Listenende steht der
+letzte Platz voll lesbar da, darunter bleibt der Verlauf leer. Ob rotiert
+wird, entscheidet weiter die volle Fensterhöhe — passen alle Zeilen hinein,
+gibt es weder Rotation noch Verlauf.
+
+**Begründung:** Der bisherige Verlauf war nur 48 px hoch, also kleiner als
+eine Zeile (64 px). Von der angeschnittenen Zeile blieb so der obere Teil mit
+Kante und halber Schrift voll stehen, was am Fernseher wie ein harter Schnitt
+wirkte. Ein Verlauf über fast zwei Zeilen liest sich als „da kommt noch
+mehr". Damit er keinen Platz frisst, der vorher für den letzten Platz der
+Liste gebraucht wurde, rechnet die Rotation einen Schritt weiter.

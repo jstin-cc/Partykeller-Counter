@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-24 (D-053): **TV-Rangliste läuft unten weich aus** — rotiert
+die Liste, blendet sie über knapp zwei Zeilen in einem Verlauf aus statt hart
+abzuschneiden; am Listenende steht der letzte Platz voll lesbar über dem
+Verlauf.
 Seit 2026-09-21 (D-052): **Onboarding für neue Konten** — nach „Konto
 erstellen & los" kommen drei Willkommens-Seiten (`/<bereich>/onboarding`):
 Getränke tracken, Rangliste auf dem Fernseher, Profil-Tab. Mit Punkten,
@@ -301,6 +305,9 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Abendrückblick als Story-Bild (1080 × 1920) aus dem Abend-Archiv, für
       alle, gezeichnet im Browser; gemeinsame Kurvenformel (D-049)
 - [x] Gendersprache aus der Oberfläche entfernt, Konvention in CLAUDE.md (D-050)
+- [x] TV-Podest in Rangfarben, Board ohne Kästen, neues Logo (D-051)
+- [x] Onboarding für neue Konten (D-052)
+- [x] TV-Rangliste läuft unten in einem Verlauf aus (D-053)
 
 ## Verifikation (2026-09-10, D-049)
 
