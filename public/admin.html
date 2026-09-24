@@ -321,7 +321,7 @@
 
     <div class="adm-grid">
       <main>
-        <div class="sec"><span class="sec-title">Konten</span><span id="k-count" class="sec-hint">alphabetisch</span></div>
+        <div class="sec"><span class="sec-title">Konten</span><span id="k-count" class="sec-hint"></span></div>
         <div class="k-tools">
           <input id="k-search" class="input-flat search" type="search" placeholder="🔍  Name suchen" autocomplete="off" aria-label="Name suchen">
           <button id="open-add-round" type="button" class="btn-green add-round" title="Neues Konto" aria-label="Neues Konto">+</button>
@@ -1051,7 +1051,8 @@ function renderRows() {
     if (filterMode === 'hidden') return p.hidden;
     return true;
   });
-  $('k-count').textContent = list.length === all.length ? 'alphabetisch' : `${list.length} von ${all.length}`;
+  // Nur bei aktiver Suche/Filter ein Hinweis, sonst steht „Konten“ allein (D-064)
+  $('k-count').textContent = list.length === all.length ? '' : `${list.length} von ${all.length}`;
 
   if (!list.length) {
     const empty = document.createElement('div');
