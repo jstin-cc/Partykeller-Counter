@@ -117,20 +117,10 @@
   }
   .rest-viewport { flex: 1; min-height: 0; overflow: hidden; position: relative; }
   /* Wenn rotiert wird, läuft die Liste unten in einem Verlauf aus statt hart
-     abzubrechen (D-053): Die untersten --fade Design-Pixel (knapp zwei Zeilen)
-     blenden weich aus. Die Stufe in der Mitte lässt den Verlauf erst schneller
-     und dann sanft auslaufen, und ganz unten ist er schon durchsichtig — so
-     bleibt von der angeschnittenen Zeile keine Kante stehen. Die Rotation zählt nur die Zeilen oberhalb des
-     Verlaufs als sichtbar, damit am Listenende der letzte Platz voll lesbar
-     dasteht (siehe syncScroll). */
-  .rest-viewport.scrollable {
-    --fade-mask: linear-gradient(to bottom,
-      black calc(100% - var(--fade)),
-      rgb(0 0 0 / 0.45) calc(100% - var(--fade) * 0.5),
-      transparent calc(100% - 8px));
-    -webkit-mask-image: var(--fade-mask);
-    mask-image: var(--fade-mask);
-  }
+     abzubrechen (D-053, D-055). Das macht applyFade() über die Deckkraft der
+     einzelnen Zeilen und nicht über eine mask-image auf dem Fenster: Mit
+     backdrop-filter in den Zeilen ignorieren manche Browser die Maske, und
+     die Liste endete dort wieder mit einer harten Kante. */
   .rest-track { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; gap: 8px; will-change: transform; }
   .row {
     display: flex;
@@ -379,7 +369,6 @@ const GAP = 8;            // px zwischen den Zeilen (muss zu .rest-track passen)
 const SCROLL_MS = 650;    // sanft eine Zeile weiter
 const RESET_MS = 900;     // schnell zurück nach oben
 const FADE_H = 120;       // Höhe des Auslauf-Verlaufs unten (D-053), knapp zwei Zeilen
-$('rest').style.setProperty('--fade', `${FADE_H}px`);
 
 // Verweildauer pro Schritt: im Admin einstellbar (setScrollSpeed), kommt im State
 let stepMs = 3200;
@@ -432,6 +421,31 @@ function buildRow(p, prev) {
   return row;
 }
 
+// Verlauf unten (D-055): Jede Zeile bekommt die Deckkraft, die zu ihrer
+// Position im Fenster passt. Oberhalb des Verlaufs voll, darin nach unten
+// abnehmend, sodass von der angeschnittenen letzten Zeile nur ein Hauch
+// bleibt. Zeilen, die oben hinausgeschoben werden oder noch ganz unten
+// außerhalb liegen, stehen auf 0 und blenden beim Weiterrücken weich ein
+// bzw. aus. Ohne Rotation (alles passt hinein) bleibt jede Zeile voll.
+function rowOpacity(i) {
+  if (maxPos <= 0) return 1;
+  const y = (i - pos) * (ROW_H + GAP);
+  if (y < 0) return 0;
+  const fadeTop = $('rest').clientHeight - FADE_H;
+  const center = y + ROW_H / 2;
+  if (center <= fadeTop) return 1;
+  return Math.max(0, Math.round((1 - (center - fadeTop) / FADE_H) * 100) / 100);
+}
+
+// ms = Dauer, passend zur Bewegung der Liste (0 = sofort)
+function applyFade(ms) {
+  if (!track) return;
+  [...track.children].forEach((r, i) => {
+    r.style.transition = ms ? `opacity ${ms}ms ease` : 'none';
+    r.style.opacity = String(rowOpacity(i));
+  });
+}
+
 function stopScroll() {
   if (scrollTimer) { clearInterval(scrollTimer); scrollTimer = null; }
 }
@@ -442,9 +456,11 @@ function scrollStep() {
     // Ende erreicht: schnell zurück nach oben und von vorne
     track.style.transition = `transform ${RESET_MS}ms ease-in-out`;
     pos = 0;
+    applyFade(RESET_MS);
   } else {
     track.style.transition = `transform ${SCROLL_MS}ms ease`;
     pos += 1;
+    applyFade(SCROLL_MS);
   }
   track.style.transform = `translateY(${-pos * (ROW_H + GAP)}px)`;
 }
@@ -465,7 +481,7 @@ function syncScroll() {
   }
   if (maxPos > 0 && !scrollTimer) scrollTimer = setInterval(scrollStep, stepMs);
   if (maxPos <= 0) stopScroll();
-  $('rest').classList.toggle('scrollable', maxPos > 0);
+  applyFade(0);
 }
 
 function sameIds(a, b) {
@@ -520,9 +536,12 @@ function rebuildRest(animate) {
   for (const r of track.children) r.style.height = `${ROW_H}px`;
   track.style.transition = 'none';
   track.style.transform = 'translateY(0)';
+  // Rotation und Verlauf zuerst, damit neue Zeilen unten gleich auf ihre
+  // Deckkraft im Verlauf einblenden statt auf voll
+  syncScroll();
 
   if (animate && !modeSwitching) {
-    for (const r of track.children) {
+    [...track.children].forEach((r, i) => {
       const id = r.dataset.id;
       const newTop = r.getBoundingClientRect().top;
       if (oldTop[id] != null) {
@@ -536,12 +555,10 @@ function rebuildRest(animate) {
         }
       } else {
         r.style.opacity = '0';               // neue Zeile: sanft einblenden
-        requestAnimationFrame(() => { r.style.transition = 'opacity 0.55s ease'; r.style.opacity = '1'; });
+        requestAnimationFrame(() => { r.style.transition = 'opacity 0.55s ease'; r.style.opacity = String(rowOpacity(i)); });
       }
-    }
+    });
   }
-
-  syncScroll();
 }
 
 // Ändert sich der verfügbare Platz (Fenster-Resize, Font-Swap, anderes

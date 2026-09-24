@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-24 (D-055): **TV-Verlauf robust** — die Rangliste blendet unten
+über die Deckkraft der einzelnen Zeilen aus statt über eine Maske, die auf
+dem Rechner des Nutzers nicht griff; oben hinausrückende Zeilen blenden
+ebenfalls weich aus.
 Seit 2026-09-24 (D-054): **Design-Analyse umgesetzt** — alle Fehler A1–A13
 (Schrift in Formularen, Dialog-Abdunklung und Gold je Bereich, „gleichauf"
 statt „0 Getränke Vorsprung", kein doppeltes „Heute" im Profil, Einzahl in
@@ -317,6 +321,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] TV-Podest in Rangfarben, Board ohne Kästen, neues Logo (D-051)
 - [x] Onboarding für neue Konten (D-052)
 - [x] TV-Rangliste läuft unten in einem Verlauf aus (D-053)
+- [x] TV-Verlauf über Zeilen-Deckkraft statt mask-image (D-055)
 - [x] Design-Analyse: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5) (D-054)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest, E6 (warten auf Auswahl)
 

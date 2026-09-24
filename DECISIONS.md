@@ -1356,3 +1356,27 @@ das Ranglisten-Blatt in dieselbe Sprache wie das TV. E5 sorgt dafür, dass das
 Onboarding zeigt, was man danach wirklich sieht. E1, E2, E3 (Rest: offene
 Abzeichen) und E6 bleiben Entwürfe. Nicht umgeschrieben: der Text von D-052,
 der noch die alten Onboarding-Sätze nennt.
+
+## D-055 (2026-09-24): TV-Verlauf über die Deckkraft der Zeilen statt mask-image
+
+**Entscheidung:** Der Verlauf unten in der TV-Rangliste (D-053) entsteht
+nicht mehr über eine `mask-image` auf dem Ranglisten-Fenster. Stattdessen
+setzt `applyFade()` jeder Zeile die Deckkraft, die zu ihrer Position passt:
+oberhalb der untersten 120 Design-Pixel voll, darin linear abnehmend (bei
+1080p z. B. 0,75 und 0,15 für die letzten beiden Zeilen). Zeilen außerhalb
+des Fensters stehen auf 0. Beim Weiterrücken und beim Sprung nach oben
+blenden die Zeilen im selben Takt wie die Bewegung ein und aus, oben
+hinausgeschobene Zeilen verschwinden also weich statt an der Kopfzeile
+abgeschnitten zu werden. Neue Zeilen blenden auf ihre Verlaufs-Deckkraft
+ein. Ohne Rotation bleiben alle Zeilen voll. Die Zählung aus D-053 (nur
+Zeilen oberhalb des Verlaufs gelten als sichtbar) bleibt.
+
+**Begründung:** Beim Nutzer am echten Rechner kam die Maske nicht an: Die
+Liste endete weiter mit einer harten Kante, auch die ursprüngliche
+48-px-Maske war dort nie zu sehen. In Chromium (headless und mit
+GPU-Rendering) ließ sich das nicht nachstellen. Die Zeilen tragen
+`backdrop-filter`, und die Kombination mit einer Maske auf einem Vorfahren
+setzen Browser und Grafiktreiber nicht überall um. Die Deckkraft einzelner
+Elemente dagegen funktioniert überall. Verzichtet wird dafür auf den
+stufenlosen Verlauf innerhalb einer Zeile: Jede Zeile hat eine Deckkraft,
+der Verlauf entsteht über die Zeilen hinweg.
