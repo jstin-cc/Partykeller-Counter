@@ -1410,3 +1410,13 @@ Zahlen und QR-Code.
 
 **Begründung:** Wunsch des Nutzers. Die Mitte bleibt frei, und die
 Kennzahlen stehen beim QR-Code gebündelt.
+
+## D-058 (2026-09-24): TV-Teilnehmerzahl rechts neben der QR-Pille
+
+**Entscheidung:** Der Block aus Teilnehmerzahl, Summen und
+Rekordkurs-Pille steht rechtsbündig ganz rechts im TV-Kopf, also rechts
+neben der QR-Pille. Das ersetzt die Position aus D-057 links neben der
+QR-Pille.
+
+**Begründung:** Der Nutzer hatte „links“ geschrieben, aber „rechts“
+gemeint.
