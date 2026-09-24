@@ -117,10 +117,10 @@
   }
   .rest-viewport { flex: 1; min-height: 0; overflow: hidden; position: relative; }
   /* Wenn rotiert wird, läuft die Liste unten in einem Verlauf aus statt hart
-     abzubrechen (D-053, D-055). Das macht applyFade() über die Deckkraft der
-     einzelnen Zeilen und nicht über eine mask-image auf dem Fenster: Mit
-     backdrop-filter in den Zeilen ignorieren manche Browser die Maske, und
-     die Liste endete dort wieder mit einer harten Kante. */
+     abzubrechen (D-053, D-055, D-056). Das macht applyFade() über die
+     Deckkraft ganzer Zeilen, nicht über eine mask-image auf dem Fenster: Mit
+     backdrop-filter in den Zeilen ignorieren manche Browser die Maske. Eine
+     angeschnittene Zeile ist nie zu sehen, sie hätte immer eine Kante. */
   .rest-track { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; gap: 8px; will-change: transform; }
   .row {
     display: flex;
@@ -368,7 +368,8 @@ const ROW_H = 64;         // Zeilenhöhe in Design-Pixeln
 const GAP = 8;            // px zwischen den Zeilen (muss zu .rest-track passen)
 const SCROLL_MS = 650;    // sanft eine Zeile weiter
 const RESET_MS = 900;     // schnell zurück nach oben
-const FADE_H = 120;       // Höhe des Auslauf-Verlaufs unten (D-053), knapp zwei Zeilen
+// Verlauf unten (D-056): Deckkraft der letzten beiden ganz sichtbaren Zeilen
+const FADE_STEPS = [0.55, 0.2];
 
 // Verweildauer pro Schritt: im Admin einstellbar (setScrollSpeed), kommt im State
 let stepMs = 3200;
@@ -421,20 +422,22 @@ function buildRow(p, prev) {
   return row;
 }
 
-// Verlauf unten (D-055): Jede Zeile bekommt die Deckkraft, die zu ihrer
-// Position im Fenster passt. Oberhalb des Verlaufs voll, darin nach unten
-// abnehmend, sodass von der angeschnittenen letzten Zeile nur ein Hauch
-// bleibt. Zeilen, die oben hinausgeschoben werden oder noch ganz unten
-// außerhalb liegen, stehen auf 0 und blenden beim Weiterrücken weich ein
-// bzw. aus. Ohne Rotation (alles passt hinein) bleibt jede Zeile voll.
+// Verlauf unten (D-055, D-056): Jede Zeile bekommt die Deckkraft ihres
+// Platzes im Fenster. Sichtbar sind nur ganze Zeilen; die letzten beiden
+// blenden stufenweise aus (FADE_STEPS). Die angeschnittene Zeile darunter
+// steht auf 0 und wird zusätzlich weggeschnitten (clip-path in syncScroll),
+// so bleibt unten keine Kante stehen, auch nicht halb durchsichtig. Zeilen,
+// die oben hinausgeschoben werden oder unten noch außerhalb liegen, stehen
+// auf 0 und blenden beim Weiterrücken weich ein bzw. aus. Ohne Rotation
+// (alles passt hinein) bleibt jede Zeile voll.
+let slots = 1;            // ganz sichtbare Zeilen im Fenster (syncScroll)
+
 function rowOpacity(i) {
   if (maxPos <= 0) return 1;
-  const y = (i - pos) * (ROW_H + GAP);
-  if (y < 0) return 0;
-  const fadeTop = $('rest').clientHeight - FADE_H;
-  const center = y + ROW_H / 2;
-  if (center <= fadeTop) return 1;
-  return Math.max(0, Math.round((1 - (center - fadeTop) / FADE_H) * 100) / 100);
+  const slot = i - pos;
+  if (slot < 0 || slot >= slots) return 0;
+  const fadeFrom = slots - FADE_STEPS.length;
+  return slot < fadeFrom ? 1 : FADE_STEPS[slot - fadeFrom];
 }
 
 // ms = Dauer, passend zur Bewegung der Liste (0 = sofort)
@@ -467,10 +470,17 @@ function scrollStep() {
 
 // Rotation passend zum aktuellen Stand (Zeilenzahl, Platz) starten/stoppen
 function syncScroll() {
-  // Rotiert wird nur, wenn nicht alle Zeilen ins Fenster passen. Dann liegt
-  // unten der Verlauf, und als voll sichtbar zählt nur, was darüber Platz hat.
+  // Rotiert wird nur, wenn nicht alle Zeilen ins Fenster passen. Dann liegen
+  // unten die ausblendenden Zeilen, und als voll sichtbar zählt nur, was
+  // darüber Platz hat — am Listenende steht der letzte Platz voll lesbar da.
+  // Bei sehr wenig Platz (unter drei Zeilen) entfällt der Verlauf.
   const h = $('rest').clientHeight;
-  maxPos = others.length > rowsIn(h) ? Math.max(0, others.length - rowsIn(h - FADE_H)) : 0;
+  slots = rowsIn(h);
+  const faded = slots > FADE_STEPS.length ? FADE_STEPS.length : 0;
+  maxPos = others.length > slots ? others.length - (slots - faded) : 0;
+  // Die angeschnittene Zeile unter der letzten ganzen wegschneiden
+  const used = slots * (ROW_H + GAP) - GAP;
+  $('rest').style.clipPath = maxPos > 0 ? `inset(0 0 ${Math.max(0, h - used)}px 0)` : '';
   if (pos > maxPos) {
     pos = Math.min(pos, maxPos);
     if (track) {

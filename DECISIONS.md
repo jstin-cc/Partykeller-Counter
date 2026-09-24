@@ -1380,3 +1380,22 @@ setzen Browser und Grafiktreiber nicht überall um. Die Deckkraft einzelner
 Elemente dagegen funktioniert überall. Verzichtet wird dafür auf den
 stufenlosen Verlauf innerhalb einer Zeile: Jede Zeile hat eine Deckkraft,
 der Verlauf entsteht über die Zeilen hinweg.
+
+## D-056 (2026-09-24): TV-Rangliste zeigt nur ganze Zeilen, die letzten beiden blenden aus
+
+**Entscheidung:** Der Verlauf unten in der TV-Rangliste (D-053, D-055) geht
+nicht mehr von der Pixelposition aus, sondern von ganzen Zeilen. Sichtbar
+sind nur so viele Zeilen, wie vollständig ins Fenster passen. Die letzten
+beiden davon stehen auf 55 % bzw. 20 % Deckkraft. Die angeschnittene Zeile
+darunter steht auf 0 und wird zusätzlich per `clip-path` weggeschnitten.
+Beim Weiterrücken blendet die nachrückende Zeile von 0 auf ihre Stufe ein.
+Am Listenende steht der letzte Platz voll lesbar da, darunter bleiben die
+beiden Verlaufsplätze leer. Der Rest des Fensters unter der letzten ganzen
+Zeile (je nach Format bis knapp eine Zeile) bleibt frei.
+
+**Begründung:** Mit D-055 hatte die angeschnittene Zeile noch 15 %
+Deckkraft. In Firefox und Chrome war ihre abgeschnittene Unterkante, z. B.
+die halbe Gesamt-Pille, weiter als Kante zu sehen. Solange eine
+angeschnittene Zeile überhaupt sichtbar ist, bleibt eine Kante. Deshalb
+zeigt das Fenster jetzt nur ganze Zeilen und legt den Verlauf auf deren
+Deckkraft.
