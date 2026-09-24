@@ -7,8 +7,8 @@ Handy 390 px, TV 1920 × 1080, Admin 1440 px) mit 20 Testkonten.
 
 **Stand der Umsetzung:** TV-Verlauf (D-053), alle Fehler A1–A13, E4 und E5
 (D-054) sind umgesetzt. Von E3 sind A2, A12 und A13 umgesetzt; offen bleiben
-die offenen Abzeichen und „war später dran“ beim Hintermann. E1, E2 und E6 sind weiter Entwürfe
-und warten auf eine Entscheidung. Die Bilder in `docs/design-review/`
+die offenen Abzeichen und „war später dran“ beim Hintermann. E1, E2 und E7
+(Admin, ersetzt E6) sind weiter Entwürfe und warten auf eine Entscheidung. Die Bilder in `docs/design-review/`
 zeigen die echte App, in die die vorgeschlagenen Änderungen per CSS/JS
 eingespielt wurden. Links steht der heutige Stand, rechts der Entwurf.
 
@@ -160,7 +160,7 @@ Bildschirme tief. Wer neu ist, sieht es nicht.
 - Außerdem, nicht im Bild: Logo wie auf der Anmeldung (72 px statt 44 px) und
   die Reihenfolge der Felder im Youngstars-Bereich wie im Dashboard (A8).
 
-### E6 – Admin: gefährliche Knöpfe weg vom Alltag
+### E6 – Admin: gefährliche Knöpfe weg vom Alltag (abgelöst durch E7)
 
 ![E6](design-review/e6-admin.png)
 
@@ -176,6 +176,58 @@ Bildschirme tief. Wer neu ist, sieht es nicht.
 - Nicht im Bild: Dialoge ohne grüne Oberkante (A9), „+ Neues Konto" statt
   „+ Neuer Nutzer" (B).
 
+### E7 – Admin im aktuellen Design (ersetzt E6)
+
+![E7](design-review/e7-admin.png)
+
+![E7 Youngstars](design-review/e7b-admin-ys.png)
+
+Das Panel um die Namenszeilen ist schon weg (D-060). Der Entwurf übernimmt
+E6 (Gefahrenzone, ⋯-Menü) und zieht den Admin auf die Formensprache von
+Dashboard und Profil:
+
+- **Kopf wie im Profil:** „Admin“ mit Unterzeile *Partykeller · 20 Konten ·
+  253 Getränke gesamt* statt „Admin-Dashboard“. Rechts nur „+ Neues Konto“
+  und ein leiser Link „Abmelden“ ohne Unterstreichung (wie die Fußlinks im
+  Dashboard).
+- **Zwei Spalten statt fünf gestapelter Kästen:** links die Konten, rechts
+  eine mitlaufende Seitenleiste (`position: sticky`). Der TV bleibt beim
+  Korrigieren von Zählern in Sichtweite. Unter ca. 1100 px rutscht die
+  Seitenleiste unter die Liste.
+- **Abschnitte mit `.sec-title`** (Gold-Versalien plus auslaufende
+  Haarlinie) statt Glas-Kästen mit eigener Überschrift: *Konten*,
+  *TV-Anzeige*, *Eigene Fun-Facts*, *Einrichtung*, *Gefahrenzone*. Damit
+  gilt auch die einheitliche Laufweite 0.12em (B).
+- **Konten-Zeilen:** Namenskreis (`.avatar`) wie in Anmeldung und Profil.
+  Stepper mit runden Knöpfen: „–“ als leiser Umriss, „+“ gefüllt in der
+  Getränkefarbe wie die Zählkarten. Die Zahl steht ohne eigenes Feld in der
+  Getränkefarbe. Ein Klick auf die Zahl öffnet weiterhin die direkte
+  Eingabe. Gesamt in Gold.
+- **⋯-Menü pro Zeile** (im Bild bei Basti offen): *Umbenennen*, *PIN
+  ändern*, *Auf dem TV ausblenden*, abgesetzt *Konto löschen* in brick. Das
+  ersetzt die Häkchen, „Bearbeiten“, „PIN“ und die 20 roten
+  „Löschen“-Knöpfe. Ausgeblendete Konten sind abgedunkelt und tragen einen
+  Chip *ausgeblendet*, Konten ohne PIN den Chip *ohne PIN* (beide im Stil
+  der Fun-Fact-Chips).
+- **Suche und Filter** über der Liste: *Alle / Heute dabei / Ausgeblendet*
+  als Umschalter mit gleitendem Balken wie im Profil.
+- **TV-Karte:** Umschalter, darunter Rotation und Fun-Fact-Takt als Raster
+  *Etikett | Regler | Wert*. Darunter läuft *Gerade auf dem TV* mit
+  Restzeit-Balken und ‹ › direkt in der Karte. Das Fenster „Alle Fun-Facts
+  ansehen“ bleibt für die ganze Liste.
+- **Eigene Fun-Facts:** Titel und Text untereinander (der Text als
+  zweizeiliges Feld). Die vorhandenen Meldungen stehen darunter mit Chip
+  und ⋯.
+- **Einrichtung:** QR-Adresse und „Backup herunterladen“. **Gefahrenzone**
+  (gestrichelt in brick, mit Hinweis auf das Lösch-Passwort): „Backup
+  einspielen“ und „Alles zurücksetzen“.
+- Nicht im Bild: Dialoge ohne Änderung. Beim Umsetzen ziehen die
+  Admin-Inline-Styles in Klassen (C).
+
+**Zu entscheiden:** Soll es zwei Spalten geben, oder eine Spalte wie heute
+mit denselben Bausteinen? Sind Suche und Filter gewollt? Soll die direkte
+Zahleneingabe bleiben, oder reichen – und +?
+
 ---
 
 ## Vorschlag zur Reihenfolge
@@ -184,5 +236,5 @@ Bildschirme tief. Wer neu ist, sieht es nicht.
    Aufräumen. Kann ohne weitere Entscheidung umgesetzt werden.
 2. **E3 + E4 + E5**: kleine, sichtbare Verbesserungen auf dem Handy.
 3. **E1**: TV-Kopf (am besten einmal am echten Fernseher gegenprüfen).
-4. **E2 und E6**: größere Umbauten von Anmeldung bzw. Admin. Davor
+4. **E2 und E7**: größere Umbauten von Anmeldung bzw. Admin. Davor
    entscheiden, ob Suche und ⋯-Menü gewollt sind.
