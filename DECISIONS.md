@@ -1512,3 +1512,14 @@ kein „alphabetisch“ mehr. Nur wenn Suche oder Filter die Liste einschränken
 erscheint dort „n von m“.
 
 **Begründung:** Wunsch des Nutzers. Die Sortierung erklärt sich von selbst.
+
+## D-065 (2026-09-24): Zurück-Link im Admin wie im Abend-Archiv
+
+**Entscheidung:** Unter „Admin“ steht ein grüner Link wie im Abend-Archiv
+(D-054), daneben die Kennzahlen. Mit Gast-Anmeldung auf diesem Gerät heißt
+er „‹ Zurück“ und führt ins Dashboard, sonst „‹ Zur Anmeldung“ und führt
+zur Bereichs-Startseite. Das Admin-Token bleibt in der `sessionStorage`,
+wer zurückkommt, ist also noch angemeldet.
+
+**Begründung:** Wunsch des Nutzers. Aus dem Admin kam man bisher nur über
+„Abmelden“ oder den Browser heraus.
