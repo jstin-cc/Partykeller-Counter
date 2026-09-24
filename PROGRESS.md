@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-24 (D-056): **TV-Rangliste ohne angeschnittene Zeile** — es sind
+nur ganze Zeilen zu sehen, die letzten beiden blenden auf 55 % und 20 % aus;
+die angeschnittene Zeile darunter ist ausgeblendet und weggeschnitten.
 Seit 2026-09-24 (D-055): **TV-Verlauf robust** — die Rangliste blendet unten
 über die Deckkraft der einzelnen Zeilen aus statt über eine Maske, die auf
 dem Rechner des Nutzers nicht griff; oben hinausrückende Zeilen blenden
@@ -322,6 +325,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Onboarding für neue Konten (D-052)
 - [x] TV-Rangliste läuft unten in einem Verlauf aus (D-053)
 - [x] TV-Verlauf über Zeilen-Deckkraft statt mask-image (D-055)
+- [x] TV-Rangliste nur mit ganzen Zeilen, Verlauf über die letzten beiden (D-056)
 - [x] Design-Analyse: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5) (D-054)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest, E6 (warten auf Auswahl)
 
