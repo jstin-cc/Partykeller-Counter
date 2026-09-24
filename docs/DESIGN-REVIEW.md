@@ -192,8 +192,8 @@ Dashboard und Profil:
   Dashboard).
 - **Zwei Spalten statt fünf gestapelter Kästen:** links die Konten, rechts
   eine mitlaufende Seitenleiste (`position: sticky`). Der TV bleibt beim
-  Korrigieren von Zählern in Sichtweite. Unter ca. 1100 px rutscht die
-  Seitenleiste unter die Liste.
+  Korrigieren von Zählern in Sichtweite. Auf dem Handy wird daraus ein
+  Umschalter (siehe unten).
 - **Abschnitte mit `.sec-title`** (Gold-Versalien plus auslaufende
   Haarlinie) statt Glas-Kästen mit eigener Überschrift: *Konten*,
   *TV-Anzeige*, *Eigene Fun-Facts*, *Einrichtung*, *Gefahrenzone*. Damit
@@ -223,6 +223,28 @@ Dashboard und Profil:
   einspielen“ und „Alles zurücksetzen“.
 - Nicht im Bild: Dialoge ohne Änderung. Beim Umsetzen ziehen die
   Admin-Inline-Styles in Klassen (C).
+
+**Auf dem Handy:**
+
+![E7 Handy](design-review/e7c-admin-handy.png)
+
+Heute ist der Admin auf dem Handy rund 6 300 px lang. Die drei Stepper
+stehen je Konto untereinander und haben keine Getränke-Beschriftung, der
+TV-Umschalter läuft rechts aus dem Bild („Archi…“). Im Entwurf:
+
+- **Umschalter *Konten | TV | Mehr*** unter dem Kopf, wie *Zählen | Profil*
+  im Dashboard. *TV* enthält TV-Anzeige und eigene Fun-Facts, *Mehr* die
+  Einrichtung und die Gefahrenzone. Die Konten sind damit sofort da, ohne
+  an vier Kästen vorbeizuscrollen.
+- **Konto als Karte in zwei Zeilen:** oben Namenskreis, Name, Gesamt in
+  Gold und ⋯. Darunter, abgetrennt durch eine Haarlinie, die drei Stepper
+  nebeneinander, jeweils mit *BIER / SHOTS / MISCHEN* in der Getränkefarbe
+  darüber. 20 Konten brauchen so etwa 3 000 px statt heute rund 6 300 px.
+- „+ Neues Konto“ wird ein runder +-Knopf neben der Suche. Im Kopf bleibt
+  nur „Abmelden“. Die Unterzeile lässt den Bereichsnamen weg, den zeigt
+  schon das Logo.
+- Das Youngstars-Logo im Kopf entfällt auf dem Handy aus Platzgründen, die
+  Farben zeigen den Bereich.
 
 **Zu entscheiden:** Soll es zwei Spalten geben, oder eine Spalte wie heute
 mit denselben Bausteinen? Sind Suche und Filter gewollt? Soll die direkte
