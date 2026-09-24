@@ -137,8 +137,6 @@
 
   /* Seitenleiste */
   .side { position: relative; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  /* Glas-Karten bilden je eine eigene Ebene; die mit offenem Menü nach oben */
-  .side.menu-open { z-index: 5; }
   .side .input-flat { width: 100%; box-sizing: border-box; padding: 10px 14px; font-size: 14px; resize: none; }
   #tv-mode { --tabs: 3; }
   #tv-mode .tab-btn { font-size: 14px; padding: 8px 4px; white-space: nowrap; }
@@ -152,10 +150,23 @@
   .now-nav .btn-flat { width: 34px; height: 30px; font-size: 16px; padding: 0; }
   .now-nav .btn-flat:disabled { opacity: 0.4; cursor: default; }
   .now-nav .quiet { font-size: 13px; }
-  .own { display: flex; align-items: center; gap: 9px; border-top: 1px solid var(--glass-edge); padding-top: 12px; font-size: 13px; color: var(--ink); }
-  .own .t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  /* Eigene Fun-Facts: kompakte Einzeiler; ab etwa sechs Einträgen scrollt
+     die Liste in sich, statt die Seitenleiste endlos zu verlängern (D-062) */
+  .own-list {
+    max-height: 236px; overflow-y: auto; overscroll-behavior: contain;
+    border-top: 1px solid var(--glass-edge); margin-right: -8px; padding-right: 8px;
+    scrollbar-width: thin; scrollbar-color: var(--glass-edge) transparent;
+  }
+  .own-list:empty { display: none; }
+  .own { display: flex; align-items: center; gap: 9px; padding: 6px 0; border-bottom: 1px solid var(--glass-edge); font-size: 13px; color: var(--ink); }
+  .own:last-child { border-bottom: none; }
+  .own .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .own .more { height: 28px; }
   .own .fact-chip { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .own form { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .own form { display: flex; flex-direction: column; gap: 8px; flex: 1; padding: 4px 0; }
+  /* Menü der Fun-Fact-Liste hängt am <body>, sonst schneidet der
+     Scrollbereich es ab (und die Glas-Karte wäre Bezugsrahmen für fixed) */
+  .menu.floating { position: fixed; right: auto; z-index: 20; }
   .lbl { font-family: 'Bitter', serif; font-weight: 600; font-size: 12px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.12em; }
   .hint { font-size: 13px; color: var(--ink-muted); }
   .hint:empty { display: none; }
@@ -357,7 +368,7 @@
               <textarea id="fact-text" class="input-flat" rows="2" maxlength="160" placeholder="Text der Meldung" autocomplete="off" required></textarea>
               <button class="btn-green" style="padding:11px;font-size:14px;">Hinzufügen</button>
             </form>
-            <div id="fact-list" style="display:contents;"></div>
+            <div id="fact-list" class="own-list"></div>
           </div>
         </div>
 
@@ -811,7 +822,7 @@ let lastFacts = [];
 
 function renderFacts(facts) {
   lastFacts = facts;
-  $('fact-list').parentElement.classList.toggle('menu-open', !!openMenu?.startsWith('f'));
+  document.querySelectorAll('.menu.floating').forEach((m) => m.remove());
   $('own-count').textContent = facts.length ? String(facts.length) : '';
   const box = $('fact-list');
   box.textContent = '';
@@ -860,11 +871,12 @@ function renderFacts(facts) {
       const text = document.createElement('span');
       text.className = 't';
       text.textContent = f.text;
+      text.title = f.text;
       row.append(chip, text, moreMenu(`f${f.id}`, [
         { label: '✎ Bearbeiten', run: () => { factEditId = f.id; renderFacts(lastFacts); } },
         { sep: true },
         { label: 'Löschen', danger: true, run: () => send({ type: 'deleteFact', id: f.id }) },
-      ]));
+      ], { floating: true }));
     }
     box.appendChild(row);
   }
@@ -919,7 +931,7 @@ function redrawMenus() {
   renderRows();
   renderFacts(lastFacts);
 }
-function moreMenu(key, items) {
+function moreMenu(key, items, { floating = false } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'more-wrap';
   const btn = document.createElement('button');
@@ -958,10 +970,28 @@ function moreMenu(key, items) {
       });
       menu.appendChild(b);
     }
-    wrap.appendChild(menu);
+    if (floating) {
+      // Am <body> und fest positioniert: unter dem Knopf, oder darüber,
+      // wenn unten kein Platz mehr ist.
+      menu.classList.add('floating');
+      document.body.appendChild(menu);
+      requestAnimationFrame(() => {
+        const r = btn.getBoundingClientRect();
+        const h = menu.offsetHeight;
+        menu.style.left = `${Math.max(8, r.right - menu.offsetWidth)}px`;
+        menu.style.top = `${r.bottom + 6 + h > window.innerHeight - 8 ? r.top - h - 6 : r.bottom + 6}px`;
+      });
+    } else {
+      wrap.appendChild(menu);
+    }
   }
   return wrap;
 }
+// Ein am <body> hängendes Menü würde beim Scrollen am Platz bleiben, während
+// sein Knopf wegwandert — also schließen.
+document.addEventListener('scroll', () => {
+  if (document.querySelector('.menu.floating')) { openMenu = null; redrawMenus(); }
+}, { capture: true, passive: true });
 document.addEventListener('click', (e) => {
   if (openMenu && !e.target.closest('.menu')) { openMenu = null; redrawMenus(); }
 });
