@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-24 (D-066): **Schneller bei vielen Getränken** — die
+Heute-Abfragen lesen nicht mehr das ganze Log, und Broadcasts werden
+gebündelt (eine Runde mit 60 Leuten bei ~3 Jahren Historie: 0,12 s statt
+1,7 s bis zur Bestätigung).
 Seit 2026-09-24 (D-065): **Admin mit Zurück-Link** wie im Abend-Archiv —
 zum Dashboard (mit Gast-Anmeldung) bzw. zur Anmeldung; der Admin bleibt
 angemeldet.
@@ -354,6 +358,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Admin: ⋯-Menü ausgeblendeter Konten nicht mehr durchsichtig (D-063)
 - [x] Admin: Hinweis „alphabetisch“ bei Konten entfernt (D-064)
 - [x] Admin: Zurück-Link ohne Abmelden (D-065)
+- [x] Lasttest; Heute-Abfragen mit festem Index, Broadcasts gebündelt (D-066)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)

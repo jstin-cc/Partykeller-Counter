@@ -209,11 +209,26 @@ export function setupWs(server, areas) {
     const allowIncrement = createIncrementThrottle();
     area.wss = wss;
 
-    area.broadcast = () => {
+    // Broadcasts bündeln (D-066): Der erste geht sofort raus, alles was in
+    // den nächsten 100 ms dazukommt, als EIN Stand hinterher. Sonst rechnet
+    // bei einer Runde (alle tippen gleichzeitig) der Server den State für
+    // jedes Getränk einzeln aus und schickt ihn jedes Mal an alle Geräte.
+    const BROADCAST_GAP_MS = 100;
+    let broadcastTimer = null;
+    let lastBroadcast = 0;
+    const sendState = () => {
+      broadcastTimer = null;
+      lastBroadcast = Date.now();
       const msg = JSON.stringify({ type: 'state', ...area.db.getState() });
       for (const client of wss.clients) {
         if (client.readyState === client.OPEN) client.send(msg);
       }
+    };
+    area.broadcast = () => {
+      if (broadcastTimer) return;
+      const wait = lastBroadcast + BROADCAST_GAP_MS - Date.now();
+      if (wait <= 0) sendState();
+      else broadcastTimer = setTimeout(sendState, wait);
     };
 
     // --- Fun-Fact-Uhr (D-043) ---------------------------------------------
