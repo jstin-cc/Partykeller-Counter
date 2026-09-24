@@ -133,8 +133,13 @@ export function createDb(dbPath) {
     setPinHash: db.prepare('UPDATE players SET pin_hash = ? WHERE id = ?'),
     deletePlayer: db.prepare('DELETE FROM players WHERE id = ?'),
     insertLog: db.prepare('INSERT INTO drink_log (player_id, drink, ts) VALUES (?, ?, ?)'),
+    // Heute-Abfragen mit GROUP BY player_id: Index auf ts erzwingen (D-066).
+    // Sonst nimmt SQLite wegen des GROUP BY idx_drink_log_player_ts und liest
+    // bei jedem Getränk das komplette Log aller Abende.
     todayCounts: db.prepare(
-      'SELECT player_id, drink, COUNT(*) AS n FROM drink_log WHERE ts >= ? GROUP BY player_id, drink'
+      `SELECT player_id, drink, COUNT(*) AS n
+       FROM drink_log INDEXED BY idx_drink_log_ts WHERE ts >= ?
+       GROUP BY player_id, drink`
     ),
     // Tages-Aggregate über VERGANGENE Party-Tage (ts < Tagesstart), D-047:
     // sie laufen einmal in den Historien-Cache; der laufende Tag kommt aus den
@@ -192,7 +197,7 @@ export function createDb(dbPath) {
     ),
     todayPlayerTotals: db.prepare(
       `SELECT player_id, COUNT(*) AS n, MAX(ts) AS last_ts
-       FROM drink_log WHERE ts >= ?
+       FROM drink_log INDEXED BY idx_drink_log_ts WHERE ts >= ?
        GROUP BY player_id`
     ),
     // Erstes Getränk jedes Party-Tags (SQLite: bare column folgt MIN(ts))
@@ -242,7 +247,9 @@ export function createDb(dbPath) {
       'SELECT player_id, MAX(ts) AS ts FROM drink_log WHERE ts < ? GROUP BY player_id'
     ),
     lastLogTsToday: db.prepare(
-      'SELECT player_id, MAX(ts) AS ts FROM drink_log WHERE ts >= ? GROUP BY player_id'
+      `SELECT player_id, MAX(ts) AS ts
+       FROM drink_log INDEXED BY idx_drink_log_ts WHERE ts >= ?
+       GROUP BY player_id`
     ),
     playerLogsToday: db.prepare(
       'SELECT drink, ts FROM drink_log WHERE player_id = ? AND ts >= ? ORDER BY ts'

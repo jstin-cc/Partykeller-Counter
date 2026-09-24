@@ -1523,3 +1523,26 @@ wer zurückkommt, ist also noch angemeldet.
 
 **Begründung:** Wunsch des Nutzers. Aus dem Admin kam man bisher nur über
 „Abmelden“ oder den Browser heraus.
+
+## D-066 (2026-09-24): Heute-Abfragen mit festem Index, Broadcasts gebündelt
+
+**Entscheidung:** Zwei Änderungen nach einem Lasttest (60 Handys, 2 TVs,
+Admin; Test-Datenbanken mit 6 000, 120 000 und 627 000 Log-Einträgen):
+
+1. Die drei Heute-Abfragen mit `GROUP BY player_id` (`todayCounts`,
+   `todayPlayerTotals`, `lastLogTsToday`) nutzen fest `INDEXED BY
+   idx_drink_log_ts`.
+2. `area.broadcast()` bündelt: Der erste State geht sofort raus, alles, was
+   in den nächsten 100 ms dazukommt, als ein gemeinsamer State hinterher.
+
+**Begründung:** Wegen des `GROUP BY` wählte SQLite den Index
+`(player_id, ts)` und las bei jedem Getränk das komplette Log aller Abende.
+Der Historien-Cache (D-047) half dagegen nicht. Dazu rechnete jedes Getränk
+den State einzeln aus und schickte ihn an alle Geräte. Tippten 60 Leute
+gleichzeitig (Runde), wartete man bei 120 000 Einträgen bis 1,7 s und bei
+627 000 bis 17 s auf die Bestätigung, bei Mehrfach-Tippen bis 5 s bzw. 51 s.
+Dabei gingen 277 MB bzw. 684 MB übers WLAN. Nachher sind es 0,12 s bzw.
+0,17 s und 3 MB bzw. 8 MB. Im Normalbetrieb sinkt die Zeit von 57 auf 21 ms
+bzw. von 340 auf 73 ms. `ANALYZE` hätte den Plan ebenfalls korrigiert,
+hängt aber von gepflegten Statistiken ab. Der feste Index ist
+vorhersehbar. Der Inhalt des States bleibt unverändert.
