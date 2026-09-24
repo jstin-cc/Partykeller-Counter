@@ -7,9 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
-Seit 2026-09-24 (D-058): **TV-Kopf umsortiert** — Teilnehmerzahl, Summen
-und Rekordkurs-Pille stehen rechtsbündig ganz rechts, rechts neben der
-QR-Pille (D-057 hatte sie versehentlich links daneben gesetzt).
+Seit 2026-09-24 (D-059): **TV-Kopf umsortiert** — Teilnehmerzahl, Summen
+und Rekordkurs-Pille stehen rechtsbündig direkt links neben der QR-Pille,
+die QR-Pille sitzt ganz rechts (nach D-057/D-058).
 Seit 2026-09-24 (D-056): **TV-Rangliste ohne angeschnittene Zeile** — es sind
 nur ganze Zeilen zu sehen, die letzten beiden blenden auf 55 % und 20 % aus;
 die angeschnittene Zeile darunter ist ausgeblendet und weggeschnitten.
@@ -331,6 +331,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] TV-Rangliste nur mit ganzen Zeilen, Verlauf über die letzten beiden (D-056)
 - [x] TV-Kopf: Teilnehmerzahl linksbündig neben der QR-Pille (D-057)
 - [x] TV-Kopf: Teilnehmerzahl rechtsbündig rechts neben der QR-Pille (D-058)
+- [x] TV-Kopf: Teilnehmerzahl rechtsbündig links neben der QR-Pille (D-059)
 - [x] Design-Analyse: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5) (D-054)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest, E6 (warten auf Auswahl)
 
