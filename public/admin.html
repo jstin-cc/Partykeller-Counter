@@ -41,35 +41,174 @@
     background: oklch(0.3 0.1 38 / 0.4); color: var(--ink);
     border-radius: var(--radius); padding: 12px 16px; font-size: 14px; font-weight: 600;
   }
-  /* Zeilen als einzeln abgerundete Glas-Elemente in einem großen Panel */
-  #rows { display: flex; flex-direction: column; gap: 8px; }
-  .admin-row {
-    display: flex; align-items: center; gap: 16px; padding: 12px 20px; flex-wrap: wrap;
-    border: 1px solid var(--glass-edge); border-radius: var(--radius);
+  /* Admin-Layout (D-061): Konten links, rechts eine mitlaufende Seitenleiste
+     mit TV, Fun-Facts, Einrichtung und Danger Zone. Unter 1180 px wird daraus
+     ein Umschalter Konten | TV | Mehr, unter 760 px werden die Konten zu
+     zweizeiligen Karten. */
+  .adm { max-width: 1280px; margin: 0 auto; width: 100%; box-sizing: border-box; padding: 28px 40px 0; position: relative; z-index: 1; flex: 1; }
+  .adm-head { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; }
+  .adm-head .logo { height: 56px; width: auto; object-fit: contain; }
+  .adm-head h1 { font-family: 'Bitter', serif; font-weight: 800; font-size: 30px; color: var(--creme); margin: 0; line-height: 1.1; }
+  .adm-head .sub { font-size: 14px; color: var(--ink-muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .head-actions { margin-left: auto; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; justify-content: flex-end; }
+  .quiet { background: none; border: none; padding: 0; color: var(--ink-muted); font-size: 14px; text-decoration: none; cursor: pointer; font-family: inherit; }
+  .quiet:hover { color: var(--ink); }
+  .m-tabs { display: none; --tabs: 3; margin-bottom: 18px; }
+  .adm-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 36px; align-items: start; }
+  .adm-grid main, .adm-grid aside { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .adm-grid aside { position: sticky; top: 20px; }
+  .grp { display: contents; }
+  aside .sec { margin-top: 12px; }
+  aside .grp:first-child > .sec:first-child { margin-top: 0; }
+
+  /* Konten */
+  .k-tools { display: flex; gap: 12px; align-items: center; }
+  .k-tools .search { flex: 1; min-width: 0; padding: 10px 14px; font-size: 14px; }
+  .k-filter { --tabs: 3; width: 330px; flex: none; }
+  .k-filter .tab-btn { font-size: 13px; padding: 8px 6px; }
+  .add-round { display: none; }
+  .k-head { display: flex; align-items: center; gap: 14px; padding: 4px 17px 0; font-family: 'Bitter', serif; font-weight: 600; font-size: 12px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+  .k-head .h-name { flex: 1; padding-left: 52px; }
+  .k-head .h-st { width: 112px; text-align: center; }
+  .k-head .h-total { width: 56px; text-align: right; }
+  .k-head .h-more { width: 36px; }
+  #rows { display: flex; flex-direction: column; gap: 6px; }
+  .k-empty { padding: 18px; text-align: center; color: var(--ink-muted); font-size: 14px; }
+  .k-row {
+    position: relative; display: flex; align-items: center; gap: 14px; padding: 9px 16px;
+    background: var(--surface); border: 1px solid var(--glass-edge); border-radius: var(--radius-lg);
     backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    transition: opacity 0.2s ease;
   }
-  .admin-row:nth-child(odd) { background: var(--surface); }
-  .admin-row:nth-child(even) { background: var(--surface-alt); }
-  .stepper { width: 170px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .stepper button {
-    width: 34px; height: 34px; border-radius: var(--radius); border: none; font-size: 18px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  .k-row.menu-open { z-index: 5; }
+  .k-row.is-hidden { opacity: 0.5; }
+  .k-row .avatar { width: 38px; height: 38px; font-size: 16px; }
+  .k-name { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .k-name .n { font-family: 'Bitter', serif; font-weight: 700; font-size: 16px; color: var(--creme); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .k-name form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .k-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+  .k-meta:empty { display: none; }
+  .chip { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid currentColor; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+  .chip-brick { color: var(--brick); }
+  .chip-muted { color: var(--ink-muted); }
+  .st-group { display: contents; }
+  .st { width: 112px; display: flex; align-items: center; justify-content: center; gap: 4px; flex: none; }
+  .st button {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--glass-edge); background: transparent;
+    color: var(--ink-muted); font-size: 16px; line-height: 1; cursor: pointer; padding: 0; flex: none;
   }
-  .stepper input {
-    width: 56px; text-align: center; background: var(--surface-2); border: 1px solid var(--glass-edge);
-    border-radius: var(--radius); padding: 6px 4px; font-family: 'Bitter', serif; font-weight: 700;
-    font-size: 17px; font-variant-numeric: tabular-nums;
+  .st button:hover { color: var(--ink); }
+  .st .plus { border: none; font-weight: 700; }
+  /* Die Zahl ist ein Eingabefeld ohne Rahmen: Klick darauf erlaubt die
+     direkte Eingabe, sonst liest sie sich wie reiner Text. */
+  .st input {
+    width: 40px; box-sizing: border-box; text-align: center; background: transparent; border: 1px solid transparent;
+    border-radius: 8px; padding: 3px 0; font-family: 'Bitter', serif; font-weight: 800; font-size: 18px;
+    font-variant-numeric: tabular-nums; -moz-appearance: textfield; appearance: textfield;
   }
-  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 13px; text-decoration: underline; cursor: pointer; }
-  /* TV-Anzeige als Umschalter mit gleitendem Balken wie im Profil (D-044) */
-  #tv-mode { --tabs: 3; flex: 0 0 auto; }
-  /* Feste Breite als width, nicht als flex-basis: Firefox rechnet flex-basis
-     nicht in die Breite des Umschalters ein, der dritte Knopf lief über. */
-  #tv-mode .tab-btn { flex: 0 0 auto; width: 128px; padding: 8px 12px; font-size: 14px; white-space: nowrap; }
-  .vis-check { width: 20px; height: 20px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
-  .admin-row { transition: opacity 0.2s ease, background-color 0.2s ease; }
-  .admin-row.is-hidden { opacity: 0.5; }
+  .st input:hover { border-color: var(--glass-edge); }
+  .st input:focus { outline: none; border-color: var(--green); background: var(--surface-2); }
+  .st input::-webkit-outer-spin-button, .st input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .st.beer input { color: var(--amber); } .st.beer .plus { background: var(--amber); color: var(--bg); }
+  .st.shot input { color: var(--brick); } .st.shot .plus { background: var(--brick); color: var(--ink); }
+  .st.mix input { color: var(--mix); } .st.mix .plus { background: var(--mix); color: var(--bg); }
+  .k-total { width: 56px; text-align: right; font-size: 22px; color: var(--gold); flex: none; }
+
+  /* ⋯-Menü (Konten und eigene Fun-Facts) */
+  .more-wrap { position: relative; width: 36px; flex: none; }
+  .more {
+    width: 36px; height: 32px; border-radius: 999px; border: 1px solid transparent; background: transparent;
+    color: var(--ink-muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0;
+  }
+  .more:hover, .more.open { border-color: var(--glass-edge); background: var(--surface-2); color: var(--ink); }
+  .menu {
+    position: absolute; right: 0; top: 38px; z-index: 5; width: 230px; padding: 6px;
+    background: linear-gradient(var(--surface-2), var(--surface-2)), var(--bg);
+    border: 1px solid var(--glass-edge); border-radius: var(--radius);
+    box-shadow: 0 16px 40px oklch(0 0 0 / 0.45); display: flex; flex-direction: column;
+  }
+  .menu button {
+    text-align: left; background: none; border: none; color: var(--ink); padding: 10px 12px;
+    border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit;
+  }
+  .menu button:hover, .menu button:focus-visible { background: var(--surface); outline: none; }
+  .menu .danger { color: var(--brick); }
+  .menu .sep { height: 1px; background: var(--glass-edge); margin: 4px 6px; }
+
+  /* Seitenleiste */
+  .side { position: relative; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  /* Glas-Karten bilden je eine eigene Ebene; die mit offenem Menü nach oben */
+  .side.menu-open { z-index: 5; }
+  .side .input-flat { width: 100%; box-sizing: border-box; padding: 10px 14px; font-size: 14px; resize: none; }
+  #tv-mode { --tabs: 3; }
+  #tv-mode .tab-btn { font-size: 14px; padding: 8px 4px; white-space: nowrap; }
+  .sl { display: grid; grid-template-columns: 104px minmax(0, 1fr) 70px; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-muted); }
+  .sl input { accent-color: var(--green); width: 100%; cursor: pointer; }
+  .sl b { color: var(--creme); font-size: 13px; text-align: right; }
+  .now { border-top: 1px solid var(--glass-edge); padding-top: 12px; display: flex; flex-direction: column; gap: 9px; }
+  .now-row { display: flex; gap: 9px; align-items: flex-start; }
+  .now-row .t { font-family: 'Bitter', serif; font-weight: 700; font-size: 15px; color: var(--creme); line-height: 1.35; }
+  .now-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .now-nav .btn-flat { width: 34px; height: 30px; font-size: 16px; padding: 0; }
+  .now-nav .btn-flat:disabled { opacity: 0.4; cursor: default; }
+  .now-nav .quiet { font-size: 13px; }
+  .own { display: flex; align-items: center; gap: 9px; border-top: 1px solid var(--glass-edge); padding-top: 12px; font-size: 13px; color: var(--ink); }
+  .own .t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .own .fact-chip { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .own form { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .lbl { font-family: 'Bitter', serif; font-weight: 600; font-size: 12px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+  .hint { font-size: 13px; color: var(--ink-muted); }
+  .hint:empty { display: none; }
+  .danger-sec .sec-title { color: var(--brick); }
+  .danger-sec::after { background: linear-gradient(90deg, color-mix(in oklab, var(--brick) 60%, transparent), transparent); }
+  .danger-box { border: 1px dashed color-mix(in oklab, var(--brick) 70%, transparent); border-radius: var(--radius-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .danger-box p { margin: 0; font-size: 13px; color: var(--ink-muted); line-height: 1.45; }
+  .btn-danger { background: transparent; border: 1px solid var(--brick); color: var(--brick); border-radius: var(--radius); padding: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn-danger:hover { background: color-mix(in oklab, var(--brick) 12%, transparent); }
+
+  /* Schmaler als zwei Spalten: Umschalter statt Seitenleiste */
+  @media (max-width: 1180px) {
+    .m-tabs { display: flex; }
+    .adm-grid { display: block; }
+    .adm-grid aside { position: static; }
+    .adm[data-m="konten"] aside, .adm[data-m="tv"] main, .adm[data-m="mehr"] main { display: none; }
+    .adm[data-m="tv"] .grp-more, .adm[data-m="mehr"] .grp-tv { display: none; }
+    .adm[data-m="mehr"] .grp-more > .sec:first-child { margin-top: 0; }
+    .adm-grid aside { max-width: 560px; }
+  }
+  /* Handy */
+  @media (max-width: 760px) {
+    .adm { padding: 18px 16px 0; }
+    .adm-head { gap: 12px; margin-bottom: 16px; }
+    .adm-head .logo { height: 40px; }
+    .adm-head .ys-logo { display: none !important; }
+    .adm-head h1 { font-size: 24px; }
+    .adm-head .sub { font-size: 12px; }
+    .adm-head .sub-area { display: none; }
+    .head-actions { gap: 14px; align-self: flex-start; margin-top: 4px; }
+    #open-add { display: none; }
+    .m-tabs .tab-btn { font-size: 14px; padding: 9px 4px; }
+    .k-tools { flex-wrap: wrap; gap: 10px; }
+    .add-round { display: block; width: 42px; height: 42px; border-radius: 50%; font-size: 22px; padding: 0; line-height: 1; flex: none; }
+    .k-filter { width: 100%; }
+    .k-head { display: none; }
+    .k-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto 36px; column-gap: 12px; row-gap: 10px; padding: 12px 12px 12px 14px; }
+    .k-row .avatar { grid-column: 1; grid-row: 1; }
+    .k-name { grid-column: 2; grid-row: 1; flex-direction: row; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .k-total { grid-column: 3; grid-row: 1; width: auto; }
+    .more-wrap { grid-column: 4; grid-row: 1; }
+    .st-group {
+      display: grid; grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(3, 1fr); gap: 6px;
+      border-top: 1px solid var(--glass-edge); padding-top: 10px;
+    }
+    .st { width: auto; display: grid; grid-template-columns: 30px 34px 30px; justify-content: center; align-items: center; row-gap: 4px; column-gap: 2px; }
+    .st::before { grid-column: 1 / -1; text-align: center; font-family: 'Bitter', serif; font-weight: 700; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .st.beer::before { content: 'Bier'; color: var(--amber); }
+    .st.shot::before { content: 'Shots'; color: var(--brick); }
+    .st.mix::before { content: 'Mischen'; color: var(--mix); }
+    .st input { width: 34px; font-size: 17px; }
+    .sl { grid-template-columns: 96px minmax(0, 1fr) 64px; }
+  }
   .modal-backdrop {
     position: fixed; inset: 0; background: var(--scrim);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -140,97 +279,119 @@
   <img src="assets/footer-woods.png" alt="" class="footer-woods">
 </div>
 
-<!-- Ansicht 2: Admin-Dashboard (Admin Dashboard v3) -->
+<!-- Ansicht 2: Admin-Dashboard (Aufbau nach Entwurf E7, D-061) -->
 <div id="dash-view" hidden style="min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div class="admin-watermark" style="right:-200px;top:-160px;width:700px;height:700px;opacity:0.16;transform:rotate(20deg);"></div>
 
-  <div style="max-width:1200px;margin:0 auto;width:100%;padding:28px 40px 0 40px;position:relative;z-index:1;flex:1;">
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
-      <div style="display:flex;align-items:center;gap:18px;">
-        <img src="assets/logo.png" alt="SV Partykeller" style="height:56px;width:auto;object-fit:contain;">
-        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:36px;width:auto;object-fit:contain;">
-        <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:32px;color:var(--creme);margin:0;">Admin-Dashboard</h1>
+  <div id="adm" class="adm" data-m="konten">
+    <header class="adm-head">
+      <img src="assets/logo.png" alt="SV Partykeller" class="logo">
+      <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:36px;width:auto;object-fit:contain;">
+      <div>
+        <h1>Admin</h1>
+        <div id="adm-sub" class="sub"></div>
       </div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div class="head-actions">
         <div id="reset-done" hidden style="color:var(--green);font-size:14px;font-weight:600;">Zurückgesetzt!</div>
-        <div id="dash-error" class="error-msg"></div>
-        <button id="open-add" class="btn-green" style="padding:12px 22px;font-size:14px;">+ Neuer Nutzer</button>
-        <button id="reset-btn" class="btn-flat" style="color:var(--brick);border-color:var(--brick);padding:12px 20px;font-size:14px;font-weight:700;">Alles zurücksetzen</button>
-        <button id="logout" class="link-btn">Abmelden</button>
+        <div id="dash-error" class="error-msg" style="min-height:0;"></div>
+        <button id="open-add" type="button" class="btn-green" style="padding:12px 22px;font-size:14px;">+ Neues Konto</button>
+        <button id="logout" type="button" class="quiet">Abmelden</button>
       </div>
+    </header>
+
+    <div id="m-tabs" class="tabs m-tabs" role="tablist" data-pos="0">
+      <div class="tab-indicator"></div>
+      <button type="button" class="tab-btn active" data-m="konten">Konten</button>
+      <button type="button" class="tab-btn" data-m="tv">TV</button>
+      <button type="button" class="tab-btn" data-m="mehr">Mehr</button>
     </div>
 
-    <div class="glass" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
-      <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">TV-Anzeige</div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <div id="tv-mode" class="tabs" role="tablist" data-pos="0">
-          <div class="tab-indicator"></div>
-          <button id="mode-alltime" class="tab-btn mode-btn" type="button" data-mode="alltime">All-Time</button>
-          <button id="mode-today" class="tab-btn mode-btn" type="button" data-mode="today">Heute</button>
-          <button id="mode-archive" class="tab-btn mode-btn" type="button" data-mode="archive">Archiv-Abend</button>
+    <div class="adm-grid">
+      <main>
+        <div class="sec"><span class="sec-title">Konten</span><span id="k-count" class="sec-hint">alphabetisch</span></div>
+        <div class="k-tools">
+          <input id="k-search" class="input-flat search" type="search" placeholder="🔍  Name suchen" autocomplete="off" aria-label="Name suchen">
+          <button id="open-add-round" type="button" class="btn-green add-round" title="Neues Konto" aria-label="Neues Konto">+</button>
+          <div id="k-filter" class="tabs k-filter" role="tablist" data-pos="0">
+            <div class="tab-indicator"></div>
+            <button type="button" class="tab-btn active" data-filter="all">Alle</button>
+            <button type="button" class="tab-btn" data-filter="today">Heute dabei</button>
+            <button type="button" class="tab-btn" data-filter="hidden">Ausgeblendet</button>
+          </div>
         </div>
-        <select id="archive-day" class="input-flat" hidden style="padding:8px 12px;font-size:14px;cursor:pointer;"></select>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:13px;color:var(--ink-muted);">Rotation</span>
-        <input id="speed-slider" type="range" min="1.5" max="10" step="0.5" value="3" style="width:130px;accent-color:var(--green);cursor:pointer;">
-        <span id="speed-value" class="num" style="font-size:13px;color:var(--creme);min-width:64px;">3,0 s/Zeile</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:13px;color:var(--ink-muted);">Fun-Fact-Takt</span>
-        <input id="funfact-slider" type="range" min="30" max="300" step="15" value="30" style="width:130px;accent-color:var(--green);cursor:pointer;">
-        <span id="funfact-value" class="num" style="font-size:13px;color:var(--creme);min-width:70px;">alle 30 s</span>
-      </div>
-    </div>
+        <div class="k-head" aria-hidden="true">
+          <div class="h-name">Name</div><div class="h-st">Bier</div><div class="h-st">Shots</div><div class="h-st">Mischen</div><div class="h-total">Gesamt</div><div class="h-more"></div>
+        </div>
+        <div id="rows"></div>
+      </main>
 
-    <!-- QR-Adresse und Vollsicherung (D-034) teilen sich eine Zeile -->
-    <div class="glass" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);">
-      <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">QR-Adresse</div>
-      <input id="join-url" class="input-flat" type="text" placeholder="z. B. http://192.168.1.50:3000/" autocomplete="off" style="flex:1;min-width:200px;padding:10px 14px;font-size:14px;">
-      <button id="join-save" class="btn-green" style="padding:10px 18px;font-size:14px;">Speichern</button>
-      <div id="join-hint" style="font-size:13px;color:var(--ink-muted);"></div>
-      <div style="align-self:stretch;width:1px;background:var(--glass-edge);"></div>
-      <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">Sicherung</div>
-      <button id="backup-save" class="btn-green" style="padding:10px 18px;font-size:14px;">⬇ Backup herunterladen</button>
-      <button id="backup-load" class="btn-flat" style="padding:10px 18px;font-size:14px;font-weight:700;">⬆ Backup einspielen</button>
-      <div id="backup-hint" style="font-size:13px;color:var(--ink-muted);"></div>
-    </div>
+      <aside id="adm-side">
+        <div class="grp grp-tv">
+          <div class="sec"><span class="sec-title">TV-Anzeige</span></div>
+          <div class="card side">
+            <div id="tv-mode" class="tabs" role="tablist" data-pos="0">
+              <div class="tab-indicator"></div>
+              <button id="mode-alltime" class="tab-btn mode-btn" type="button" data-mode="alltime">All-Time</button>
+              <button id="mode-today" class="tab-btn mode-btn" type="button" data-mode="today">Heute</button>
+              <button id="mode-archive" class="tab-btn mode-btn" type="button" data-mode="archive">Archiv</button>
+            </div>
+            <select id="archive-day" class="input-flat" hidden style="cursor:pointer;"></select>
+            <label class="sl" title="Sekunden je Zeile der TV-Rangliste"><span>Rotation</span><input id="speed-slider" type="range" min="1.5" max="10" step="0.5" value="3"><b id="speed-value" class="num">3,0 s</b></label>
+            <label class="sl" title="Wie oft die Meldung im TV-Band wechselt"><span>Fun-Fact-Takt</span><input id="funfact-slider" type="range" min="30" max="300" step="15" value="30"><b id="funfact-value" class="num">30 s</b></label>
+            <div class="now">
+              <div class="eyebrow" style="font-size:11px;">Gerade auf dem TV</div>
+              <div class="now-row"><span id="now-chip" class="fact-chip k-leer">–</span><span id="now-text" class="t">Noch keine Meldungen.</span></div>
+              <div class="fact-bar"><div id="now-bar"></div></div>
+              <div class="now-nav">
+                <button type="button" id="now-prev" class="btn-flat" aria-label="Vorige Meldung">‹</button>
+                <button type="button" id="open-facts" class="quiet">Alle Fun-Facts ansehen ›</button>
+                <button type="button" id="now-next" class="btn-flat" aria-label="Nächste Meldung">›</button>
+              </div>
+            </div>
+          </div>
 
-    <!-- Eigene Fun-Facts: rotieren im TV-Band zusammen mit den Live-Facts -->
-    <div class="glass" style="margin-bottom:22px;padding:14px 18px;background:var(--surface-alt);border-radius:var(--radius-lg);display:flex;flex-direction:column;gap:12px;">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div style="font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.06em;">Eigene Fun-Facts</div>
-        <button type="button" id="open-facts" class="btn-flat" style="margin-left:auto;padding:9px 16px;font-size:13px;font-weight:600;">Alle Fun-Facts ansehen ›</button>
-      </div>
-      <form id="fact-form" style="display:flex;gap:10px;flex-wrap:wrap;">
-        <input id="fact-title" class="input-flat" type="text" maxlength="30" placeholder="Titel (z. B. Ansage)" autocomplete="off" required style="width:200px;padding:10px 14px;font-size:14px;">
-        <input id="fact-text" class="input-flat" type="text" maxlength="160" placeholder="Text der Meldung" autocomplete="off" required style="flex:1;min-width:260px;padding:10px 14px;font-size:14px;">
-        <button class="btn-green" style="padding:10px 18px;font-size:14px;">Hinzufügen</button>
-      </form>
-      <div id="fact-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
+          <div class="sec"><span class="sec-title">Eigene Fun-Facts</span><span id="own-count" class="sec-hint"></span></div>
+          <div class="card side">
+            <form id="fact-form" style="display:flex;flex-direction:column;gap:10px;">
+              <input id="fact-title" class="input-flat" type="text" maxlength="30" placeholder="Titel (z. B. Ansage)" autocomplete="off" required>
+              <textarea id="fact-text" class="input-flat" rows="2" maxlength="160" placeholder="Text der Meldung" autocomplete="off" required></textarea>
+              <button class="btn-green" style="padding:11px;font-size:14px;">Hinzufügen</button>
+            </form>
+            <div id="fact-list" style="display:contents;"></div>
+          </div>
+        </div>
 
-    <!-- Namenszeilen stehen frei, ohne umschließendes Panel (D-060) -->
-    <div>
-      <div style="display:flex;align-items:center;gap:16px;padding:0 21px 12px 21px;text-transform:uppercase;letter-spacing:0.08em;font-size:13px;color:var(--gold);">
-        <div style="flex:1;min-width:220px;">Name</div>
-        <div style="width:170px;text-align:center;">Bier</div>
-        <div style="width:170px;text-align:center;">Shots</div>
-        <div style="width:170px;text-align:center;">Mischen</div>
-        <div style="width:90px;text-align:right;">Gesamt</div>
-        <div style="width:90px;text-align:right;">&nbsp;</div>
-      </div>
-      <div id="rows"></div>
+        <div class="grp grp-more">
+          <div class="sec"><span class="sec-title">Einrichtung</span></div>
+          <div class="card side">
+            <div class="lbl">QR-Adresse für den TV</div>
+            <div style="display:flex;gap:8px;">
+              <input id="join-url" class="input-flat" type="text" placeholder="z. B. http://192.168.1.50:3000/" autocomplete="off" style="flex:1;min-width:0;">
+              <button id="join-save" type="button" class="btn-green" style="padding:0 16px;font-size:14px;">Speichern</button>
+            </div>
+            <div id="join-hint" class="hint"></div>
+            <div class="lbl" style="margin-top:6px;">Sicherung</div>
+            <button id="backup-save" type="button" class="btn-flat" style="padding:11px;font-size:14px;font-weight:700;color:var(--ink);">⬇ Backup herunterladen</button>
+            <div id="backup-hint" class="hint"></div>
+          </div>
+
+          <div class="sec danger-sec"><span class="sec-title">Danger Zone</span></div>
+          <div class="danger-box">
+            <p>Beides braucht das Lösch-Passwort und lässt sich nicht rückgängig machen.</p>
+            <button id="backup-load" type="button" class="btn-danger">⬆ Backup einspielen</button>
+            <button id="reset-btn" type="button" class="btn-danger">Alles zurücksetzen</button>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
-  <img src="assets/footer-woods.png" alt="" class="footer-woods" style="margin-top:24px;">
+  <img src="assets/footer-woods.png" alt="" class="footer-woods" style="margin-top:32px;">
 </div>
 
-<!-- Modal: Neuer Nutzer -->
+<!-- Modal: Neues Konto -->
 <div id="add-modal" class="modal-backdrop" hidden>
   <form id="add-form" class="glass" style="background:var(--surface);border-radius:var(--radius-lg);padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;">
-    <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Neuer Nutzer</h2>
+    <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Neues Konto</h2>
     <input id="add-name" class="input-flat" type="text" maxlength="24" placeholder="Name" autocomplete="off" required>
     <input id="add-pin" class="input-flat" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (optional, 4 Ziffern)" autocomplete="off">
     <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -386,7 +547,9 @@ function enterDashboard() {
     onState(state) {
       players = state.players;
       lastState = state;
+      renderHeader();
       renderFactSheet();
+      renderNow();
       renderRows();
       updateJoinField(state.joinUrl ?? '');
       updateBoardMode(state.boardMode ?? 'alltime', state.boardDay);
@@ -404,9 +567,23 @@ function enterDashboard() {
     onFact(msg) {
       factPos = msg;
       renderFactSheet();
+      renderNow();
     },
     onError: showError,
   });
+}
+
+// --- Kopf: Bereich, Anzahl Konten, Getränke gesamt ---
+const AREA_LABEL = AREA.id === 'youngstars' ? 'Youngstars' : 'Partykeller';
+function renderHeader() {
+  const n = players.length;
+  const sum = players.reduce((acc, p) => acc + p.total, 0);
+  const sub = $('adm-sub');
+  sub.textContent = '';
+  const area = document.createElement('span');
+  area.className = 'sub-area';
+  area.textContent = `${AREA_LABEL} · `;
+  sub.append(area, `${n} ${n === 1 ? 'Konto' : 'Konten'} · ${sum} ${sum === 1 ? 'Getränk' : 'Getränke'} gesamt`);
 }
 
 // --- Fun-Facts im Wechsel (D-043) ----------------------------------------
@@ -422,6 +599,37 @@ function currentFacts() {
     lastState.players.filter((p) => !p.hidden),
     lastState.records, lastState.customFacts, lastState.funStats
   );
+}
+
+// Der Balken läuft ohne eigenen Timer: Startbreite setzen, dann per
+// Transition über die Restzeit auf 100 % ziehen.
+function runBar(bar) {
+  const passed = Math.min(factPos.seconds * 1000, Math.max(0, Date.now() - factPos.since));
+  bar.style.transition = 'none';
+  bar.style.width = `${(passed / (factPos.seconds * 1000)) * 100}%`;
+  void bar.offsetWidth;
+  bar.style.transition = `width ${factPos.seconds * 1000 - passed}ms linear`;
+  bar.style.width = '100%';
+}
+
+// Kurzfassung in der TV-Karte: welche Meldung läuft, mit Restzeit und ‹ ›
+function renderNow() {
+  const list = currentFacts();
+  const empty = !list.length || !factPos;
+  $('now-prev').disabled = $('now-next').disabled = empty;
+  if (empty) {
+    $('now-chip').className = 'fact-chip k-leer';
+    $('now-chip').textContent = '–';
+    $('now-text').textContent = 'Noch keine Meldungen.';
+    $('now-bar').style.transition = 'none';
+    $('now-bar').style.width = '0';
+    return;
+  }
+  const f = list[factPos.index % list.length];
+  $('now-chip').className = `fact-chip k-${f.kind}`;
+  $('now-chip').textContent = FACT_KIND_LABEL[f.kind] ?? f.kind;
+  $('now-text').textContent = f.text;
+  runBar($('now-bar'));
 }
 
 function renderFactSheet() {
@@ -451,15 +659,7 @@ function renderFactSheet() {
   $('facts-sub').textContent =
     `${list.length} Meldungen · alle ${factPos.seconds} s · ein Durchlauf dauert ${Math.floor(round / 60)}:${String(round % 60).padStart(2, '0')} min`;
 
-  // Der Balken läuft ohne eigenen Timer: Startbreite setzen, dann per
-  // Transition über die Restzeit auf 100 % ziehen.
-  const passed = Math.min(factPos.seconds * 1000, Math.max(0, Date.now() - factPos.since));
-  const bar = $('facts-bar');
-  bar.style.transition = 'none';
-  bar.style.width = `${(passed / (factPos.seconds * 1000)) * 100}%`;
-  void bar.offsetWidth;
-  bar.style.transition = `width ${factPos.seconds * 1000 - passed}ms linear`;
-  bar.style.width = '100%';
+  runBar($('facts-bar'));
 
   rows.textContent = '';
   list.forEach((entry, i) => {
@@ -506,6 +706,8 @@ $('facts-modal').addEventListener('click', (e) => { if (e.target === $('facts-mo
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFacts(); });
 $('facts-prev').addEventListener('click', () => stepFact(-1));
 $('facts-next').addEventListener('click', () => stepFact(1));
+$('now-prev').addEventListener('click', () => stepFact(-1));
+$('now-next').addEventListener('click', () => stepFact(1));
 
 // --- TV-Anzeige umschalten (All-Time / Heute / Archiv-Abend) ---
 function updateBoardMode(mode, day) {
@@ -560,7 +762,7 @@ $('archive-day').addEventListener('change', () => {
 $('archive-day').addEventListener('mousedown', loadArchiveDays);
 
 // --- Rotationsgeschwindigkeit der TV-Rangliste ---
-const fmtSpeed = (s) => `${Number(s).toLocaleString('de-DE', { minimumFractionDigits: 1 })} s/Zeile`;
+const fmtSpeed = (s) => `${Number(s).toLocaleString('de-DE', { minimumFractionDigits: 1 })} s`;
 
 function updateSpeed(seconds) {
   const slider = $('speed-slider');
@@ -582,9 +784,9 @@ $('speed-slider').addEventListener('change', () => {
 // unter 60 s in Sekunden, darüber in Minuten (halbe Schritte)
 function fmtFunfact(sec) {
   const s = Number(sec);
-  if (s < 60) return `alle ${s} s`;
+  if (s < 60) return `${s} s`;
   const min = s / 60;
-  return `alle ${min.toLocaleString('de-DE', { maximumFractionDigits: 2 })} min`;
+  return `${min.toLocaleString('de-DE', { maximumFractionDigits: 2 })} min`;
 }
 
 function updateFunfact(seconds) {
@@ -609,66 +811,73 @@ let lastFacts = [];
 
 function renderFacts(facts) {
   lastFacts = facts;
+  $('fact-list').parentElement.classList.toggle('menu-open', !!openMenu?.startsWith('f'));
+  $('own-count').textContent = facts.length ? String(facts.length) : '';
   const box = $('fact-list');
   box.textContent = '';
   for (const f of facts) {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);border:1px solid var(--glass-edge);border-radius:var(--radius);flex-wrap:wrap;';
+    row.className = 'own';
 
     if (factEditId === f.id) {
       const form = document.createElement('form');
-      form.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;flex:1;align-items:center;';
       const titleIn = document.createElement('input');
       titleIn.className = 'input-flat';
       titleIn.maxLength = 30;
       titleIn.required = true;
       titleIn.value = f.title;
-      titleIn.style.cssText = 'width:180px;padding:8px 10px;font-size:14px;';
       const textIn = document.createElement('input');
       textIn.className = 'input-flat';
       textIn.maxLength = 160;
       textIn.required = true;
       textIn.value = f.text;
-      textIn.style.cssText = 'flex:1;min-width:220px;padding:8px 10px;font-size:14px;';
-      const save = document.createElement('button');
-      save.className = 'btn-green';
-      save.style.cssText = 'padding:8px 14px;font-size:13px;';
-      save.textContent = 'Speichern';
+      const btns = document.createElement('div');
+      btns.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';
       const cancel = document.createElement('button');
       cancel.type = 'button';
       cancel.className = 'btn-flat';
       cancel.style.cssText = 'padding:8px 14px;font-size:13px;';
       cancel.textContent = 'Abbrechen';
       cancel.addEventListener('click', () => { factEditId = null; renderFacts(lastFacts); });
+      const save = document.createElement('button');
+      save.className = 'btn-green';
+      save.style.cssText = 'padding:8px 14px;font-size:13px;';
+      save.textContent = 'Speichern';
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         send({ type: 'updateFact', id: f.id, title: titleIn.value, text: textIn.value });
         factEditId = null;
       });
-      form.append(titleIn, textIn, save, cancel);
+      btns.append(cancel, save);
+      form.append(titleIn, textIn, btns);
       row.appendChild(form);
       queueMicrotask(() => titleIn.focus());
     } else {
-      const title = document.createElement('span');
-      title.style.cssText = "font-family:'Bitter',serif;font-weight:700;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0;";
-      title.textContent = f.title;
+      const chip = document.createElement('span');
+      chip.className = 'fact-chip k-eigene';
+      chip.textContent = f.title;
+      chip.title = f.title;
       const text = document.createElement('span');
-      text.style.cssText = 'flex:1;font-size:14px;color:var(--ink);';
+      text.className = 't';
       text.textContent = f.text;
-      const edit = document.createElement('button');
-      edit.className = 'link-btn';
-      edit.textContent = 'Bearbeiten';
-      edit.addEventListener('click', () => { factEditId = f.id; renderFacts(lastFacts); });
-      const del = document.createElement('button');
-      del.className = 'link-btn';
-      del.style.color = 'var(--brick)';
-      del.textContent = 'Löschen';
-      del.addEventListener('click', () => send({ type: 'deleteFact', id: f.id }));
-      row.append(title, text, edit, del);
+      row.append(chip, text, moreMenu(`f${f.id}`, [
+        { label: '✎ Bearbeiten', run: () => { factEditId = f.id; renderFacts(lastFacts); } },
+        { sep: true },
+        { label: 'Löschen', danger: true, run: () => send({ type: 'deleteFact', id: f.id }) },
+      ]));
     }
     box.appendChild(row);
   }
 }
+
+// Der Text ist ein zweizeiliges Feld, soll aber wie ein Einzeiler senden:
+// Enter schickt ab, einen Zeilenumbruch braucht das TV-Band nicht.
+$('fact-text').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    $('fact-form').requestSubmit();
+  }
+});
 
 $('fact-form').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -702,6 +911,96 @@ $('rows').addEventListener('focusout', () => {
   }, 0);
 });
 
+// --- ⋯-Menü (Konten und eigene Fun-Facts) ---
+// Welches Menü offen ist, steht in openMenu, damit es einen Neuaufbau der
+// Liste übersteht (jedes Getränk irgendwo schickt einen neuen Zustand).
+let openMenu = null;
+function redrawMenus() {
+  renderRows();
+  renderFacts(lastFacts);
+}
+function moreMenu(key, items) {
+  const wrap = document.createElement('div');
+  wrap.className = 'more-wrap';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'more' + (openMenu === key ? ' open' : '');
+  btn.textContent = '⋯';
+  btn.setAttribute('aria-label', 'Weitere Aktionen');
+  btn.setAttribute('aria-expanded', String(openMenu === key));
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openMenu = openMenu === key ? null : key;
+    redrawMenus();
+  });
+  wrap.appendChild(btn);
+  if (openMenu === key) {
+    const menu = document.createElement('div');
+    menu.className = 'menu';
+    menu.setAttribute('role', 'menu');
+    for (const item of items) {
+      if (item.sep) {
+        const sep = document.createElement('div');
+        sep.className = 'sep';
+        menu.appendChild(sep);
+        continue;
+      }
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'menuitem');
+      if (item.danger) b.className = 'danger';
+      b.textContent = item.label;
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openMenu = null;
+        redrawMenus();
+        item.run();
+      });
+      menu.appendChild(b);
+    }
+    wrap.appendChild(menu);
+  }
+  return wrap;
+}
+document.addEventListener('click', (e) => {
+  if (openMenu && !e.target.closest('.menu')) { openMenu = null; redrawMenus(); }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && openMenu) { openMenu = null; redrawMenus(); }
+});
+
+// --- Suche und Filter über der Kontenliste ---
+let filterText = '';
+let filterMode = 'all';   // all | today | hidden
+$('k-search').addEventListener('input', () => {
+  filterText = $('k-search').value.trim().toLocaleLowerCase('de');
+  renderRows();
+});
+const filterBtns = [...$('k-filter').querySelectorAll('.tab-btn')];
+filterBtns.forEach((b, i) => b.addEventListener('click', () => {
+  filterMode = b.dataset.filter;
+  filterBtns.forEach((x) => x.classList.toggle('active', x === b));
+  $('k-filter').dataset.pos = String(i);
+  renderRows();
+}));
+
+// --- Umschalter Konten | TV | Mehr (nur schmal sichtbar) ---
+const mBtns = [...$('m-tabs').querySelectorAll('.tab-btn')];
+mBtns.forEach((b, i) => b.addEventListener('click', () => {
+  $('adm').dataset.m = b.dataset.m;
+  mBtns.forEach((x) => x.classList.toggle('active', x === b));
+  $('m-tabs').dataset.pos = String(i);
+}));
+
+// Die Seitenleiste läuft mit (sticky). Ist sie höher als das Fenster, klebt
+// sie erst, wenn ihr unteres Ende sichtbar ist — sonst wäre die Danger Zone
+// bis zum Seitenende nicht erreichbar.
+function fitSide() {
+  const side = $('adm-side');
+  side.style.top = `${Math.min(20, window.innerHeight - side.offsetHeight - 20)}px`;
+}
+window.addEventListener('resize', fitSide);
+
 function renderRows() {
   const box = $('rows');
   const active = document.activeElement;
@@ -713,23 +1012,42 @@ function renderRows() {
   box.textContent = '';
 
   // Admin-Liste alphabetisch nach Name (nicht nach Punktestand)
-  const list = [...players].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  const all = [...players].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  const list = all.filter((p) => {
+    if (filterText && !p.name.toLocaleLowerCase('de').includes(filterText)) return false;
+    if (filterMode === 'today') return p.beersToday + p.shotsToday + p.mixesToday > 0;
+    if (filterMode === 'hidden') return p.hidden;
+    return true;
+  });
+  $('k-count').textContent = list.length === all.length ? 'alphabetisch' : `${list.length} von ${all.length}`;
+
+  if (!list.length) {
+    const empty = document.createElement('div');
+    empty.className = 'k-empty';
+    empty.textContent = all.length ? 'Keine Treffer.' : 'Noch keine Konten.';
+    box.appendChild(empty);
+  }
+
   for (const p of list) {
     const row = document.createElement('div');
-    row.className = 'admin-row' + (p.hidden ? ' is-hidden' : '');
+    row.className = 'k-row' + (p.hidden ? ' is-hidden' : '') + (openMenu === `p${p.id}` ? ' menu-open' : '');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    avatar.textContent = [...p.name][0]?.toUpperCase() ?? '?';
 
     // Name / Umbenennen
     const nameCell = document.createElement('div');
-    nameCell.style.cssText = 'flex:1;min-width:220px;';
+    nameCell.className = 'k-name';
     if (editingId === p.id) {
       const form = document.createElement('form');
-      form.style.cssText = 'display:flex;gap:8px;align-items:center;';
       const input = document.createElement('input');
       input.value = p.name;
       input.maxLength = 24;
       input.required = true;
       input.className = 'input-flat';
-      input.style.cssText = 'padding:8px 10px;font-size:15px;width:150px;';
+      input.style.cssText = 'padding:7px 10px;font-size:15px;width:150px;';
       const save = document.createElement('button');
       save.className = 'btn-green';
       save.style.cssText = 'padding:8px 14px;font-size:13px;';
@@ -749,92 +1067,99 @@ function renderRows() {
       nameCell.appendChild(form);
       queueMicrotask(() => input.focus());
     } else {
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'display:flex;align-items:center;gap:10px;';
-      // Sichtbarkeit im TV-Scoreboard: Haken = sichtbar
-      const vis = document.createElement('input');
-      vis.type = 'checkbox';
-      vis.className = 'vis-check';
-      vis.checked = !p.hidden;
-      vis.title = 'Im TV-Scoreboard und in der Anmeldeliste anzeigen';
-      vis.addEventListener('change', () => send({ type: 'setHidden', id: p.id, hidden: !vis.checked }));
       const name = document.createElement('div');
-      name.style.cssText = "font-size:16px;font-weight:600;font-family:'Bitter',serif;";
+      name.className = 'n';
       name.textContent = p.name;
-      // Hinweis, wenn dieser Nutzer keine PIN hat (D-018)
-      const noPin = document.createElement('span');
-      if (!p.hasPin) {
-        noPin.textContent = 'ohne PIN';
-        noPin.title = 'Meldet sich ohne PIN an';
-        noPin.style.cssText = 'font-size:11px;color:var(--brick);border:1px solid var(--brick);border-radius:999px;padding:1px 8px;white-space:nowrap;';
+      const meta = document.createElement('div');
+      meta.className = 'k-meta';
+      if (p.hidden) {
+        const chip = document.createElement('span');
+        chip.className = 'chip chip-muted';
+        chip.textContent = 'ausgeblendet';
+        chip.title = 'Nicht auf dem TV und nicht in der Anmeldeliste';
+        meta.appendChild(chip);
       }
-      const edit = document.createElement('button');
-      edit.className = 'link-btn';
-      edit.textContent = 'Bearbeiten';
-      edit.addEventListener('click', () => { editingId = p.id; renderRows(); });
-      const pinBtn = document.createElement('button');
-      pinBtn.className = 'link-btn';
-      pinBtn.textContent = 'PIN';
-      pinBtn.addEventListener('click', () => openPinModal(p));
-      wrap.append(vis, name);
-      if (!p.hasPin) wrap.append(noPin);
-      wrap.append(edit, pinBtn);
-      nameCell.appendChild(wrap);
+      // Hinweis, wenn dieses Konto keine PIN hat (D-018)
+      if (!p.hasPin) {
+        const chip = document.createElement('span');
+        chip.className = 'chip chip-brick';
+        chip.textContent = 'ohne PIN';
+        chip.title = 'Meldet sich ohne PIN an';
+        meta.appendChild(chip);
+      }
+      nameCell.append(name, meta);
     }
 
-    // Zähler-Stepper
-    const stepper = (drink, value, color, onColor) => {
+    // Zähler-Stepper; die Zahl ist direkt editierbar
+    const stepper = (drink, value, cls, label) => {
       const cell = document.createElement('div');
-      cell.className = 'stepper';
+      cell.className = `st ${cls}`;
       const dec = document.createElement('button');
+      dec.type = 'button';
       dec.textContent = '–';
-      dec.style.cssText = `background:var(--surface-2);color:var(--${color});`;
+      dec.setAttribute('aria-label', `${label} −1`);
       dec.addEventListener('click', () => send({ type: 'increment', playerId: p.id, drink, delta: -1 }));
       const input = document.createElement('input');
       input.type = 'number';
       input.min = 0;
+      input.inputMode = 'numeric';
       input.value = value;
-      input.style.color = `var(--${color})`;
+      input.setAttribute('aria-label', `${label} von ${p.name}`);
       input.addEventListener('change', () => {
         const v = Math.max(0, Math.round(Number(input.value)) || 0);
         send({ type: 'setCounter', id: p.id, drink, value: v });
       });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
       const inc = document.createElement('button');
+      inc.type = 'button';
+      inc.className = 'plus';
       inc.textContent = '+';
-      inc.style.cssText = `background:var(--${color});color:var(--${onColor});`;
+      inc.setAttribute('aria-label', `${label} +1`);
       inc.addEventListener('click', () => send({ type: 'increment', playerId: p.id, drink, delta: 1 }));
       cell.append(dec, input, inc);
       return cell;
     };
+    const steppers = document.createElement('div');
+    steppers.className = 'st-group';
+    steppers.append(
+      stepper('beer', p.beers, 'beer', 'Bier'),
+      stepper('shot', p.shots, 'shot', 'Shots'),
+      stepper('mix', p.mixes, 'mix', 'Mischen'),
+    );
 
     const total = document.createElement('div');
-    total.className = 'num';
-    total.style.cssText = 'width:90px;text-align:right;font-size:22px;color:var(--gold);';
+    total.className = 'k-total num';
     total.textContent = p.total;
 
-    const delCell = document.createElement('div');
-    delCell.style.cssText = 'width:90px;text-align:right;';
-    const del = document.createElement('button');
-    del.textContent = 'Löschen';
-    del.style.cssText = 'background:transparent;border:1px solid var(--brick);color:var(--brick);border-radius:var(--radius);padding:8px 12px;font-size:13px;cursor:pointer;';
-    del.addEventListener('click', () => {
-      if (confirm(`${p.name} wirklich löschen? Alle Zählstände gehen verloren.`)) {
-        send({ type: 'deletePlayer', id: p.id });
-      }
-    });
-    delCell.appendChild(del);
+    const menu = moreMenu(`p${p.id}`, [
+      { label: '✎ Umbenennen', run: () => { editingId = p.id; renderRows(); } },
+      { label: '🔑 PIN ändern', run: () => openPinModal(p) },
+      // Sichtbarkeit im TV-Scoreboard und in der Anmeldeliste
+      p.hidden
+        ? { label: '👁 Auf dem TV einblenden', run: () => send({ type: 'setHidden', id: p.id, hidden: false }) }
+        : { label: '👁 Auf dem TV ausblenden', run: () => send({ type: 'setHidden', id: p.id, hidden: true }) },
+      { sep: true },
+      { label: 'Konto löschen', danger: true, run: () => {
+        if (confirm(`${p.name} wirklich löschen? Alle Zählstände gehen verloren.`)) {
+          send({ type: 'deletePlayer', id: p.id });
+        }
+      } },
+    ]);
 
-    row.append(nameCell, stepper('beer', p.beers, 'amber', 'bg'), stepper('shot', p.shots, 'brick', 'ink'), stepper('mix', p.mixes, 'mix', 'bg'), total, delCell);
+    row.append(avatar, nameCell, steppers, total, menu);
     box.appendChild(row);
   }
+  fitSide();
 }
 
-// --- Neuer Nutzer ---
-$('open-add').addEventListener('click', () => {
+// --- Neues Konto ---
+function openAddModal() {
   $('add-form').reset();
   $('add-modal').hidden = false;
   $('add-name').focus();
-});
+}
+$('open-add').addEventListener('click', openAddModal);
+$('open-add-round').addEventListener('click', openAddModal);
 $('close-add').addEventListener('click', () => { $('add-modal').hidden = true; });
 $('add-form').addEventListener('submit', (e) => {
   e.preventDefault();
