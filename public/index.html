@@ -107,7 +107,7 @@
 
     <form id="create-form" style="display:flex;flex-direction:column;gap:10px;">
       <input id="create-name" class="input-flat" type="text" maxlength="24" placeholder="Dein Name" autocomplete="off" required>
-      <input id="create-pin" class="input-flat num" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (optional, 4 Ziffern)" autocomplete="off">
+      <input id="create-pin" class="input-flat" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (optional, 4 Ziffern)" autocomplete="off">
       <button class="btn-green" style="padding:15px;font-size:16px;margin-top:4px;">Konto erstellen &amp; los</button>
     </form>
 
@@ -198,7 +198,7 @@ function renderUsers(all) {
       pin.placeholder = 'PIN';
       pin.autocomplete = 'off';
       pin.required = true;
-      pin.className = 'input-flat num';
+      pin.className = 'input-flat';
       pin.style.flex = '1';
 
       const ok = document.createElement('button');

@@ -152,9 +152,9 @@
     animation: pk-rowflash 0.85s ease;
   }
   @keyframes pk-rowflash {
-    0%   { background: oklch(0.80 0.15 83 / 0); }
-    30%  { background: oklch(0.80 0.15 83 / 0.20); }
-    100% { background: oklch(0.80 0.15 83 / 0); }
+    0%   { background: transparent; }
+    30%  { background: color-mix(in oklab, var(--gold) 20%, transparent); }
+    100% { background: transparent; }
   }
   @media (prefers-reduced-motion: reduce) { .row.pk-rowflash::after { animation: none; } }
   .col-rank { width: 70px; font-family:'Bitter',serif; font-weight:700; font-size:24px; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
@@ -179,8 +179,8 @@
     margin-top: 6px;
     padding: 4px 14px;
     border-radius: 999px;
-    border: 1px solid oklch(0.80 0.15 83 / 0.55);
-    background: oklch(0.80 0.15 83 / 0.12);
+    border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent);
+    background: color-mix(in oklab, var(--gold) 12%, transparent);
     color: var(--gold);
     font-family: 'Bitter', serif;
     font-weight: 800;
@@ -189,8 +189,8 @@
     animation: pk-paceglow 2.4s ease-in-out infinite;
   }
   @keyframes pk-paceglow {
-    0%, 100% { box-shadow: 0 0 4px oklch(0.80 0.15 83 / 0.15); }
-    50%      { box-shadow: 0 0 18px oklch(0.80 0.15 83 / 0.45); }
+    0%, 100% { box-shadow: 0 0 4px color-mix(in oklab, var(--gold) 15%, transparent); }
+    50%      { box-shadow: 0 0 18px color-mix(in oklab, var(--gold) 45%, transparent); }
   }
   @media (prefers-reduced-motion: reduce) { .pace-pill { animation: none; } }
   /* Fun-Fact-Band: genau so hoch wie eine Ranglistenzeile (ROW_H) und der Text

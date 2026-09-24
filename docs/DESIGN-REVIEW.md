@@ -5,8 +5,10 @@ Onboarding, Dashboard (Zählen, Profil, Ranglisten-Blatt), TV, Abend-Archiv
 und Admin. Grundlage sind Screenshots aus dem laufenden Server (Chromium,
 Handy 390 px, TV 1920 × 1080, Admin 1440 px) mit 20 Testkonten.
 
-**Umgesetzt ist davon nur der TV-Verlauf (D-053).** Alles andere sind
-Entwürfe und wartet auf eine Entscheidung. Die Bilder in `docs/design-review/`
+**Stand der Umsetzung:** TV-Verlauf (D-053), alle Fehler A1–A13, E4 und E5
+(D-054) sind umgesetzt. Von E3 sind A2, A12 und A13 umgesetzt; offen bleibt
+die offenen Abzeichen und „war später dran“ beim Hintermann. E1, E2 und E6 sind weiter Entwürfe
+und warten auf eine Entscheidung. Die Bilder in `docs/design-review/`
 zeigen die echte App, in die die vorgeschlagenen Änderungen per CSS/JS
 eingespielt wurden. Links steht der heutige Stand, rechts der Entwurf.
 
@@ -25,7 +27,7 @@ Zeit auseinandergelaufen sind.
 
 ---
 
-## A. Unstimmigkeiten (klare Fehler, schnell zu beheben)
+## A. Unstimmigkeiten (klare Fehler) ✅ alle umgesetzt (D-054)
 
 | # | Wo | Was | Vorschlag |
 |---|----|-----|-----------|
@@ -124,7 +126,7 @@ Bildschirme tief. Wer neu ist, sieht es nicht.
 - Zeilen etwas kompakter (Namenszeichen 34 statt 40 px).
 - Schrift in den Feldern einheitlich (A1), „‹ Bereich" in derselben Linkfarbe.
 
-### E3 – Profil aufgeräumt
+### E3 – Profil aufgeräumt (teilweise umgesetzt: A2, A12, A13)
 
 ![E3](design-review/e3-profil.png)
 
@@ -135,7 +137,7 @@ Bildschirme tief. Wer neu ist, sieht es nicht.
 - Offene Abzeichen: gestrichelter Rand und volle Deckkraft statt 55 %, ohne
   „×0". Sie sind lesbar und bleiben klar von den geschafften unterscheidbar.
 
-### E4 – Ganze Rangliste: Rangkreise wie auf dem TV
+### E4 – Ganze Rangliste: Rangkreise wie auf dem TV ✅ umgesetzt (D-054)
 
 ![E4](design-review/e4-blatt.png)
 
@@ -145,7 +147,7 @@ Bildschirme tief. Wer neu ist, sieht es nicht.
 - „20 Personen heute dabei" → „20 heute dabei" (wie auf dem TV).
 - Hintergrund im Youngstars-Bereich navy statt grünstichig (A3).
 
-### E5 – Onboarding passt zur echten Oberfläche
+### E5 – Onboarding passt zur echten Oberfläche ✅ umgesetzt (D-054)
 
 ![E5](design-review/e5-onboarding.png)
 ![E5 Schritt 1](design-review/e5b-onboarding1.png)

@@ -40,6 +40,8 @@
   --glass-edge: oklch(0.92 0.02 160 / 0.12);   /* feine helle Glaskante */
   --hair-gold: oklch(0.80 0.15 83 / 0.55);       /* Gold-Haarlinie der Abschnittszeilen (D-044) */
   --glass-blur: 16px;
+  /* Abdunklung hinter Dialogen und Blättern — im Farbton des Bereichs (A3) */
+  --scrim: oklch(0.08 0.02 155 / 0.55);
 
   /* Eckenradien – Kanten sind bewusst leicht abgerundet */
   --radius: 12px;      /* Buttons, Felder, kleine Controls */
@@ -63,6 +65,7 @@ html[data-area="youngstars"] {
   --surface-2: oklch(0.29 0.028 260 / 0.60);
   --glass-edge: oklch(0.92 0.02 260 / 0.12);
   --hair-gold: oklch(0.80 0.14 75 / 0.55);
+  --scrim: oklch(0.08 0.025 260 / 0.55);
 }
 
 /* Zapfen-Wasserzeichen in Navy (gleiche Form, hellere Navy-Füllung) */
@@ -105,6 +108,10 @@ body {
   font-family: 'Work Sans', sans-serif;
   color: var(--ink);
 }
+
+/* Formularelemente erben die Schrift der Seite — sonst setzt der Browser
+   seine Systemschrift ein (Eingabefelder standen in Arial, A1) */
+input, button, select, textarea { font-family: inherit; }
 
 a { color: var(--green); }
 a:hover { color: var(--gold); }
@@ -261,6 +268,33 @@ a:hover { color: var(--gold); }
   letter-spacing: 0.06em;
 }
 
+/* Beschriftungen im Profil (D-044): gemischte Schreibung statt Versalien —
+   Versalien bleiben den Abschnittszeilen vorbehalten */
+.cell .label--plain { text-transform: none; letter-spacing: 0; font-size: 12.5px; color: var(--ink-muted); }
+
+/* Abzeichen (Profil und Onboarding-Schaubild): „geschafft" leuchtet gold,
+   offen ist gedimmt; die Pill zählt, wie oft es schon erreicht wurde */
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  background: var(--surface-2); border: 1px solid var(--glass-edge);
+  color: var(--ink-muted); opacity: 0.55;
+  transition: opacity 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+.badge.earned {
+  opacity: 1; color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--gold) 18%, transparent);
+}
+.badge-count {
+  font-family: 'Bitter', serif; font-weight: 800; font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface); border: 1px solid var(--glass-edge);
+  border-radius: 999px; padding: 1px 7px;
+}
+.badge.earned .badge-count { color: var(--gold); border-color: color-mix(in oklab, var(--gold) 40%, transparent); }
+
 /* Formulare (Login) */
 .field {
   width: 100%;
@@ -300,9 +334,9 @@ button:not(:disabled):active { transform: scale(0.95); }
 
 /* Kurzes Aufleuchten (z. B. Podest bei Platzwechsel). */
 @keyframes pk-flash {
-  0%   { box-shadow: 0 0 0 0 var(--pk-flash, oklch(0.80 0.15 83 / 0.0)); }
-  30%  { box-shadow: 0 0 26px 4px var(--pk-flash, oklch(0.80 0.15 83 / 0.55)); }
-  100% { box-shadow: 0 0 0 0 var(--pk-flash, oklch(0.80 0.15 83 / 0.0)); }
+  0%   { box-shadow: 0 0 0 0 transparent; }
+  30%  { box-shadow: 0 0 26px 4px var(--pk-flash, color-mix(in oklab, var(--gold) 55%, transparent)); }
+  100% { box-shadow: 0 0 0 0 transparent; }
 }
 .pk-flash { animation: pk-flash 0.9s ease; }
 

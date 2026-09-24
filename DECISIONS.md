@@ -1312,3 +1312,47 @@ Kante und halber Schrift voll stehen, was am Fernseher wie ein harter Schnitt
 wirkte. Ein Verlauf über fast zwei Zeilen liest sich als „da kommt noch
 mehr". Damit er keinen Platz frisst, der vorher für den letzten Platz der
 Liste gebraucht wurde, rechnet die Rotation einen Schritt weiter.
+
+## D-054 (2026-09-24): Design-Analyse umgesetzt: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5)
+
+**Entscheidung:** Aus `docs/DESIGN-REVIEW.md` sind alle Fehler A1–A13 sowie
+die Entwürfe E4 und E5 umgesetzt:
+
+- **Farben je Bereich:** Die Abdunklung hinter Dialogen ist jetzt ein Token
+  `--scrim` (Navy im Youngstars-Bereich statt grünstichig). Alle bisher fest
+  eingetragenen Goldtöne (Rekordkurs-Pille, Zeilen-Aufleuchten,
+  Podest-Flash, Abzeichen) und der Glow um „Getränke heute" werden per
+  `color-mix` aus `--gold` bzw. `--green` abgeleitet.
+- **Schrift in Formularen:** `input, button, select, textarea` erben die
+  Schrift der Seite. PIN-Felder tragen nicht mehr `.num`, der Platzhalter
+  steht in Work Sans statt Bitter fett.
+- **Admin:** Anmeldung und Dialoge ohne 4-px-Farbkante oben (wie Karten seit
+  D-038). Gefährliche Dialoge erkennt man am roten Bestätigungsknopf.
+- **Profil:** „Du führst!" bei Gleichstand „gleichauf mit …" statt
+  „0 Getränke Vorsprung". Der doppelte Hinweis „Heute/All-Time" neben
+  RANGLISTE entfällt. „Bester Abend" ohne Datum in der Beschriftung (steht
+  im Tooltip), damit die drei Statistik-Werte auf einer Linie bleiben.
+- **Ganze Rangliste (E4):** Plätze ohne „#", die ersten drei im Rangkreis in
+  Gold/Silber/Bronze wie auf dem TV. Die eigene Zeile trägt eine „Du"-Pille
+  statt „(du)". Die Zählzeile sagt „20 heute dabei" bzw. „20 Teilnehmer" wie
+  das TV-Board.
+- **Onboarding (E5):** „Getränke zählen" / „Tipp auf ein Getränkefeld, und es
+  zählt eins dazu.", Logo in Anmeldungsgröße, im Youngstars-Bereich Bier
+  unten wie im Dashboard. Das Profil-Schaubild entspricht dem echten Profil
+  („#1 von 12 heute", Beschriftung in gemischter Schreibung, Statistik
+  rahmenlos, Abzeichen „Stammgast ×13" und „Tagessieger ×3"). Im
+  TV-Schaubild „Fun Fact" wie auf dem Fernseher. Abzeichen und
+  `.label--plain` liegen dafür jetzt gemeinsam in `theme.css`.
+- **Fun-Facts:** Einzahl bei 1 („1 Shot", „1 Mische", „1 Getränk", „genau
+  eins", „einen Shot").
+- **Links:** Das Abend-Archiv führt mit Anmeldung „‹ Zurück" ins Dashboard.
+  „Zur Anmeldung" im Dashboard ohne Konto führt auf die Anmeldung des
+  Bereichs statt auf die Bereichsauswahl.
+
+**Begründung:** Die Analyse vom selben Tag hat gezeigt, dass die meisten
+Unstimmigkeiten aus fest eingetragenen Werten und seitenweise kopierten
+Bausteinen kamen. Fehler A sind ohne Design-Entscheidung behebbar. E4 bringt
+das Ranglisten-Blatt in dieselbe Sprache wie das TV. E5 sorgt dafür, dass das
+Onboarding zeigt, was man danach wirklich sieht. E1, E2, E3 (Rest: offene
+Abzeichen) und E6 bleiben Entwürfe. Nicht umgeschrieben: der Text von D-052,
+der noch die alten Onboarding-Sätze nennt.

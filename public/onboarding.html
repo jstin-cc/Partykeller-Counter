@@ -93,12 +93,6 @@
     text-transform: uppercase; letter-spacing: 0.1em;
   }
   .hint { font-size: 13px; line-height: 1.45; color: var(--ink-muted); }
-
-  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
-  .badge {
-    font-size: 12px; padding: 5px 11px; border-radius: 999px;
-    border: 1px solid var(--glass-edge); background: var(--surface-alt); color: var(--ink-muted);
-  }
 </style>
 </head>
 <body>
@@ -109,17 +103,17 @@
   <div class="screen-inner" style="padding:26px 24px 24px;">
 
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-      <img src="assets/logo.png" alt="SV Partykeller" style="height:44px;width:auto;object-fit:contain;">
-      <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:30px;width:auto;object-fit:contain;">
+      <img src="assets/logo.png" alt="SV Partykeller" style="height:72px;width:auto;object-fit:contain;">
+      <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:40px;width:auto;object-fit:contain;">
     </div>
 
     <!-- Schritt 1: zählen -->
     <section id="step-1" class="step" style="margin-top:14px;">
       <div class="sec"><span id="welcome" class="sec-title">Willkommen</span></div>
-      <h1 class="step-title">Getränke Tracken</h1>
-      <p class="step-lead">Tippe auf ein Getränkefeld um es zu tracken.</p>
-      <div style="display:flex;flex-direction:column;gap:9px;margin-top:-4px;">
-        <div class="drink-demo" style="--fill:var(--amber);--on:var(--bg);">
+      <h1 class="step-title">Getränke zählen</h1>
+      <p class="step-lead">Tipp auf ein Getränkefeld, und es zählt eins dazu.</p>
+      <div id="drink-demos" style="display:flex;flex-direction:column;gap:9px;margin-top:-4px;">
+        <div id="demo-beer" class="drink-demo" style="--fill:var(--amber);--on:var(--bg);">
           <div class="drink-head"><span class="drink-name">Bier</span><span class="drink-plus" aria-hidden="true">+</span></div>
           <div class="split">
             <div class="cell"><div class="num value">3</div><div class="label">Heute</div></div>
@@ -135,7 +129,7 @@
             <div class="cell"><div class="num value">44</div><div class="label">Gesamt</div></div>
           </div>
         </div>
-        <div class="drink-demo" style="--fill:var(--mix);--on:var(--bg);">
+        <div id="demo-mix" class="drink-demo" style="--fill:var(--mix);--on:var(--bg);">
           <div class="drink-head"><span class="drink-name">Mischen</span><span class="drink-plus" aria-hidden="true">+</span></div>
           <div class="split">
             <div class="cell"><div class="num value">0</div><div class="label">Heute</div></div>
@@ -159,7 +153,7 @@
         </div>
         <div class="row"><span class="rank">4</span><span class="who">Marie</span><span class="total">29</span></div>
         <div class="row"><span class="rank">5</span><span class="who">Jonas</span><span class="total">24</span></div>
-        <div class="band"><b>Fun-Fact</b><span>Heute sind zwölf Leute dabei.</span></div>
+        <div class="band"><b>Fun Fact</b><span>Heute sind zwölf Leute dabei.</span></div>
       </div>
       <p class="hint">Unten im Band laufen Fun-Facts durch — Tagesbestwerte, Comebacks, Jubiläen.</p>
     </section>
@@ -169,22 +163,27 @@
       <div class="sec"><span class="sec-title">Profil-Tab</span></div>
       <h1 class="step-title">Platz, Abende, Abzeichen</h1>
       <p class="step-lead">Im Profil stehen dein Platz heute und all-time, deine Mischung und die Abzeichen, die du über die Abende sammelst.</p>
+      <!-- Wie im echten Profil (D-040, D-044): nur die Rangliste ist eine
+           Karte, Statistik und Abzeichen stehen rahmenlos darunter (D-054) -->
       <div class="card" style="margin-top:-4px;">
         <div class="sec" style="margin-bottom:12px;"><span class="sec-title">Rangliste</span></div>
         <div class="split">
-          <div class="cell"><div class="num value" style="font-size:36px;">58</div><div class="label label--plain">Getränke</div></div>
+          <div class="cell"><div class="num value" style="font-size:36px;color:var(--green);">5</div><div class="label label--plain">Getränke</div></div>
           <div class="sep" style="background:var(--glass-edge);"></div>
-          <div class="cell"><div class="num value value--gold" style="font-size:36px;">1</div><div class="label label--plain">Platz</div></div>
+          <div class="cell"><div class="num value value--gold" style="font-size:36px;">#1</div><div class="label label--plain">von 12 heute</div></div>
         </div>
       </div>
-      <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;flex-direction:column;gap:14px;padding:0 2px;">
         <div class="sec"><span class="sec-title">Deine Statistik</span></div>
         <div class="split">
           <div class="cell"><div class="num value" style="font-size:26px;">13</div><div class="label label--plain">Abende</div></div>
-          <div class="cell"><div class="num value value--gold" style="font-size:26px;">11</div><div class="label label--plain">Bestes</div></div>
+          <div class="cell"><div class="num value value--gold" style="font-size:26px;">11</div><div class="label label--plain">Bester Abend</div></div>
           <div class="cell"><div class="num value" style="font-size:26px;">4,5</div><div class="label label--plain">Ø pro Abend</div></div>
         </div>
-        <div class="badges"><span class="badge">👑 Tagessieger</span><span class="badge">🏅 10 Abende</span></div>
+        <div class="badges">
+          <div class="badge earned">🎖 Stammgast <span class="badge-count">×13</span></div>
+          <div class="badge earned">👑 Tagessieger <span class="badge-count">×3</span></div>
+        </div>
       </div>
     </section>
 
@@ -204,6 +203,9 @@ import { getSession, fetchPlayers } from './js/api.js';
 const $ = (id) => document.getElementById(id);
 const STEPS = 3;
 let step = 1;
+
+// Youngstars: Bier steht wie im Dashboard ganz unten (Shots, Mischen, Bier)
+if (document.documentElement.dataset.area === 'youngstars') $('demo-mix').after($('demo-beer'));
 
 // Ohne Anmeldung gibt es hier nichts zu sehen (die Seite wird direkt nach dem
 // Anlegen eines Kontos aufgerufen).

@@ -11,20 +11,8 @@
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
 <style>
-  /* Achievement-Badges: klein, mit Zustand „geschafft" (gold) / offen (gedimmt) */
-  .badges { display: flex; flex-wrap: wrap; gap: 8px; }
-  .badge {
-    display: flex; align-items: center; gap: 7px;
-    padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
-    background: var(--surface-2); border: 1px solid var(--glass-edge);
-    color: var(--ink-muted); opacity: 0.55;
-    transition: opacity 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-  }
-  .badge.earned {
-    opacity: 1; color: var(--gold);
-    border-color: oklch(0.80 0.15 83 / 0.55);
-    box-shadow: 0 0 12px oklch(0.80 0.15 83 / 0.18);
-  }
+  /* Abzeichen (.badge, .badge-count) und .label--plain stehen in theme.css,
+     weil das Onboarding sie im Schaubild genauso zeigt (D-054) */
   /* Verteilungsbalken Bier/Shots/Mischen */
   .dist-bar {
     display: flex; height: 10px; border-radius: 999px; overflow: hidden;
@@ -33,9 +21,6 @@
   .dist-bar > div { transition: width 0.5s ease; }
   .dist-legend { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; }
 
-  /* Beschriftungen im Profil (D-044): gemischte Schreibung statt Versalien —
-     Versalien bleiben den Abschnittszeilen vorbehalten */
-  .cell .label--plain { text-transform: none; letter-spacing: 0; font-size: 12.5px; color: var(--ink-muted); }
   .sub-label { font-size: 13px; font-weight: 500; color: var(--ink-muted); margin-bottom: 8px; }
 
   /* „Ganze Rangliste": Knopf unter den Nachbarn + Blatt von unten (D-030) */
@@ -47,7 +32,7 @@
   }
   .show-all:hover { color: var(--ink); border-color: var(--green); }
   .modal-backdrop {
-    position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
+    position: fixed; inset: 0; background: var(--scrim);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     display: flex; align-items: flex-end; justify-content: center; z-index: 10;
   }
@@ -68,11 +53,17 @@
     background: var(--surface-2); border: 1px solid var(--glass-edge);
     border-radius: var(--radius);
   }
+  /* Platz als Zahl ohne „#"; die ersten drei im Rangkreis in
+     Gold/Silber/Bronze wie auf dem TV-Podest (D-054) */
   .board-row .rank {
-    width: 36px; font-family: 'Bitter', serif; font-weight: 800; font-size: 15px;
+    width: 28px; height: 28px; flex-shrink: 0; margin-right: 4px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 13px;
     font-variant-numeric: tabular-nums; color: var(--ink-muted);
   }
-  .board-row.top .rank { color: var(--gold); }
+  .board-row[data-rank="1"] .rank { background: var(--gold); color: var(--bg); }
+  .board-row[data-rank="2"] .rank { background: var(--silver); color: var(--bg); }
+  .board-row[data-rank="3"] .rank { background: var(--bronze); color: var(--bg); }
   .board-row .who { flex: 1; font-family: 'Bitter', serif; font-weight: 700; font-size: 15px; }
   .board-row .total {
     font-family: 'Bitter', serif; font-weight: 800; font-size: 15px;
@@ -81,15 +72,13 @@
   /* Eigene Zeile hervorgehoben – sie wird beim Öffnen in die Mitte gescrollt */
   .board-row.me { background: var(--surface); border-color: var(--green); }
   .board-row.me .who { color: var(--green); }
-
-  /* Anzahl-Pill am Abzeichen: wie oft schon erreicht */
-  .badge-count {
-    font-family: 'Bitter', serif; font-weight: 800; font-size: 12px;
-    font-variant-numeric: tabular-nums;
-    background: var(--surface); border: 1px solid var(--glass-edge);
-    border-radius: 999px; padding: 1px 7px;
+  .me-pill {
+    font-family: 'Work Sans', sans-serif; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--bg); background: var(--green); border-radius: 999px;
+    padding: 2px 8px; margin-left: 8px; vertical-align: 2px;
   }
-  .badge.earned .badge-count { color: var(--gold); border-color: oklch(0.80 0.15 83 / 0.4); }
+
 
   /* Nachbarn in der Rangliste: wer ist vor/hinter mir — Zeilen mit
      Haarlinie statt eigener Kästchen (D-044) */
@@ -180,7 +169,7 @@
 
       <div class="card" style="text-align:center;padding:18px;">
         <div class="eyebrow">Getränke heute</div>
-        <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px oklch(0.64 0.15 152 / 0.45);">0</div>
+        <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px color-mix(in oklab, var(--green) 45%, transparent);">0</div>
       </div>
 
       <button id="add-beer" class="drink" type="button" aria-label="Bier hinzufügen" style="--fill:var(--amber);--on:var(--bg);">
@@ -245,7 +234,7 @@
         <!-- Eine Karte für beide Zeiträume (D-040): oben umschaltbar, darunter
              Platz und Nachbarn, in der Fußzeile die ganze Liste im selben Zeitraum -->
         <div class="card" style="display:flex;flex-direction:column;gap:12px;">
-          <div class="sec"><span class="sec-title">Rangliste</span><span id="prof-scope-hint" class="sec-hint"></span></div>
+          <div class="sec"><span class="sec-title">Rangliste</span></div>
           <div id="prof-tabs" class="tabs" role="tablist" data-pos="0">
             <div class="tab-indicator"></div>
             <button id="prof-tab-today" class="tab-btn active" type="button">Heute</button>
@@ -279,8 +268,8 @@
               <div class="label label--plain">Abende</div>
             </div>
             <div class="cell">
-              <div id="stat-best" class="num value value--gold" style="font-size:30px;color:var(--gold);">–</div>
-              <div id="stat-best-label" class="label label--plain">Bestes Ergebnis</div>
+              <div id="stat-best" class="num value value--gold" style="font-size:30px;">–</div>
+              <div class="label label--plain">Bester Abend</div>
             </div>
             <div class="cell">
               <div id="stat-avg" class="num value" style="font-size:30px;">–</div>
@@ -330,7 +319,7 @@
 
     <div id="no-user-view" hidden style="text-align:center;margin-top:80px;color:var(--ink-muted);">
       <div style="font-size:17px;margin-bottom:16px;">Kein Nutzer ausgewählt.</div>
-      <a href="/" style="font-weight:600;">Zur Anmeldung</a>
+      <a href="./" style="font-weight:600;">Zur Anmeldung</a>
     </div>
 
     <div style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
@@ -430,8 +419,10 @@ if (!token || !playerId) {
       renderSince();
       bump('stat-days', days);
       if (best) {
+        // Datum nur im Tooltip: in der Beschriftung bräche es die Zelle auf
+        // zwei Zeilen um und die drei Werte stünden nicht mehr auf einer Linie
         $('stat-best').textContent = best.total;
-        $('stat-best-label').textContent = `Bester Abend (${fmtDay(best.day)})`;
+        $('stat-best').parentElement.title = `Bester Abend am ${fmtDay(best.day)}`;
       }
       $('stat-avg').textContent = days
         ? avgPerNight.toLocaleString('de-DE', { maximumFractionDigits: 1 })
@@ -505,7 +496,9 @@ if (!token || !playerId) {
     const gapUp = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} vor dir`);
     const gapDown = (n) => (n === 0 ? 'gleichauf' : `${fmtDrinks(n)} Rückstand`);
     if (!ahead) {
-      box.appendChild(rivalRow('👑', 'Du führst!', behind ? `${fmtDrinks(me.total - behind.total)} Vorsprung` : ''));
+      const lead = behind ? me.total - behind.total : null;
+      box.appendChild(rivalRow('👑', 'Du führst!',
+        lead === null ? '' : lead === 0 ? `gleichauf mit ${behind.name}` : `${fmtDrinks(lead)} Vorsprung`));
     } else {
       box.appendChild(rivalRow('▲', `Vor dir: ${ahead.name}`, gapUp(ahead.total - me.total)));
     }
@@ -535,9 +528,10 @@ if (!token || !playerId) {
   function renderBoard(scrollToMe = false) {
     const entries = boardEntries(boardScope);
     $('board-title').textContent = boardScope === 'today' ? 'Rangliste heute' : 'All-Time Rangliste';
+    // Gleiche Wörter wie auf dem TV-Board (D-054)
     $('board-count').textContent = boardScope === 'today'
-      ? (entries.length === 1 ? '1 Person heute dabei' : `${entries.length} Personen heute dabei`)
-      : (entries.length === 1 ? '1 Person insgesamt' : `${entries.length} Personen insgesamt`);
+      ? `${entries.length} heute dabei`
+      : `${entries.length} Teilnehmer`;
 
     const list = $('board-list');
     list.textContent = '';
@@ -553,14 +547,21 @@ if (!token || !playerId) {
     entries.forEach((e, i) => {
       const row = document.createElement('div');
       row.className = 'board-row';
-      if (i < 3) row.classList.add('top');
-      if (e.id === playerId) { row.classList.add('me'); myRow = row; }
+      row.dataset.rank = i + 1;
       const rank = document.createElement('span');
       rank.className = 'rank';
-      rank.textContent = `#${i + 1}`;
+      rank.textContent = i + 1;
       const who = document.createElement('span');
       who.className = 'who';
-      who.textContent = e.id === playerId ? `${e.name} (du)` : e.name;
+      who.textContent = e.name;
+      if (e.id === playerId) {
+        row.classList.add('me');
+        myRow = row;
+        const pill = document.createElement('span');
+        pill.className = 'me-pill';
+        pill.textContent = 'Du';
+        who.appendChild(pill);
+      }
       const total = document.createElement('span');
       total.className = 'total';
       total.textContent = e.total;
@@ -610,7 +611,6 @@ if (!token || !playerId) {
     $('prof-tabs').dataset.pos = scope === 'today' ? '0' : '1';
     $('prof-tab-today').classList.toggle('active', scope === 'today');
     $('prof-tab-alltime').classList.toggle('active', scope !== 'today');
-    $('prof-scope-hint').textContent = scope === 'today' ? 'Heute' : 'All-Time';
     renderProfile(!manual);
   }
 

@@ -125,7 +125,7 @@
   }
   .night-btn.on-tv { background: var(--green); color: var(--bg); border-color: var(--green); }
   .modal-backdrop {
-    position: fixed; inset: 0; background: oklch(0.08 0.02 155 / 0.55);
+    position: fixed; inset: 0; background: var(--scrim);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center; z-index: 10; padding: 20px;
   }
@@ -173,7 +173,7 @@
         <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:34px;width:auto;object-fit:contain;">
         <div style="display:flex;flex-direction:column;gap:2px;">
           <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0;line-height:1.1;">Abend-Archiv</h1>
-          <a href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
+          <a id="back" href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
@@ -230,8 +230,16 @@
 import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
 import { buildCurve } from './js/curve.js';
+import { getSession } from './js/api.js';
 
 const $ = (id) => document.getElementById(id);
+
+// Wer angemeldet ist, kommt aus dem Dashboard und will dorthin zurück —
+// nicht zur Anmeldung (D-054)
+if (getSession().token) {
+  $('back').href = 'dashboard';
+  $('back').textContent = '‹ Zurück';
+}
 
 // Admin-Werkzeuge (Bearbeiten, TV-Anzeige) erscheinen nur mit Admin-Login aus
 // derselben Browser-Session (Token wie in admin.html, bereichsgetrennt D-019)
