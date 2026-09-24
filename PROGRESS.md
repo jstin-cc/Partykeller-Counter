@@ -10,7 +10,9 @@ getestet.
 Seit 2026-09-24 (D-053): **TV-Rangliste läuft unten weich aus** — rotiert
 die Liste, blendet sie über knapp zwei Zeilen in einem Verlauf aus statt hart
 abzuschneiden; am Listenende steht der letzte Platz voll lesbar über dem
-Verlauf.
+Verlauf. Dazu eine **Design-Analyse mit Entwürfen** in `docs/DESIGN-REVIEW.md`
+(13 Unstimmigkeiten, sechs Entwürfe E1–E6 mit Vorher/Nachher-Bildern in
+`docs/design-review/`) — **noch nicht umgesetzt**, wartet auf Auswahl.
 Seit 2026-09-21 (D-052): **Onboarding für neue Konten** — nach „Konto
 erstellen & los" kommen drei Willkommens-Seiten (`/<bereich>/onboarding`):
 Getränke tracken, Rangliste auf dem Fernseher, Profil-Tab. Mit Punkten,
@@ -308,6 +310,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] TV-Podest in Rangfarben, Board ohne Kästen, neues Logo (D-051)
 - [x] Onboarding für neue Konten (D-052)
 - [x] TV-Rangliste läuft unten in einem Verlauf aus (D-053)
+- [ ] Design-Analyse `docs/DESIGN-REVIEW.md`: Fehler A1–A13 beheben, Entwürfe E1–E6 nach Auswahl umsetzen
 
 ## Verifikation (2026-09-10, D-049)
 
