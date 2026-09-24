@@ -7,8 +7,9 @@ Handy 390 px, TV 1920 × 1080, Admin 1440 px) mit 20 Testkonten.
 
 **Stand der Umsetzung:** TV-Verlauf (D-053), alle Fehler A1–A13, E4 und E5
 (D-054) sind umgesetzt. Von E3 sind A2, A12 und A13 umgesetzt; offen bleiben
-die offenen Abzeichen und „war später dran“ beim Hintermann. E1, E2 und E7
-(Admin, ersetzt E6) sind weiter Entwürfe und warten auf eine Entscheidung. Die Bilder in `docs/design-review/`
+die offenen Abzeichen und „war später dran“ beim Hintermann. E7 (Admin,
+ersetzt E6) ist umgesetzt (D-061), mit „Danger Zone“ statt „Gefahrenzone“.
+E1 und E2 sind weiter Entwürfe und warten auf eine Entscheidung. Die Bilder in `docs/design-review/`
 zeigen die echte App, in die die vorgeschlagenen Änderungen per CSS/JS
 eingespielt wurden. Links steht der heutige Stand, rechts der Entwurf.
 
@@ -176,7 +177,7 @@ Bildschirme tief. Wer neu ist, sieht es nicht.
 - Nicht im Bild: Dialoge ohne grüne Oberkante (A9), „+ Neues Konto" statt
   „+ Neuer Nutzer" (B).
 
-### E7 – Admin im aktuellen Design (ersetzt E6)
+### E7 – Admin im aktuellen Design (ersetzt E6) ✅ umgesetzt (D-061)
 
 ![E7](design-review/e7-admin.png)
 

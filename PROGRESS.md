@@ -7,10 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
-Seit 2026-09-24: **Entwurf E7 für den Admin** in `docs/DESIGN-REVIEW.md`
-(zwei Spalten, `.sec-title`-Abschnitte, Namenskreise, ⋯-Menü, Gefahrenzone;
-auf dem Handy Umschalter *Konten | TV | Mehr* und zweizeilige Konto-Karten).
-Er ersetzt E6 und wartet auf eine Entscheidung.
+Seit 2026-09-24 (D-061): **Admin im aktuellen Design** nach Entwurf E7 —
+zwei Spalten mit mitlaufender Seitenleiste, `.sec-title`-Abschnitte,
+Namenskreise, runde Stepper, ⋯-Menü, Suche und Filter, TV-Karte mit
+„Gerade auf dem TV“, Danger Zone; unter 1180 px Umschalter
+*Konten | TV | Mehr*, unter 760 px zweizeilige Konto-Karten.
 Seit 2026-09-24 (D-060): **Admin-Namenszeilen ohne Rahmen** — das Panel um
 die Namenszeilen ist weg, die Zeilen stehen frei und fluchten mit den
 Panels darüber.
@@ -341,7 +342,8 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] TV-Kopf: Teilnehmerzahl rechtsbündig links neben der QR-Pille (D-059)
 - [x] Admin: Panel um die Namenszeilen entfernt (D-060)
 - [x] Design-Analyse: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5) (D-054)
-- [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest, E7 Admin (warten auf Auswahl)
+- [x] Admin im aktuellen Design nach Entwurf E7 (D-061)
+- [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)
 

@@ -1443,3 +1443,38 @@ darüber. Der Tabellenkopf ist um die Rahmenbreite eingerückt und steht
 **Begründung:** Wunsch des Nutzers („passt nicht mehr ins Bild“). Rahmen
 in Rahmen wirkt doppelt, und das übrige Design (Dashboard, Ranglisten-Blatt)
 setzt Zeilen ebenfalls ohne äußeren Kasten.
+
+## D-061 (2026-09-24): Admin-Bereich im aktuellen Design (Entwurf E7)
+
+**Entscheidung:** Der Admin ist nach Entwurf E7 (`docs/DESIGN-REVIEW.md`)
+umgebaut:
+- **Kopf wie im Profil:** „Admin“, darunter *Bereich · n Konten · m Getränke
+  gesamt*. Rechts „+ Neues Konto“ und „Abmelden“ als leiser Link.
+- **Zwei Spalten:** links die Konten, rechts eine mitlaufende Seitenleiste
+  (sticky) mit *TV-Anzeige*, *Eigene Fun-Facts*, *Einrichtung* und
+  *Danger Zone*. Ist die Leiste höher als das Fenster, klebt sie erst, wenn
+  ihr unteres Ende sichtbar ist. So bleibt die Danger Zone erreichbar.
+- **Abschnitte mit `.sec-title`** statt eigener Glas-Kästen mit Überschrift.
+- **Konten:** Namenskreis, runde Stepper („–“ als Umriss, „+“ gefüllt in der
+  Getränkefarbe). Die Zahl ist ein rahmenloses Eingabefeld und bleibt direkt
+  eintippbar. Gesamt steht in Gold. Umbenennen, PIN, Ein-/Ausblenden und
+  Löschen liegen im ⋯-Menü und ersetzen Häkchen, Textlinks und die roten
+  Löschknöpfe. Chips zeigen *ausgeblendet* und *ohne PIN*. Über der Liste
+  stehen Suche und Filter *Alle / Heute dabei / Ausgeblendet*. *Heute dabei*
+  nutzt die Heute-Werte, die der Server ohnehin schickt.
+- **TV-Karte** mit Umschalter, Reglern und *Gerade auf dem TV* (Meldung,
+  Restzeit, ‹ ›). Das Fenster „Alle Fun-Facts ansehen“ bleibt.
+- **Danger Zone** (gestrichelt in brick): „Backup einspielen“ und „Alles
+  zurücksetzen“. Beide stehen nicht mehr im Kopf bzw. neben „Backup
+  herunterladen“. Die Überschrift ist auf Wunsch des Nutzers englisch.
+- **Unter 1180 px** wird die Seitenleiste zu einem Umschalter *Konten | TV |
+  Mehr*. **Unter 760 px** werden die Konten zweizeilige Karten mit
+  beschrifteten Steppern nebeneinander. „+ Neues Konto“ ist dann ein runder
+  Knopf neben der Suche.
+- „Nutzer“ heißt im Admin jetzt „Konto“ (Abschnitt B der Design-Analyse).
+
+**Begründung:** Wunsch des Nutzers nach Ansicht des Entwurfs („gerne so
+umsetzen wie im Entwurf, aber Dangerzone auf englisch“). Der Admin hatte die
+Formensprache von Dashboard und Profil noch nicht. Auf dem Handy war er rund
+6 300 px lang, und der TV-Umschalter lief aus dem Bild. Gefährliche Knöpfe
+standen direkt neben alltäglichen.
