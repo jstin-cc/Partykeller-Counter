@@ -7,6 +7,8 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-24 (D-062): **Eigene Fun-Facts kompakt** — einzeilige Einträge,
+ab etwa sechs Einträgen scrollt die Liste in sich.
 Seit 2026-09-24 (D-061): **Admin im aktuellen Design** nach Entwurf E7 —
 zwei Spalten mit mitlaufender Seitenleiste, `.sec-title`-Abschnitte,
 Namenskreise, runde Stepper, ⋯-Menü, Suche und Filter, TV-Karte mit
@@ -343,6 +345,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Admin: Panel um die Namenszeilen entfernt (D-060)
 - [x] Design-Analyse: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5) (D-054)
 - [x] Admin im aktuellen Design nach Entwurf E7 (D-061)
+- [x] Admin: Liste der eigenen Fun-Facts begrenzt und kompakt (D-062)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)

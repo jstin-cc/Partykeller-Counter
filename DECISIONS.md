@@ -1478,3 +1478,18 @@ umsetzen wie im Entwurf, aber Dangerzone auf englisch“). Der Admin hatte die
 Formensprache von Dashboard und Profil noch nicht. Auf dem Handy war er rund
 6 300 px lang, und der TV-Umschalter lief aus dem Bild. Gefährliche Knöpfe
 standen direkt neben alltäglichen.
+
+## D-062 (2026-09-24): Liste der eigenen Fun-Facts begrenzt und kompakt
+
+**Entscheidung:** In der Admin-Seitenleiste ist jede eigene Meldung ein
+Einzeiler (Titel-Chip, Text mit „…“ gekürzt, voller Text als Tooltip, ⋯).
+Die Liste ist auf etwa sechs Einträge (236 px) begrenzt und scrollt darüber
+hinaus in sich. Das ⋯-Menü dieser Liste hängt am `<body>` und ist fest
+positioniert: unter dem Knopf, oder darüber, wenn unten kein Platz ist.
+Beim Scrollen schließt es sich.
+
+**Begründung:** Wunsch des Nutzers. Mit vielen eigenen Meldungen wurde die
+Karte und damit die mitlaufende Seitenleiste endlos lang. Im Scrollbereich
+würde ein normal angehängtes Menü abgeschnitten, und die Glas-Karte
+(`backdrop-filter`) wäre der Bezugsrahmen für `position: fixed`. Deshalb
+hängt das Menü am `<body>`.
