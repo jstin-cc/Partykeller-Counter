@@ -78,10 +78,12 @@
     position: relative; display: flex; align-items: center; gap: 14px; padding: 9px 16px;
     background: var(--surface); border: 1px solid var(--glass-edge); border-radius: var(--radius-lg);
     backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-    transition: opacity 0.2s ease;
   }
   .k-row.menu-open { z-index: 5; }
-  .k-row.is-hidden { opacity: 0.5; }
+  /* Ausgeblendete Konten: nur Inhalt dimmen, nicht die ganze Zeile — sonst
+     würden ⋯-Menü und der Chip „ausgeblendet“ mit durchsichtig (D-063) */
+  .k-row .avatar, .k-name .n, .k-row .st, .k-row .k-total { transition: opacity 0.2s ease; }
+  .k-row.is-hidden .avatar, .k-row.is-hidden .k-name .n, .k-row.is-hidden .st, .k-row.is-hidden .k-total { opacity: 0.5; }
   .k-row .avatar { width: 38px; height: 38px; font-size: 16px; }
   .k-name { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
   .k-name .n { font-family: 'Bitter', serif; font-weight: 700; font-size: 16px; color: var(--creme); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

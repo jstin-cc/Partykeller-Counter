@@ -1493,3 +1493,14 @@ Karte und damit die mitlaufende Seitenleiste endlos lang. Im Scrollbereich
 würde ein normal angehängtes Menü abgeschnitten, und die Glas-Karte
 (`backdrop-filter`) wäre der Bezugsrahmen für `position: fixed`. Deshalb
 hängt das Menü am `<body>`.
+
+## D-063 (2026-09-24): Ausgeblendete Konten dimmen nur den Inhalt
+
+**Entscheidung:** Ein ausgeblendetes Konto im Admin dimmt nur Namenskreis,
+Name, Stepper und Gesamt auf 50 %, nicht mehr die ganze Zeile. ⋯-Knopf,
+⋯-Menü und der Chip „ausgeblendet“ bleiben voll deckend.
+
+**Begründung:** Der Nutzer hat es gemeldet. Mit `opacity` auf der ganzen
+Zeile (D-061) wurde das darin aufklappende ⋯-Menü mit durchsichtig, und die
+Zeilen darunter schienen durch. Einstellungen sollen auch für ausgeblendete
+Konten normal aussehen.
