@@ -1420,3 +1420,14 @@ QR-Pille.
 
 **Begründung:** Der Nutzer hatte „links“ geschrieben, aber „rechts“
 gemeint.
+
+## D-059 (2026-09-24): TV-Teilnehmerzahl rechtsbündig links neben der QR-Pille
+
+**Entscheidung:** Die QR-Pille steht wieder ganz rechts im TV-Kopf. Der
+Block aus Teilnehmerzahl, Summen und Rekordkurs-Pille steht direkt links
+daneben und ist rechtsbündig. Das ersetzt D-058 (Block rechts neben der
+Pille). Von D-057 bleibt die Position, nur rechtsbündig statt linksbündig.
+
+**Begründung:** Wunsch des Nutzers nach Ansicht von D-058: „tausch doch
+nochmal Pille und Anzahl". Rechtsbündig schließen die Zahlen bündig zur
+QR-Pille ab.
