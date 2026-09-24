@@ -41,6 +41,9 @@ function fmtGap(days) {
   return days === 1 ? 'einem Tag' : `${days} Tagen`;
 }
 
+// Zahl mit passender Wortform: plural(1, 'Shot', 'Shots') -> '1 Shot' (A5)
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
 // Wortform für Meilensteine: 'Max steht jetzt bei 100 Bier insgesamt'
 const MILESTONE_WORDS = { beer: 'Bier', shot: 'Shots', mix: 'Mischen', total: 'Getränken' };
 
@@ -60,9 +63,9 @@ export function computeFacts(players, records, customFacts, funStats) {
 
   // All-Time-Rekorde: meiste Getränke an einem einzelnen Abend, schön formuliert
   if (records) {
-    if (records.beer) fact(`Bier-Rekord: Die meisten Biere an einem Abend hat ${records.beer.name} am ${fmtDay(records.beer.day)} geschafft – ganze ${records.beer.n} Stück.`);
-    if (records.shot) fact(`Shot-Rekord: ${records.shot.name} kippte am ${fmtDay(records.shot.day)} sagenhafte ${records.shot.n} Shots an einem Abend.`);
-    if (records.mix) fact(`Mische-Rekord: ${records.mix.name} mixte am ${fmtDay(records.mix.day)} ${records.mix.n} Mischgetränke an einem Abend.`);
+    if (records.beer) fact(`Bier-Rekord: Die meisten Biere an einem Abend hat ${records.beer.name} am ${fmtDay(records.beer.day)} geschafft – ${records.beer.n === 1 ? 'genau eins' : `ganze ${records.beer.n} Stück`}.`);
+    if (records.shot) fact(`Shot-Rekord: ${records.shot.name} kippte am ${fmtDay(records.shot.day)} ${records.shot.n === 1 ? 'einen Shot' : `sagenhafte ${records.shot.n} Shots`} an einem Abend.`);
+    if (records.mix) fact(`Mische-Rekord: ${records.mix.name} mixte am ${fmtDay(records.mix.day)} ${plural(records.mix.n, 'Mischgetränk', 'Mischgetränke')} an einem Abend.`);
   }
 
   // Eigene Meldungen aus dem Admin (mit eigenem Titel)
@@ -73,15 +76,15 @@ export function computeFacts(players, records, customFacts, funStats) {
   const b = leaderBy(players, 'beersToday');
   if (b) fact(`Bier-König des Abends: ${b.name} mit ${b.beersToday} Bier.`);
   const s = leaderBy(players, 'shotsToday');
-  if (s) fact(`Shot-Meister des Abends: ${s.name} mit ${s.shotsToday} Shots.`);
+  if (s) fact(`Shot-Meister des Abends: ${s.name} mit ${plural(s.shotsToday, 'Shot', 'Shots')}.`);
   const m = leaderBy(players, 'mixesToday');
-  if (m) fact(`Misch-Meister des Abends: ${m.name} mit ${m.mixesToday} Mischen.`);
+  if (m) fact(`Misch-Meister des Abends: ${m.name} mit ${plural(m.mixesToday, 'Mische', 'Mischen')}.`);
   let top = null, topN = 0;
   for (const p of players) {
     const n = (p.beersToday || 0) + (p.shotsToday || 0) + (p.mixesToday || 0);
     if (n > topN) { topN = n; top = p; }
   }
-  if (top) fact(`Fleißigster heute: ${top.name} mit ${topN} Getränken.`);
+  if (top) fact(`Fleißigster heute: ${top.name} mit ${plural(topN, 'Getränk', 'Getränken')}.`);
 
   // Statistik-Facts aus dem Archiv (Server: funStats); erst zeigen, wenn die
   // Zahlen etwas hergeben, damit das Band nicht mit Banalem langweilt.
@@ -128,7 +131,7 @@ export function computeFacts(players, records, customFacts, funStats) {
     const beers = players.reduce((sum, p) => sum + (p.beers || 0), 0);
     const shots = players.reduce((sum, p) => sum + (p.shots || 0), 0);
     const mixes = players.reduce((sum, p) => sum + (p.mixes || 0), 0);
-    fact(`Gesamtbilanz: ${beers} Bier, ${shots} Shots und ${mixes} Mischen in ${fs.nights} Abenden.`);
+    fact(`Gesamtbilanz: ${beers} Bier, ${plural(shots, 'Shot', 'Shots')} und ${plural(mixes, 'Mische', 'Mischen')} in ${fs.nights} Abenden.`);
   }
   return out;
 }

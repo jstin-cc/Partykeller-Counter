@@ -51,6 +51,8 @@ mit getrennten Daten und eigenem Theme (D-019): **Partykeller**
 - Sprache im Repo (Doku, Commits): Deutsch; Code-Bezeichner Englisch.
 - Commits: klein, beschreibend, ein Thema pro Commit.
 - Keine neuen npm-Dependencies ohne DECISIONS.md-Eintrag.
+- Pull Requests nach dem Push **immer direkt mergen** — nicht auf ein Review
+  warten (Wunsch des Nutzers, 2026-09-24).
 - `data/` und `.env` sind gitignored; niemals committen.
 
 ## Status

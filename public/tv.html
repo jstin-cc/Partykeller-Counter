@@ -116,11 +116,20 @@
     overflow: hidden;
   }
   .rest-viewport { flex: 1; min-height: 0; overflow: hidden; position: relative; }
-  /* Wenn rotiert wird, läuft unten eine angeschnittene Zeile mit — weich
-     ausblenden statt hart abschneiden */
+  /* Wenn rotiert wird, läuft die Liste unten in einem Verlauf aus statt hart
+     abzubrechen (D-053): Die untersten --fade Design-Pixel (knapp zwei Zeilen)
+     blenden weich aus. Die Stufe in der Mitte lässt den Verlauf erst schneller
+     und dann sanft auslaufen, und ganz unten ist er schon durchsichtig — so
+     bleibt von der angeschnittenen Zeile keine Kante stehen. Die Rotation zählt nur die Zeilen oberhalb des
+     Verlaufs als sichtbar, damit am Listenende der letzte Platz voll lesbar
+     dasteht (siehe syncScroll). */
   .rest-viewport.scrollable {
-    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent);
-    mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent);
+    --fade-mask: linear-gradient(to bottom,
+      black calc(100% - var(--fade)),
+      rgb(0 0 0 / 0.45) calc(100% - var(--fade) * 0.5),
+      transparent calc(100% - 8px));
+    -webkit-mask-image: var(--fade-mask);
+    mask-image: var(--fade-mask);
   }
   .rest-track { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; gap: 8px; will-change: transform; }
   .row {
@@ -143,9 +152,9 @@
     animation: pk-rowflash 0.85s ease;
   }
   @keyframes pk-rowflash {
-    0%   { background: oklch(0.80 0.15 83 / 0); }
-    30%  { background: oklch(0.80 0.15 83 / 0.20); }
-    100% { background: oklch(0.80 0.15 83 / 0); }
+    0%   { background: transparent; }
+    30%  { background: color-mix(in oklab, var(--gold) 20%, transparent); }
+    100% { background: transparent; }
   }
   @media (prefers-reduced-motion: reduce) { .row.pk-rowflash::after { animation: none; } }
   .col-rank { width: 70px; font-family:'Bitter',serif; font-weight:700; font-size:24px; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
@@ -170,8 +179,8 @@
     margin-top: 6px;
     padding: 4px 14px;
     border-radius: 999px;
-    border: 1px solid oklch(0.80 0.15 83 / 0.55);
-    background: oklch(0.80 0.15 83 / 0.12);
+    border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent);
+    background: color-mix(in oklab, var(--gold) 12%, transparent);
     color: var(--gold);
     font-family: 'Bitter', serif;
     font-weight: 800;
@@ -180,8 +189,8 @@
     animation: pk-paceglow 2.4s ease-in-out infinite;
   }
   @keyframes pk-paceglow {
-    0%, 100% { box-shadow: 0 0 4px oklch(0.80 0.15 83 / 0.15); }
-    50%      { box-shadow: 0 0 18px oklch(0.80 0.15 83 / 0.45); }
+    0%, 100% { box-shadow: 0 0 4px color-mix(in oklab, var(--gold) 15%, transparent); }
+    50%      { box-shadow: 0 0 18px color-mix(in oklab, var(--gold) 45%, transparent); }
   }
   @media (prefers-reduced-motion: reduce) { .pace-pill { animation: none; } }
   /* Fun-Fact-Band: genau so hoch wie eine Ranglistenzeile (ROW_H) und der Text
@@ -369,6 +378,8 @@ const ROW_H = 64;         // Zeilenhöhe in Design-Pixeln
 const GAP = 8;            // px zwischen den Zeilen (muss zu .rest-track passen)
 const SCROLL_MS = 650;    // sanft eine Zeile weiter
 const RESET_MS = 900;     // schnell zurück nach oben
+const FADE_H = 120;       // Höhe des Auslauf-Verlaufs unten (D-053), knapp zwei Zeilen
+$('rest').style.setProperty('--fade', `${FADE_H}px`);
 
 // Verweildauer pro Schritt: im Admin einstellbar (setScrollSpeed), kommt im State
 let stepMs = 3200;
@@ -382,9 +393,9 @@ let maxPos = 0;
 let scrollTimer = null;
 let modeSwitching = false; // beim Moduswechsel keine Zeilen-Animation (Slide übernimmt)
 
-// Wie viele Zeilen passen aktuell komplett ins Ranglisten-Fenster?
-function visibleRows() {
-  return Math.max(1, Math.floor(($('rest').clientHeight + GAP) / (ROW_H + GAP)));
+// Wie viele Zeilen passen komplett in die Höhe h?
+function rowsIn(h) {
+  return Math.max(1, Math.floor((h + GAP) / (ROW_H + GAP)));
 }
 
 function popEl(el) { el.classList.remove('pk-pop'); void el.offsetWidth; el.classList.add('pk-pop'); }
@@ -440,7 +451,10 @@ function scrollStep() {
 
 // Rotation passend zum aktuellen Stand (Zeilenzahl, Platz) starten/stoppen
 function syncScroll() {
-  maxPos = Math.max(0, others.length - visibleRows());
+  // Rotiert wird nur, wenn nicht alle Zeilen ins Fenster passen. Dann liegt
+  // unten der Verlauf, und als voll sichtbar zählt nur, was darüber Platz hat.
+  const h = $('rest').clientHeight;
+  maxPos = others.length > rowsIn(h) ? Math.max(0, others.length - rowsIn(h - FADE_H)) : 0;
   if (pos > maxPos) {
     pos = Math.min(pos, maxPos);
     if (track) {

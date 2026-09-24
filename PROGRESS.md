@@ -7,6 +7,19 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-24 (D-054): **Design-Analyse umgesetzt** — alle Fehler A1–A13
+(Schrift in Formularen, Dialog-Abdunklung und Gold je Bereich, „gleichauf"
+statt „0 Getränke Vorsprung", kein doppeltes „Heute" im Profil, Einzahl in
+Fun-Facts, Links, Admin-Dialoge ohne Farbkante), das **Ranglisten-Blatt mit
+Rangkreisen und „Du"-Pille (E4)** und das **Onboarding passend zur echten
+Oberfläche (E5)**. Offen als Entwurf: E1 (TV-Kopf), E2 (Anmeldung), E3-Rest
+(offene Abzeichen), E6 (Admin).
+Seit 2026-09-24 (D-053): **TV-Rangliste läuft unten weich aus** — rotiert
+die Liste, blendet sie über knapp zwei Zeilen in einem Verlauf aus statt hart
+abzuschneiden; am Listenende steht der letzte Platz voll lesbar über dem
+Verlauf. Dazu eine **Design-Analyse mit Entwürfen** in `docs/DESIGN-REVIEW.md`
+(13 Unstimmigkeiten, sechs Entwürfe E1–E6 mit Vorher/Nachher-Bildern in
+`docs/design-review/`) — **noch nicht umgesetzt**, wartet auf Auswahl.
 Seit 2026-09-21 (D-052): **Onboarding für neue Konten** — nach „Konto
 erstellen & los" kommen drei Willkommens-Seiten (`/<bereich>/onboarding`):
 Getränke tracken, Rangliste auf dem Fernseher, Profil-Tab. Mit Punkten,
@@ -301,6 +314,11 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Abendrückblick als Story-Bild (1080 × 1920) aus dem Abend-Archiv, für
       alle, gezeichnet im Browser; gemeinsame Kurvenformel (D-049)
 - [x] Gendersprache aus der Oberfläche entfernt, Konvention in CLAUDE.md (D-050)
+- [x] TV-Podest in Rangfarben, Board ohne Kästen, neues Logo (D-051)
+- [x] Onboarding für neue Konten (D-052)
+- [x] TV-Rangliste läuft unten in einem Verlauf aus (D-053)
+- [x] Design-Analyse: Fehler A1–A13, Ranglisten-Blatt (E4), Onboarding (E5) (D-054)
+- [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest, E6 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)
 
