@@ -349,6 +349,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Admin im aktuellen Design nach Entwurf E7 (D-061)
 - [x] Admin: Liste der eigenen Fun-Facts begrenzt und kompakt (D-062)
 - [x] Admin: ⋯-Menü ausgeblendeter Konten nicht mehr durchsichtig (D-063)
+- [x] Admin: Hinweis „alphabetisch“ bei Konten entfernt (D-064)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)

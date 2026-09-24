@@ -1504,3 +1504,11 @@ Name, Stepper und Gesamt auf 50 %, nicht mehr die ganze Zeile. ⋯-Knopf,
 Zeile (D-061) wurde das darin aufklappende ⋯-Menü mit durchsichtig, und die
 Zeilen darunter schienen durch. Einstellungen sollen auch für ausgeblendete
 Konten normal aussehen.
+
+## D-064 (2026-09-24): Kein Hinweis „alphabetisch“ neben „Konten“
+
+**Entscheidung:** Neben der Abschnittsüberschrift „Konten“ im Admin steht
+kein „alphabetisch“ mehr. Nur wenn Suche oder Filter die Liste einschränken,
+erscheint dort „n von m“.
+
+**Begründung:** Wunsch des Nutzers. Die Sortierung erklärt sich von selbst.
