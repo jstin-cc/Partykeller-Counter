@@ -1431,3 +1431,15 @@ Pille). Von D-057 bleibt die Position, nur rechtsbündig statt linksbündig.
 **Begründung:** Wunsch des Nutzers nach Ansicht von D-058: „tausch doch
 nochmal Pille und Anzahl". Rechtsbündig schließen die Zahlen bündig zur
 QR-Pille ab.
+
+## D-060 (2026-09-24): Admin-Namenszeilen ohne umschließendes Panel
+
+**Entscheidung:** Das Glas-Panel um Tabellenkopf und Namenszeilen im
+Admin-Dashboard entfällt. Die Zeilen sind schon selbst Glas-Elemente mit
+Rahmen und stehen jetzt frei auf dem Hintergrund, bündig mit den Panels
+darüber. Der Tabellenkopf ist um die Rahmenbreite eingerückt und steht
+über den Spalten.
+
+**Begründung:** Wunsch des Nutzers („passt nicht mehr ins Bild“). Rahmen
+in Rahmen wirkt doppelt, und das übrige Design (Dashboard, Ranglisten-Blatt)
+setzt Zeilen ebenfalls ohne äußeren Kasten.
