@@ -6,7 +6,7 @@ und Admin. Grundlage sind Screenshots aus dem laufenden Server (Chromium,
 Handy 390 px, TV 1920 × 1080, Admin 1440 px) mit 20 Testkonten.
 
 **Stand der Umsetzung:** TV-Verlauf (D-053), alle Fehler A1–A13, E4 und E5
-(D-054) sind umgesetzt. Von E3 sind A2, A12 und A13 umgesetzt; offen bleibt
+(D-054) sind umgesetzt. Von E3 sind A2, A12 und A13 umgesetzt; offen bleiben
 die offenen Abzeichen und „war später dran“ beim Hintermann. E1, E2 und E6 sind weiter Entwürfe
 und warten auf eine Entscheidung. Die Bilder in `docs/design-review/`
 zeigen die echte App, in die die vorgeschlagenen Änderungen per CSS/JS
