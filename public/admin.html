@@ -49,7 +49,10 @@
   .adm-head { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; }
   .adm-head .logo { height: 56px; width: auto; object-fit: contain; }
   .adm-head h1 { font-family: 'Bitter', serif; font-weight: 800; font-size: 30px; color: var(--creme); margin: 0; line-height: 1.1; }
-  .adm-head .sub { font-size: 14px; color: var(--ink-muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .adm-head .sub { font-size: 14px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  /* Zurück-Link wie im Abend-Archiv, daneben die Kennzahlen (D-065) */
+  .adm-head .sub-row { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; margin-top: 3px; }
+  .adm-head .back { text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
   .head-actions { margin-left: auto; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; justify-content: flex-end; }
   .quiet { background: none; border: none; padding: 0; color: var(--ink-muted); font-size: 14px; text-decoration: none; cursor: pointer; font-family: inherit; }
   .quiet:hover { color: var(--ink); }
@@ -302,7 +305,10 @@
       <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:36px;width:auto;object-fit:contain;">
       <div>
         <h1>Admin</h1>
-        <div id="adm-sub" class="sub"></div>
+        <div class="sub-row">
+          <a id="back" class="back" href="./">‹ Zur Anmeldung</a>
+          <div id="adm-sub" class="sub"></div>
+        </div>
       </div>
       <div class="head-actions">
         <div id="reset-done" hidden style="color:var(--green);font-size:14px;font-weight:600;">Zurückgesetzt!</div>
@@ -499,7 +505,7 @@
 
 <script type="module">
 import { AREA } from './js/area.js';
-import { post } from './js/api.js';
+import { post, getSession } from './js/api.js';
 import { connectState } from './js/ws-client.js';
 import { factList, FACT_KIND_LABEL } from './js/facts.js';
 
@@ -530,6 +536,14 @@ $('logout').addEventListener('click', () => {
   sessionStorage.removeItem(ADMIN_TOKEN_KEY);
   location.reload();
 });
+
+// Raus aus dem Admin, ohne sich abzumelden (D-065): Wer als Gast angemeldet
+// ist, will zurück ins Dashboard, sonst zur Anmeldung — wie im Abend-Archiv.
+// Das Admin-Token liegt in der sessionStorage und bleibt dabei erhalten.
+if (getSession().token) {
+  $('back').href = 'dashboard';
+  $('back').textContent = '‹ Zurück';
+}
 
 // --- Dashboard ---
 let errTimer;
