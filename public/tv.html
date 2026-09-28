@@ -183,6 +183,21 @@
     50%      { box-shadow: 0 0 18px color-mix(in oklab, var(--gold) 45%, transparent); }
   }
   @media (prefers-reduced-motion: reduce) { .pace-pill { animation: none; } }
+  /* Inhalts-Spalte der Bühne; zum Oktoberfest rückt sie unter die Wimpelkette (D-071) */
+  .tv-body { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 24px 64px 0 64px; }
+  html[data-season="oktoberfest"] .tv-body { padding-top: 58px; }
+  .tv-woods { position: relative; flex-shrink: 0; width: calc(100% + 128px); margin-left: -64px; height: 64px; }
+  /* Youngstars ohne Bäume: nur für Kürbisse und Schneekante ein schmaler Streifen */
+  html[data-area="youngstars"] .tv-woods { height: 0; }
+  html[data-area="youngstars"]:is([data-season="halloween"], [data-season="winter"], [data-season="silvester"]) .tv-woods { height: 28px; }
+  /* Silvester: Countdown in der letzten Stunde, danach ein Gruß (D-071) */
+  .season-countdown {
+    display: inline-flex; align-items: baseline; gap: 10px; padding: 8px 18px; border-radius: 999px;
+    background: color-mix(in oklab, var(--gold) 16%, transparent); border: 1px solid var(--hair-gold);
+    font-family: 'Bitter', serif; font-weight: 700; font-size: 18px; color: var(--gold);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .season-countdown b { font-size: 30px; font-weight: 800; color: var(--creme); }
   /* Fun-Fact-Band: genau so hoch wie eine Ranglistenzeile (ROW_H) und der Text
      in Namensgröße (.col-name), damit es vom Sofa aus lesbar ist. Es bleibt
      immer einzeilig — zu lange Facts skaliert fitFactText() herunter. */
@@ -211,14 +226,14 @@
 </head>
 <body>
 <div class="tv">
-  <div class="stage" id="stage">
+  <div class="stage" id="stage" data-deco-top="tv">
   <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;">
     <!-- Zapfen-Wasserzeichen rechts (wie zuvor bevorzugt), nicht mittig -->
     <div class="tv-mark" style="right:-220px;top:-180px;width:900px;height:900px;opacity:0.20;transform:rotate(-8deg);"></div>
     <div class="tv-mark" style="right:360px;bottom:-140px;width:420px;height:420px;opacity:0.12;transform:rotate(12deg);"></div>
   </div>
 
-  <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;height:100%;padding:24px 64px 0 64px;">
+  <div class="tv-body">
 
     <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:22px;">
@@ -230,6 +245,7 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:28px;">
+      <div id="season-countdown" class="season-countdown" hidden></div>
       <div style="text-align:right;">
         <div id="participant-count" class="num" style="font-size:22px;color:var(--creme);font-weight:700;">0 Teilnehmer</div>
         <div id="totals" style="font-size:14px;color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums;">0 Bier · 0 Shots gesamt</div>
@@ -291,7 +307,9 @@
       <span id="funfact-text">Bald gibt's hier Statistiken.</span>
     </div>
 
-    <img src="assets/footer-woods.png" alt="" class="footer-woods" style="width:calc(100% + 128px);margin-left:-64px;height:64px;object-fit:cover;object-position:center 30%;display:block;flex-shrink:0;filter:brightness(0.85) saturate(1);">
+    <div class="tv-woods" data-deco-foot="tv">
+      <img src="assets/footer-woods.png" alt="" class="footer-woods" style="width:100%;height:64px;object-fit:cover;object-position:center 30%;display:block;filter:brightness(0.85) saturate(1);">
+    </div>
   </div>
   </div><!-- /.stage -->
 </div>
@@ -300,6 +318,8 @@
 import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
 import { factList, fmtDay } from './js/facts.js';
+import { onSeason, setSeasonEnabled, newYear, mmss } from './js/season.js';
+import { createSeasonFx } from './js/seasonfx.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -357,6 +377,7 @@ function fillPodium(el, p, slot) {
     pop(totalEl);                                    // gleicher Mensch, mehr Getränke
   } else if (!modeSwitching && prev && prev.id !== p.id) {
     flash(el.querySelector('.podium-card'));         // neuer Name auf diesem Podestplatz
+    if (slot === 1 && currentMode !== 'archive') seasonLeader(p.name);
   }
   prevPod[slot] = { id: p.id, total: p.total };
 }
@@ -714,6 +735,8 @@ connectState({
   onFact({ index }) { setFactIndex(index); },
   onState(state) {
     const { joinUrl, boardMode } = state;
+    setSeasonEnabled(state.seasonal);   // Saison-Akzente (D-071), im Admin abschaltbar
+    seasonFirstBeer(state.players);
     renderQr((joinUrl && joinUrl.length ? joinUrl : location.origin + AREA.base + '/'));
     applyScrollSpeed(state.scrollSeconds);
     const mode = boardMode === 'today' ? 'today'
@@ -763,6 +786,7 @@ function fitFactText() {
 }
 
 function showFact(f) {
+  if (bandMoment) f = bandMoment;   // ein Saison-Moment steht gerade im Band (D-071)
   factTitleEl.textContent = f.title;
   factEl.textContent = f.text;
   fitFactText();
@@ -798,6 +822,89 @@ function setFactIndex(index) {
 fitFactText();
 window.addEventListener('resize', fitFactText);
 document.fonts?.ready.then(fitFactText);
+
+// --- Saison-Akzente (D-071) ---
+// Stehende Deko setzt js/season.js; hier laufen Schnee, Momente und der
+// Silvester-Ablauf. Ein Moment übernimmt kurz das Fun-Fact-Band.
+const seasonFx = createSeasonFx($('stage'));
+let season = null;
+let bandMoment = null;
+let bandTimer = null;
+
+function showMoment(title, text, ms = 8000) {
+  bandMoment = { title, text };
+  factEl.style.opacity = '0';
+  factTitleEl.style.opacity = '0';
+  setTimeout(() => { showFact(currentFact() ?? bandMoment); factEl.style.opacity = '1'; factTitleEl.style.opacity = '1'; }, 400);
+  clearTimeout(bandTimer);
+  bandTimer = setTimeout(() => {
+    bandMoment = null;
+    factEl.style.opacity = '0';
+    factTitleEl.style.opacity = '0';
+    setTimeout(() => { if (facts.length) showFact(currentFact()); factEl.style.opacity = '1'; factTitleEl.style.opacity = '1'; }, 400);
+  }, ms);
+}
+
+// Führungswechsel: Halloween schickt eine Fledermaus, Fasching Konfetti.
+// Höchstens alle zwei Minuten, früh am Abend wechselt die Spitze oft.
+let lastLeaderMoment = 0;
+function seasonLeader(name) {
+  if (season !== 'halloween' && season !== 'fasching') return;
+  if (Date.now() - lastLeaderMoment < 2 * 60 * 1000) return;
+  lastLeaderMoment = Date.now();
+  if (season === 'halloween') { seasonFx.bat(); showMoment('Führungswechsel', `${name} übernimmt Platz 1.`); }
+  if (season === 'fasching') { seasonFx.confetti(); showMoment('Helau', `${name} ist die neue Nummer 1.`); }
+}
+
+// Oktoberfest: das erste Bier des Abends zapft an
+let beersTodayBefore = null;
+function seasonFirstBeer(players) {
+  const sum = players.reduce((n, p) => n + (p.beersToday ?? 0), 0);
+  if (season === 'oktoberfest' && beersTodayBefore === 0 && sum > 0) {
+    const who = players.find((p) => p.beersToday > 0);
+    const band = $('funfacts');
+    seasonFx.bubbles(band.offsetTop + band.parentElement.offsetTop);
+    showMoment('Oktoberfest', `O’zapft is! ${who ? who.name : 'Jemand'} hat das erste Bier des Abends gezählt.`);
+  }
+  beersTodayBefore = sum;
+}
+
+// Silvester: Countdown in der letzten Stunde, um 0 Uhr ein großes Feuerwerk,
+// danach bis 6 Uhr alle paar Minuten noch ein paar Raketen
+let nyTick = null;
+let nyPhase = null;
+let nextVolley = 0;
+function newYearTick() {
+  const ny = newYear();
+  const pill = $('season-countdown');
+  pill.hidden = ny.phase !== 'countdown' && ny.phase !== 'greeting';
+  if (ny.phase === 'countdown') pill.innerHTML = `noch <b>${mmss(ny.left)}</b> bis ${ny.year}`;
+  if (ny.phase === 'greeting') pill.innerHTML = `<b>${ny.year}</b> Frohes neues Jahr`;
+  const midnight = nyPhase === 'countdown' && ny.phase === 'greeting';
+  const justAfter = nyPhase === null && ny.phase === 'greeting' && ny.since < 60 * 1000;
+  if (midnight || justAfter) {
+    for (let wave = 0; wave < 4; wave++) setTimeout(() => seasonFx.fireworks(7, 150), wave * 3500);
+    showMoment('Neujahr', `Frohes neues Jahr! Prost auf ${ny.year}.`, 30 * 1000);
+    nextVolley = Date.now() + 3 * 60 * 1000;
+  } else if (ny.phase === 'greeting' || ny.phase === 'after') {
+    if (!nextVolley) nextVolley = Date.now() + 20 * 1000;
+    if (Date.now() >= nextVolley) {
+      seasonFx.fireworks(2 + Math.floor(Math.random() * 3), 90);
+      nextVolley = Date.now() + (3 + Math.random() * 4) * 60 * 1000;
+    }
+  }
+  nyPhase = ny.phase;
+}
+
+onSeason((s) => {
+  season = s;
+  seasonFx.setSnow(s === 'winter' || s === 'silvester');
+  clearInterval(nyTick);
+  $('season-countdown').hidden = true;
+  nyPhase = null;
+  nextVolley = 0;
+  if (s === 'silvester') { newYearTick(); nyTick = setInterval(newYearTick, 1000); }
+});
 </script>
 </body>
 </html>
