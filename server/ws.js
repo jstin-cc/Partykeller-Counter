@@ -103,6 +103,13 @@ function createHandlers(area) {
       area.setFactIndex(area.factIndex);
     },
 
+    // Saison-Akzente an/aus (D-071)
+    setSeasonal(auth, { on }) {
+      requireAdmin(auth);
+      if (typeof on !== 'boolean') throw new Error('on muss boolean sein');
+      db.setSetting('seasonal', on ? '1' : '0');
+    },
+
     addFact(auth, { title, text }) {
       requireAdmin(auth);
       if (!validFactTitle(title)) throw new Error('Titel: 1-30 Zeichen');

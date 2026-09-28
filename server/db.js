@@ -866,6 +866,8 @@ export function createDb(dbPath) {
       boardMode,
       scrollSeconds: Number(getSetting('scroll_seconds', '3.2')),
       funfactSeconds: Number(getSetting('funfact_seconds', '30')),
+      // seasonal: Saison-Akzente an (Standard) oder im Admin abgeschaltet (D-071)
+      seasonal: getSetting('seasonal', '1') !== '0',
       customFacts: listFacts(),
       records: getRecords(),
       funStats: getFunStats(),
