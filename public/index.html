@@ -85,8 +85,8 @@
 
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-        <img src="assets/logo.png" alt="SV Partykeller" style="height:76px;width:auto;object-fit:contain;">
-        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:46px;width:auto;object-fit:contain;">
+        <img src="assets/logo.png" alt="SV Partykeller" style="view-transition-name:area-logo;height:76px;width:auto;object-fit:contain;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="view-transition-name:ys-logo;height:46px;width:auto;object-fit:contain;">
       </div>
       <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:30px;color:var(--creme);margin:0;">Anmeldung</h1>
     </div>
@@ -127,6 +127,15 @@ import { post, fetchPlayers, setSession, getLastPlayerId } from './js/api.js';
 const $ = (id) => document.getElementById(id);
 let selectedId = null;
 
+// Übergang ins Dashboard (D-068): Namenskreis und Name der angetippten Zeile
+// bekommen die Übergangsnamen, die dort Kopf-Kreis und Kopf-Name tragen — der
+// Browser lässt sie beim Seitenwechsel an die neue Stelle gleiten.
+function toDashboard(avatar, nameText) {
+  avatar.style.viewTransitionName = 'me-avatar';
+  nameText.style.viewTransitionName = 'me-name';
+  location.href = 'dashboard';
+}
+
 function showError(msg) {
   const el = $('error-banner');
   el.textContent = msg;
@@ -161,7 +170,9 @@ function renderUsers(all) {
 
     const name = document.createElement('div');
     name.style.cssText = 'flex:1;font-size:16px;font-weight:600;color:var(--ink);';
-    name.textContent = p.name;
+    const nameText = document.createElement('span');   // nur der Text, für den Übergang
+    nameText.textContent = p.name;
+    name.append(nameText);
 
     const chevron = document.createElement('div');
     chevron.style.cssText = 'color:var(--green);font-size:20px;';
@@ -176,8 +187,8 @@ function renderUsers(all) {
       if (!p.hasPin) {
         try {
           const { token, player } = await post('/api/login', { playerId: p.id });
-          setSession(token, player.id);
-          location.href = 'dashboard';
+          setSession(token, player.id, player.name);
+          toDashboard(avatar, nameText);
         } catch (err) {
           showError(err.message);
         }
@@ -211,8 +222,8 @@ function renderUsers(all) {
         e.preventDefault();
         try {
           const { token, player } = await post('/api/login', { playerId: p.id, pin: pin.value });
-          setSession(token, player.id);
-          location.href = 'dashboard';
+          setSession(token, player.id, player.name);
+          toDashboard(avatar, nameText);
         } catch (err) {
           showError(err.message === 'Name oder PIN falsch' ? 'Falsche PIN.' : err.message);
         }
@@ -229,7 +240,7 @@ $('create-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
     const { token, player } = await post('/api/players', { name: $('create-name').value, pin: $('create-pin').value });
-    setSession(token, player.id);
+    setSession(token, player.id, player.name);
     // Neues Konto: erst die drei Willkommens-Seiten, dann das Dashboard (D-052)
     location.href = 'onboarding';
   } catch (err) {

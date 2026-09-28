@@ -1563,3 +1563,32 @@ Außerdem leuchten heute erreichte Abzeichen nicht mehr: Der goldene Schein
 **Begründung:** Wunsch des Nutzers. Der Kranz erst ab dem ersten Sieg sorgt
 dafür, dass er etwas bedeutet. Das Leuchten der Abzeichen passte nicht mehr
 zum flachen Stil der übrigen Chips.
+
+## D-068 (2026-09-28): Übergang beim Seitenwechsel, Namenskreis gleitet ins Dashboard
+
+**Entscheidung:** Die Seiten nutzen seitenübergreifende View Transitions
+(`@view-transition { navigation: auto; }` in `theme.css`, nur bei
+`prefers-reduced-motion: no-preference`). Beim Anmelden gleiten Namenskreis
+und Name der angetippten Zeile in den Dashboard-Kopf
+(`view-transition-name: me-avatar` / `me-name`). Danach wächst der Lorbeer
+(D-067) mit kurzer Verzögerung herein. Die Logos tragen auf allen
+Handy-Seiten gemeinsame Namen (`area-logo`, `ys-logo`) und gleiten mit, statt
+doppelt überzublenden. Auf der Startseite bekommt nur das Logo der
+angetippten Karte den Namen. Alles andere blendet in 0,22 s über.
+
+Damit der Kreis im ersten Bild des Dashboards schon steht, merkt sich das
+Handy den Namen des Kontos (`pk_player_name` / `ys_player_name`, gesetzt beim
+Anmelden und bei jedem State, gelöscht beim Abmelden). Ein kleines
+Inline-Skript füllt den Kopf, bevor Module und WebSocket da sind.
+`<link rel="expect" href="#main-tabs" blocking="render">` hält das erste
+Bild so lange zurück.
+
+**Begründung:** Wunsch des Nutzers („Übergang im Profilbild“). Ohne
+Bibliothek und ohne Build-Schritt: Browser ohne View Transitions (z. B.
+Firefox) wechseln wie bisher hart. Getestet mit Chromium 141: Anmeldung →
+Dashboard lief in jedem Durchlauf. Das Überblenden zwischen den übrigen
+Seiten startet im Testbrowser nicht zuverlässig. Laut Trace bleibt es
+dort beim Warten auf das erste Bild der neuen Seite hängen, sobald sie
+Module per `import` lädt. Dann wechselt die Seite hart wie vorher, es geht
+also nichts kaputt.
+

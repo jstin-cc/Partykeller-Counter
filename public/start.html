@@ -92,5 +92,16 @@
     </a>
   </div>
 </div>
+<script>
+  // Übergang (D-068): Das Logo der angetippten Karte gleitet in den Kopf der
+  // Anmeldung. Nur die gewählte Karte bekommt den Namen — beide Logos stehen
+  // auf der Anmeldeseite der Youngstars, nur eins soll sich bewegen.
+  document.querySelector('.card-pk').addEventListener('click', (e) => {
+    e.currentTarget.querySelector('img').style.viewTransitionName = 'area-logo';
+  });
+  document.querySelector('.card-ys').addEventListener('click', (e) => {
+    e.currentTarget.querySelector('img').style.viewTransitionName = 'ys-logo';
+  });
+</script>
 </body>
 </html>

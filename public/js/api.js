@@ -8,6 +8,9 @@ const PLAYER_KEY = `${AREA.keyPrefix}_player_id`;
 // Wer sich an diesem Handy zuletzt angemeldet hat — überlebt das Abmelden
 // bewusst, damit die Anmeldeliste den eigenen Namen oben zeigen kann (D-041).
 const LAST_PLAYER_KEY = `${AREA.keyPrefix}_last_player_id`;
+// Name des angemeldeten Kontos: Das Dashboard zeigt ihn damit schon im ersten
+// Bild, noch vor dem WebSocket — Voraussetzung für den Übergang (D-068).
+const NAME_KEY = `${AREA.keyPrefix}_player_name`;
 
 export function getSession() {
   return {
@@ -16,16 +19,22 @@ export function getSession() {
   };
 }
 
-export function setSession(token, playerId) {
+export function setSession(token, playerId, name) {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(PLAYER_KEY, playerId);
   localStorage.setItem(LAST_PLAYER_KEY, playerId);
+  if (name) rememberName(name);
+}
+
+export function rememberName(name) {
+  localStorage.setItem(NAME_KEY, name);
 }
 
 // Abmelden löscht die Sitzung, nicht die Erinnerung ans letzte Konto.
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(PLAYER_KEY);
+  localStorage.removeItem(NAME_KEY);
 }
 
 export function getLastPlayerId() {

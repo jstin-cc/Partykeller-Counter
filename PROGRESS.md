@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-28 (D-068): **Übergang beim Anmelden** — Namenskreis und Name
+gleiten aus der Anmeldeliste in den Dashboard-Kopf, der Lorbeer wächst
+danach herein; Logos gleiten mit, sonst weiches Überblenden (View
+Transitions, ohne Bibliothek).
 Seit 2026-09-28 (D-067): **Lorbeer im Profil** — ab dem ersten Abendsieg
 steht der Namenskreis im Dashboard-Kopf in einem goldenen Kranz, dazu der
 Chip „n× Abendsieger“; heute erreichte Abzeichen leuchten nicht mehr.
@@ -369,6 +373,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Lasttest; Heute-Abfragen mit festem Index, Broadcasts gebündelt (D-066)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest (warten auf Auswahl)
 - [x] Profil: Lorbeer ab dem ersten Abendsieg, Abzeichen ohne Leuchten (D-067, Entwurf L4)
+- [x] Übergang beim Anmelden: Namenskreis gleitet ins Dashboard (D-068)
 - [ ] Inspiration landonorris.com: Entwürfe L1, L2, L3, L5 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)
