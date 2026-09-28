@@ -1609,3 +1609,21 @@ Bisher glitt nur der Balken, der Inhalt sprang. Nur der neue Inhalt wird
 animiert, nicht zusätzlich der alte beim Hinausgleiten. So muss der Tipp
 nicht auf ein Ende warten, und beide Tabs stehen nie gleichzeitig im Layout.
 
+## D-070 (2026-09-28): Ein Wort für den Sieg, Archiv-Kopf am Handy, Startseite ohne Untertitel
+
+**Entscheidung:**
+- Der Sieger eines Abends heißt überall **„Tagessieger“**, so wie das
+  Abzeichen (👑 Tagessieger). Das gilt für den Chip im Profil-Kopf
+  („n× Tagessieger“, bisher „Abendsieger“, D-067) und für die Story-Grafik
+  im Abend-Archiv.
+- Im Abend-Archiv steht am Handy (≤ 760 px) nur das Partykeller-Logo neben
+  dem Titel, wie im Admin-Kopf. Bisher standen bei den Youngstars beide
+  Logos nebeneinander, und „Abend-Archiv“ brach auf zwei Zeilen um.
+- Die Startseite hat keinen Untertitel mehr („Wähle deinen Bereich – beide
+  haben eigene Listen und Logins.“).
+- „Danger Zone“ im Admin bleibt englisch.
+
+**Begründung:** Wünsche des Nutzers nach der Design-Durchsicht vom
+2026-09-28. Zwei Wörter für dieselbe Sache standen im Profil direkt
+untereinander.
+
