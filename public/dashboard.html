@@ -121,6 +121,13 @@
 
   /* Kopf der Seite (D-040): Namenszeichen, Name, Zugehörigkeit — steht über
      den Tabs und gilt damit für beide Ansichten. */
+  /* Tab-Wechsel Zählen/Profil (D-069): der neue Inhalt gleitet von der Seite
+     herein, auf der sein Tab liegt */
+  .tab-in-right { animation: tab-in-right 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .tab-in-left { animation: tab-in-left 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes tab-in-right { from { transform: translateX(36px); opacity: 0; } }
+  @keyframes tab-in-left { from { transform: translateX(-36px); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .tab-in-right, .tab-in-left { animation: none; } }
   .ident { display: flex; align-items: center; gap: 13px; }
   .ident .avatar { width: 46px; height: 46px; font-size: 20px; view-transition-name: me-avatar; }
   .ident-name { view-transition-name: me-name; width: fit-content; }
@@ -417,8 +424,16 @@ if (!token || !playerId) {
 
   // Umschalter Zählen/Profil (bleibt über Reloads hinweg auf Zählen)
   function showTab(profile) {
+    const incoming = $(profile ? 'tab-profile' : 'tab-count');
+    if (!incoming.hidden) return;   // schon offen: nichts springt, nichts gleitet
     $('tab-count').hidden = profile;
     $('tab-profile').hidden = !profile;
+    // Inhalt gleitet von der Seite des Tabs herein (D-069): Profil von rechts,
+    // Zählen von links — in dieselbe Richtung wie der grüne Balken
+    incoming.classList.remove('tab-in-left', 'tab-in-right');
+    void incoming.offsetWidth;   // Reflow, damit die Animation neu startet
+    incoming.classList.add(profile ? 'tab-in-right' : 'tab-in-left');
+    incoming.addEventListener('animationend', () => incoming.classList.remove('tab-in-left', 'tab-in-right'), { once: true });
     $('tab-btn-count').classList.toggle('active', !profile);
     $('tab-btn-profile').classList.toggle('active', profile);
     $('main-tabs').dataset.pos = profile ? '1' : '0';   // grüner Balken gleitet
