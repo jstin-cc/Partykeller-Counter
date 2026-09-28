@@ -355,3 +355,55 @@ button:not(:disabled):active { transform: scale(0.95); }
   animation-duration: 0.45s;
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
+/* Saison-Akzente (D-071): Deko, die js/season.js je nach Datum in die mit
+   data-deco-top / data-deco-foot markierten Flächen setzt. Sie liegt am Rand,
+   fängt keine Tipps ab und steht nie über Zahlen oder Namen. */
+:where([data-deco-top], [data-deco-foot]) { position: relative; }
+.season-deco { position: absolute; pointer-events: none; z-index: 2; }
+.season-deco svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Oktoberfest: blau-weiße Wimpelkette ganz oben; der Kopf rückt dafür nach unten */
+.season-bunting { top: 0; left: 0; right: 0; }
+html[data-season="oktoberfest"] [data-deco-top] > .screen-inner { padding-top: 34px; }
+[data-deco-top="tv"] .season-flag { transform-box: view-box; animation: season-sway 3.4s ease-in-out infinite alternate; }
+@keyframes season-sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+
+/* Fasching: Luftschlangen */
+.season-streamers--phone { top: 0; right: 0; width: 110px; }
+.season-streamers--tv { top: 0; left: 600px; width: 680px; }
+
+/* Halloween: Kürbis-Laternen zwischen den Bäumen (Youngstars: auf der Unterkante) */
+.season-pumpkin { bottom: 3px; transform: translateX(-50%); filter: drop-shadow(0 0 5px oklch(0.78 0.17 60 / 0.75)); }
+.season-pumpkin--phone { width: 15px; }
+.season-pumpkin--tv { width: 40px; filter: drop-shadow(0 0 14px oklch(0.78 0.17 60 / 0.75)); animation: season-flicker 2.8s steps(1) infinite; }
+html[data-area="youngstars"] .season-pumpkin--tv { width: 30px; }
+@keyframes season-flicker { 0%, 100% { opacity: 1; } 12% { opacity: 0.86; } 16% { opacity: 1; } 55% { opacity: 0.92; } 58% { opacity: 1; } }
+
+/* Winter und Silvester: Schneekappen auf Bäumen und Hügeln */
+.season-snowcap {
+  inset: 0; background: oklch(0.97 0.012 240);
+  -webkit-mask-image: url('../assets/footer-woods.png'), url('../assets/footer-woods.png');
+  mask-image: url('../assets/footer-woods.png'), url('../assets/footer-woods.png');
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-composite: source-out; mask-composite: subtract;
+}
+.season-snowcap--phone {
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-position: 0 0, 0 3px; mask-position: 0 0, 0 3px;
+}
+/* TV-Footer: object-fit cover mit object-position center 30 % — Maske genauso */
+.season-snowcap--tv {
+  -webkit-mask-size: 100% auto; mask-size: 100% auto;
+  -webkit-mask-position: center 30%, center calc(30% + 6px); mask-position: center 30%, center calc(30% + 6px);
+}
+.season-drift { display: none; left: 0; right: 0; bottom: 0; }
+.season-drift svg { height: 100%; }
+.season-drift--phone { height: 12px; }
+.season-drift--tv { height: 34px; }
+html[data-area="youngstars"] .season-snowcap { display: none; }
+html[data-area="youngstars"] .season-drift { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-deco-top="tv"] .season-flag, .season-pumpkin--tv { animation: none; }
+}

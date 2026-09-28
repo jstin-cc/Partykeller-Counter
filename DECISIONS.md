@@ -1627,3 +1627,42 @@ nicht auf ein Ende warten, und beide Tabs stehen nie gleichzeitig im Layout.
 2026-09-28. Zwei Wörter für dieselbe Sache standen im Profil direkt
 untereinander.
 
+## D-071 (2026-09-28): Saison-Akzente
+
+**Entscheidung:** Zu fünf Anlässen schaltet sich nach dem Datum von selbst
+eine kleine Deko ein (Entwurf 8, Artefakt „Saison-Akzente“):
+
+| Anlass | Handy & TV | Moment auf dem TV |
+|---|---|---|
+| Oktoberfest | blau-weiße Wimpelkette oben | „O’zapft is!“ beim ersten Bier des Abends |
+| Halloween | Kürbis-Laternen zwischen den Bäumen | Fledermaus bei Führungswechsel |
+| Winter | Schneekappen, auf dem TV Schneefall | – |
+| Silvester | wie Winter, dazu Countdown in der letzten Stunde | Feuerwerk um 0 Uhr, danach bis 6 Uhr alle 3–7 Minuten ein paar Raketen |
+| Fasching | Luftschlangen | Konfetti bei Führungswechsel |
+
+- `public/js/season.js` bestimmt den Anlass. Grundlage ist die Uhr des
+  Geräts, ein Abend zählt bis 6 Uhr früh. Fasching wird über die Osterformel
+  berechnet, das Oktoberfest über die Wiesn-Regel. Die Datei setzt
+  `html[data-season]` und baut die stehende Deko in die Flächen, die mit
+  `data-deco-top` / `data-deco-foot` markiert sind (Dashboard, TV). Die
+  Schneekappen brauchen kein neues Bild: Der Baum-Footer liegt als Maske
+  zweimal übereinander, um wenige Pixel versetzt und voneinander abgezogen.
+- `public/js/seasonfx.js` (nur TV) zeichnet Schnee, Bläschen, Konfetti und
+  Feuerwerk auf zwei Canvas-Flächen in halber Auflösung. Dazu kommt die
+  Fledermaus. Die Flächen schlafen, wenn nichts zu zeichnen ist oder der Tab
+  versteckt ist.
+- Ein Moment übernimmt für 8 s das Fun-Fact-Band, zu Neujahr für 30 s.
+  Führungswechsel lösen höchstens alle zwei Minuten einen Moment aus.
+- Am Handy steht die Deko still und liegt am Rand. Mit
+  `prefers-reduced-motion` gibt es nur stehende Deko, Momente ändern dann nur
+  den Text im Band.
+- Admin, Einrichtung: Schalter „Saison-Akzente“ (Einstellung `seasonal`,
+  Standard an, kommt im State mit). `?jetzt=<Datum/Zeit>` in der Adresse
+  stellt zum Ausprobieren die Uhr einer Seite.
+
+**Begründung:** Wunsch des Nutzers. Sommer (Glühwürmchen) ist bewusst
+weggelassen. Die Wimpel sind blau-weiß, und das Silvester-Feuerwerk geht nach
+Mitternacht hin und wieder weiter. Die Deko kommt ohne Internet und ohne neue
+Abhängigkeit aus (SVG, CSS, Canvas). Weil sie nie über Zahlen oder Knöpfen
+liegt, stört sie das Zählen nicht.
+

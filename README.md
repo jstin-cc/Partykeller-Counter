@@ -197,6 +197,30 @@ Die Endpunkte dahinter sind `GET /<bereich>/api/export/backup` und
 `POST /<bereich>/api/import/backup`, beide nur mit Admin-Token im
 `Authorization`-Header (D-034).
 
+### Saison-Akzente
+
+Zu ein paar Anlässen im Jahr schaltet sich von selbst eine kleine Deko ein —
+am Handy im Dashboard (steht still, am Rand) und auf dem TV (darf sich leise
+bewegen, dazu ein kurzer Moment im Fun-Fact-Band). Ein Abend zählt dabei bis
+6 Uhr früh.
+
+| Anlass | Zeitraum | Handy & TV | Moment auf dem TV |
+|---|---|---|---|
+| Oktoberfest | Wiesn (Samstag nach dem 15.09. bis 1. Oktober-Sonntag, mind. 03.10.) | blau-weiße Wimpelkette oben | „O’zapft is!“ beim ersten Bier des Abends, Bläschen |
+| Halloween | 31.10. | Kürbis-Laternen zwischen den Bäumen | Fledermaus bei Führungswechsel |
+| Winter | 01.12. bis 06.01. | Schneekappen auf den Bäumen, auf dem TV leiser Schneefall | – |
+| Silvester | 31.12. ab 18 Uhr bis 01.01. 6 Uhr | wie Winter, dazu Countdown in der letzten Stunde | Feuerwerk um 0 Uhr, danach alle paar Minuten ein paar Raketen |
+| Fasching | Weiberfastnacht bis Faschingsdienstag | Luftschlangen | Konfetti bei Führungswechsel |
+
+Bei den Youngstars (ohne Bäume) stehen Kürbisse und Schnee an der Unterkante.
+Führungswechsel lösen höchstens alle zwei Minuten einen Moment aus. Mit
+„Bewegung reduzieren“ am Gerät bleibt nur die stehende Deko.
+
+Abschalten lässt sich alles im Admin unter **Einrichtung → Saison-Akzente**.
+Zum Ausprobieren stellt `?jetzt=…` die Uhr einer Seite, z. B.
+`/partykeller/tv?jetzt=2026-12-31T23:59:30` (Silvester-Countdown) oder
+`/partykeller/dashboard?jetzt=2026-10-31T21:00` (Halloween).
+
 Die App ist als **PWA installierbar**: Seite am Handy öffnen → „Zum
 Startbildschirm hinzufügen" — dann liegt der Counter als App-Icon auf dem
 Home-Screen (funktioniert komplett offline im WLAN, es wird nichts gecacht).
