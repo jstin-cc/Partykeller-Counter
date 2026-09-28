@@ -522,7 +522,7 @@ if (!token || !playerId) {
       const wins = achievements.dayWinner?.count ?? 0;
       $('ident-emblem').classList.toggle('won', wins > 0);
       $('win-chip').hidden = wins === 0;
-      $('win-chip').textContent = `${wins}× Abendsieger`;
+      $('win-chip').textContent = `${wins}× Tagessieger`;   // wie das Abzeichen (D-070)
     } catch { /* Offline-Moment: nächster State-Broadcast versucht es erneut */ }
   }
 
