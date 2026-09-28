@@ -173,7 +173,7 @@
 </style>
 </head>
 <body>
-<div class="screen">
+<div class="screen" data-deco-top="phone">
   <div class="watermark"></div>
 
   <div class="screen-inner">
@@ -195,6 +195,7 @@
           <div id="player-name" class="ident-name"></div>
           <div class="ident-meta">
             <span id="win-chip" class="win-chip" hidden></span>
+            <span id="season-chip" class="win-chip" hidden></span>
             <span id="player-since" class="ident-since"></span>
           </div>
         </div>
@@ -383,7 +384,7 @@
     </div>
   </div>
 
-  <img src="assets/footer-woods.png" alt="" class="footer-woods">
+  <div data-deco-foot="phone"><img src="assets/footer-woods.png" alt="" class="footer-woods"></div>
 </div>
 
 <!-- Ganze Rangliste (D-030): dasselbe Blatt für „heute" und „all-time",
@@ -410,6 +411,7 @@
 import { AREA } from './js/area.js';
 import { getSession, clearSession, rememberName } from './js/api.js';
 import { connectState } from './js/ws-client.js';
+import { onSeason, setSeasonEnabled, newYear, mmss } from './js/season.js';
 
 const { token, playerId } = getSession();
 const $ = (id) => document.getElementById(id);
@@ -755,7 +757,8 @@ if (!token || !playerId) {
   let statsTimer = null;
 
   const ws = connectState({
-    onState({ players }) {
+    onState({ players, seasonal }) {
+      setSeasonEnabled(seasonal);   // Saison-Akzente (D-071), im Admin abschaltbar
       const me = players.find((p) => p.id === playerId);
       if (!me) {
         // Account wurde (vom Admin) gelöscht
@@ -806,6 +809,23 @@ if (!token || !playerId) {
   $('add-shot').addEventListener('click', () => send('shot'));
   $('add-mix').addEventListener('click', () => send('mix'));
 }
+
+// Silvester (D-071): unter dem Namen zählt ein Chip die letzte Stunde
+// herunter, nach Mitternacht steht bis 1 Uhr ein Gruß da
+let seasonTick = null;
+onSeason((season) => {
+  clearInterval(seasonTick);
+  const chip = $('season-chip');
+  chip.hidden = true;
+  if (season !== 'silvester') return;
+  const tick = () => {
+    const ny = newYear();
+    chip.hidden = ny.phase !== 'countdown' && ny.phase !== 'greeting';
+    chip.textContent = ny.phase === 'countdown' ? `noch ${mmss(ny.left)} bis ${ny.year}` : `Prost ${ny.year}!`;
+  };
+  tick();
+  seasonTick = setInterval(tick, 1000);
+});
 
 $('logout').addEventListener('click', (e) => {
   e.preventDefault();
