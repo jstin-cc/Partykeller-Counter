@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-28 (D-067): **Lorbeer im Profil** — ab dem ersten Abendsieg
+steht der Namenskreis im Dashboard-Kopf in einem goldenen Kranz, dazu der
+Chip „n× Abendsieger“; heute erreichte Abzeichen leuchten nicht mehr.
 Seit 2026-09-28: **Entwürfe nach landonorris.com** in
 `docs/INSPIRATION-LANDO.md` (L1 Kringel bei Führungswechsel auf dem TV, L2
 Headline mit Serif-Akzent, L3 Hall of Fame der Abendsieger, L4 Lorbeer im
@@ -365,7 +368,8 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Admin: Zurück-Link ohne Abmelden (D-065)
 - [x] Lasttest; Heute-Abfragen mit festem Index, Broadcasts gebündelt (D-066)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest (warten auf Auswahl)
-- [ ] Inspiration landonorris.com: Entwürfe L1–L5 (warten auf Auswahl)
+- [x] Profil: Lorbeer ab dem ersten Abendsieg, Abzeichen ohne Leuchten (D-067, Entwurf L4)
+- [ ] Inspiration landonorris.com: Entwürfe L1, L2, L3, L5 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)
 

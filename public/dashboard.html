@@ -120,6 +120,24 @@
      den Tabs und gilt damit für beide Ansichten. */
   .ident { display: flex; align-items: center; gap: 13px; }
   .ident .avatar { width: 46px; height: 46px; font-size: 20px; }
+  /* Lorbeer-Emblem (D-067): ab dem ersten Abendsieg steht der Namenskreis in
+     einem goldenen Kranz. Der Kranz ist eine Maske (assets/laurel.svg), damit
+     er die Gold-Farbe des Bereichs annimmt. */
+  .ident-emblem { position: relative; display: grid; place-items: center; flex-shrink: 0; }
+  .ident-emblem.won { width: 84px; height: 84px; margin: -10px -6px -10px -10px; }
+  .ident-emblem.won::before {
+    content: ''; position: absolute; inset: 0; background: var(--gold);
+    -webkit-mask: url('assets/laurel.svg') center / contain no-repeat;
+    mask: url('assets/laurel.svg') center / contain no-repeat;
+  }
+  .ident-emblem.won .avatar { width: 52px; height: 52px; font-size: 22px; }
+  .ident-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 2px; }
+  .win-chip {
+    display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px;
+    background: color-mix(in oklab, var(--gold) 18%, transparent); color: var(--gold);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
   .ident-name { font-family: 'Bitter', serif; font-weight: 800; font-size: 26px; line-height: 1.1; color: var(--creme); }
   .ident-since { font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 
@@ -151,10 +169,15 @@
 
     <div id="user-view" hidden style="display:flex;flex-direction:column;gap:18px;">
       <div class="ident">
-        <div id="player-initial" class="avatar" aria-hidden="true"></div>
+        <div id="ident-emblem" class="ident-emblem">
+          <div id="player-initial" class="avatar" aria-hidden="true"></div>
+        </div>
         <div>
           <div id="player-name" class="ident-name"></div>
-          <div id="player-since" class="ident-since"></div>
+          <div class="ident-meta">
+            <span id="win-chip" class="win-chip" hidden></span>
+            <span id="player-since" class="ident-since"></span>
+          </div>
         </div>
       </div>
 
@@ -454,6 +477,12 @@ if (!token || !playerId) {
         if (a.today) earnedToday += 1;
       }
       $('badge-hint').textContent = earnedToday ? `${earnedToday} von 5 heute` : '';
+
+      // Lorbeer + Chip im Kopf (D-067): erst ab dem ersten Abendsieg
+      const wins = achievements.dayWinner?.count ?? 0;
+      $('ident-emblem').classList.toggle('won', wins > 0);
+      $('win-chip').hidden = wins === 0;
+      $('win-chip').textContent = `${wins}× Abendsieger`;
     } catch { /* Offline-Moment: nächster State-Broadcast versucht es erneut */ }
   }
 
