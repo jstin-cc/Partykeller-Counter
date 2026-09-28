@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-28: **Entwürfe nach landonorris.com** in
+`docs/INSPIRATION-LANDO.md` (L1 Kringel bei Führungswechsel auf dem TV, L2
+Headline mit Serif-Akzent, L3 Hall of Fame der Abendsieger, L4 Lorbeer im
+Profil, L5 Höhenlinien auf der Startseite) — **noch nicht umgesetzt**,
+wartet auf Auswahl.
 Seit 2026-09-24 (D-066): **Schneller bei vielen Getränken** — die
 Heute-Abfragen lesen nicht mehr das ganze Log, und Broadcasts werden
 gebündelt (eine Runde mit 60 Leuten bei ~3 Jahren Historie: 0,12 s statt
@@ -360,6 +365,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Admin: Zurück-Link ohne Abmelden (D-065)
 - [x] Lasttest; Heute-Abfragen mit festem Index, Broadcasts gebündelt (D-066)
 - [ ] Design-Analyse: Entwürfe E1, E2, E3-Rest (warten auf Auswahl)
+- [ ] Inspiration landonorris.com: Entwürfe L1–L5 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)
 
