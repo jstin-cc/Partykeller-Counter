@@ -1592,3 +1592,20 @@ dort beim Warten auf das erste Bild der neuen Seite hängen, sobald sie
 Module per `import` lädt. Dann wechselt die Seite hart wie vorher, es geht
 also nichts kaputt.
 
+## D-069 (2026-09-28): Tab-Wechsel Zählen/Profil gleitet
+
+**Entscheidung:** Beim Wechsel zwischen den Dashboard-Tabs Zählen und Profil
+gleitet der neue Inhalt von der Seite herein, auf der sein Tab liegt:
+Profil von rechts, Zählen von links. Dazu blendet er ein (0,32 s, 36 px). Das
+ist dieselbe Richtung wie beim grünen Balken. Das ist eine reine
+CSS-Animation (`.tab-in-right` / `.tab-in-left`), die nach dem Lauf wieder
+entfernt wird. Ein Tipp auf den schon offenen Tab löst nichts aus. Bei
+`prefers-reduced-motion` gibt es keine Animation. `.screen` schneidet über
+`overflow: hidden` ab, dadurch entsteht beim Gleiten keine seitliche
+Scrollleiste.
+
+**Begründung:** Wunsch des Nutzers (Vorschlag 1 aus der Übergangs-Runde).
+Bisher glitt nur der Balken, der Inhalt sprang. Nur der neue Inhalt wird
+animiert, nicht zusätzlich der alte beim Hinausgleiten. So muss der Tipp
+nicht auf ein Ende warten, und beide Tabs stehen nie gleichzeitig im Layout.
+
