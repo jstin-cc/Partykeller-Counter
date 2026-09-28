@@ -342,3 +342,16 @@ button:not(:disabled):active { transform: scale(0.95); }
 @media (prefers-reduced-motion: reduce) {
   .pk-pop, .pk-flash { animation: none; }
 }
+
+/* Seitenwechsel (D-068): Browser mit View Transitions blenden zwischen zwei
+   Seiten weich über; Elemente mit gleichem view-transition-name (der eigene
+   Namenskreis von der Anmeldung ins Dashboard) gleiten an ihre neue Stelle.
+   Ältere Browser wechseln wie bisher hart. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.22s; }
+::view-transition-group(me-avatar), ::view-transition-group(me-name) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

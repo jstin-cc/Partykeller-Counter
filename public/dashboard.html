@@ -10,6 +10,9 @@
 <meta name="theme-color" content="#010f05">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
+<!-- Erstes Bild erst, wenn der Kopf mit Namen steht — sonst hat der Übergang
+     von der Anmeldung kein Ziel (D-068) -->
+<link rel="expect" href="#main-tabs" blocking="render">
 <style>
   /* Abzeichen (.badge, .badge-count) und .label--plain stehen in theme.css,
      weil das Onboarding sie im Schaubild genauso zeigt (D-054) */
@@ -119,7 +122,8 @@
   /* Kopf der Seite (D-040): Namenszeichen, Name, Zugehörigkeit — steht über
      den Tabs und gilt damit für beide Ansichten. */
   .ident { display: flex; align-items: center; gap: 13px; }
-  .ident .avatar { width: 46px; height: 46px; font-size: 20px; }
+  .ident .avatar { width: 46px; height: 46px; font-size: 20px; view-transition-name: me-avatar; }
+  .ident-name { view-transition-name: me-name; width: fit-content; }
   /* Lorbeer-Emblem (D-067): ab dem ersten Abendsieg steht der Namenskreis in
      einem goldenen Kranz. Der Kranz ist eine Maske (assets/laurel.svg), damit
      er die Gold-Farbe des Bereichs annimmt. */
@@ -131,6 +135,14 @@
     mask: url('assets/laurel.svg') center / contain no-repeat;
   }
   .ident-emblem.won .avatar { width: 52px; height: 52px; font-size: 22px; }
+  /* Kranz wächst herein, sobald der Namenskreis angekommen ist (D-068) */
+  .ident-emblem.won::before { animation: laurel-in 0.55s 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .ident .avatar { transition: width 0.3s ease, height 0.3s ease, font-size 0.3s ease; }
+  @keyframes laurel-in { from { opacity: 0; transform: scale(0.8) rotate(-10deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .ident-emblem.won::before { animation: none; }
+    .ident .avatar { transition: none; }
+  }
   .ident-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 2px; }
   .win-chip {
     display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px;
@@ -161,8 +173,8 @@
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <a href="./" style="flex:1;text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <img src="assets/logo.png" alt="SV Partykeller" style="height:80px;width:auto;object-fit:contain;">
-        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:38px;width:auto;object-fit:contain;">
+        <img src="assets/logo.png" alt="SV Partykeller" style="view-transition-name:area-logo;height:80px;width:auto;object-fit:contain;">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="view-transition-name:ys-logo;height:38px;width:auto;object-fit:contain;">
       </div>
       <div style="flex:1;"></div>
     </div>
@@ -180,6 +192,19 @@
           </div>
         </div>
       </div>
+      <script>
+        // Kopf sofort füllen, noch bevor Module und WebSocket da sind: Der
+        // Namenskreis muss im ersten Bild stehen, damit er von der Anmeldung
+        // herübergleiten kann (D-068). Den Rest übernimmt das Modul unten.
+        (() => {
+          const k = document.documentElement.dataset.area === 'youngstars' ? 'ys' : 'pk';
+          const name = localStorage.getItem(`${k}_player_name`);
+          if (!localStorage.getItem(`${k}_token`) || !name) return;
+          document.getElementById('user-view').hidden = false;
+          document.getElementById('player-name').textContent = name;
+          document.getElementById('player-initial').textContent = name.charAt(0).toUpperCase();
+        })();
+      </script>
 
       <!-- Umschalter: Zählen (Eingabe) / Profil (Statistik & Abzeichen) -->
       <div id="main-tabs" class="tabs" role="tablist" data-pos="0">
@@ -376,7 +401,7 @@
 
 <script type="module">
 import { AREA } from './js/area.js';
-import { getSession, clearSession } from './js/api.js';
+import { getSession, clearSession, rememberName } from './js/api.js';
 import { connectState } from './js/ws-client.js';
 
 const { token, playerId } = getSession();
@@ -725,6 +750,7 @@ if (!token || !playerId) {
       }
       $('player-name').textContent = me.name;
       $('player-initial').textContent = me.name.charAt(0).toUpperCase();
+      rememberName(me.name);   // Umbenennung im Admin fürs nächste erste Bild
       // created_at steht als 'YYYY-MM-DD HH:MM:SS' im Zustand (D-006)
       const joined = /^\d{4}-\d{2}-\d{2}/.exec(me.createdAt ?? '');
       const joinedDay = joined ? fmtDay(joined[0]) : null;
