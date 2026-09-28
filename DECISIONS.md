@@ -1546,3 +1546,20 @@ Dabei gingen 277 MB bzw. 684 MB übers WLAN. Nachher sind es 0,12 s bzw.
 bzw. von 340 auf 73 ms. `ANALYZE` hätte den Plan ebenfalls korrigiert,
 hängt aber von gepflegten Statistiken ab. Der feste Index ist
 vorhersehbar. Der Inhalt des States bleibt unverändert.
+
+## D-067 (2026-09-28): Lorbeer im Profil, Abzeichen ohne Leuchten
+
+**Entscheidung:** Ab dem ersten Abendsieg steht der Namenskreis im
+Dashboard-Kopf in einem goldenen Lorbeerkranz (Entwurf L4 aus
+`docs/INSPIRATION-LANDO.md`). Unter dem Namen zeigt ein Chip „n×
+Abendsieger“. Die Zahl ist `achievements.dayWinner.count` aus der
+persönlichen Statistik. Ohne Sieg bleibt der Kopf wie bisher. Der Kranz ist
+`public/assets/laurel.svg`, eingesetzt als CSS-Maske, damit er das Gold des
+jeweiligen Bereichs annimmt.
+
+Außerdem leuchten heute erreichte Abzeichen nicht mehr: Der goldene Schein
+(`box-shadow`) um `.badge.earned` ist weg. Goldene Schrift und Rand bleiben.
+
+**Begründung:** Wunsch des Nutzers. Der Kranz erst ab dem ersten Sieg sorgt
+dafür, dass er etwas bedeutet. Das Leuchten der Abzeichen passte nicht mehr
+zum flachen Stil der übrigen Chips.

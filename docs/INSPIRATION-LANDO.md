@@ -1,7 +1,7 @@
 # Inspiration landonorris.com: Entwürfe L1–L5 (Stand 2026-09-28)
 
-**Status:** Nur Entwürfe, nichts davon ist umgesetzt. Sie warten auf eine
-Auswahl.
+**Status:** L4 ist umgesetzt (D-067). L1, L2, L3 und L5 sind Entwürfe und
+warten auf eine Auswahl.
 
 Die Seite [landonorris.com](https://landonorris.com/) ist eine Fan- und
 Markenseite. Man scrollt durch Fotos und Geschichten und bekommt
@@ -99,7 +99,7 @@ Abend liefert `getArchive()` schon heute. **Aufwand:** klein bis mittel.
 **Variante:** Wenn acht Lorbeerkränze zu viel sind, bekommt ihn nur der
 Rekord-Abend. Die anderen Karten zeigen dann nur den Namenskreis.
 
-## L4 – Lorbeer-Emblem im Profil
+## L4 – Lorbeer-Emblem im Profil ✅ umgesetzt (D-067)
 
 Im Dashboard-Kopf steht der Namenskreis in einem goldenen Lorbeerkranz.
 Daneben zeigt ein Chip „3× Abendsieger“, dahinter kommt „Dabei seit 2024“.
