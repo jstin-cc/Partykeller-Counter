@@ -285,7 +285,6 @@ a:hover { color: var(--gold); }
 .badge.earned {
   opacity: 1; color: var(--gold);
   border-color: color-mix(in oklab, var(--gold) 55%, transparent);
-  box-shadow: 0 0 12px color-mix(in oklab, var(--gold) 18%, transparent);
 }
 .badge-count {
   font-family: 'Bitter', serif; font-weight: 800; font-size: 12px;
