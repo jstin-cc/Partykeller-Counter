@@ -152,7 +152,7 @@ function rankBlock(top, c) {
       ctx.font = `800 62px ${SERIF}`;
       const numW = ctx.measureText(String(first.total)).width;
       const nameX = PAD_X + 4 + 94;
-      eyebrow(ctx, 'Abendsieger', nameX, y + 34, { size: 21, color: c.muted });
+      eyebrow(ctx, 'Tagessieger', nameX, y + 34, { size: 21, color: c.muted });
       const wName = fitText(ctx, first.name, numRight - numW - nameX - 40, { weight: 800, size: 64, minSize: 34 });
       ctx.font = `800 64px ${SERIF}`;
       ctx.fillStyle = c.gold;
