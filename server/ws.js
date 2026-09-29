@@ -110,6 +110,13 @@ function createHandlers(area) {
       db.setSetting('seasonal', on ? '1' : '0');
     },
 
+    // Schnitt-Vergleich im Dashboard an/aus (D-075)
+    setPaceCompare(auth, { on }) {
+      requireAdmin(auth);
+      if (typeof on !== 'boolean') throw new Error('on muss boolean sein');
+      db.setSetting('pace_compare', on ? '1' : '0');
+    },
+
     addFact(auth, { title, text }) {
       requireAdmin(auth);
       if (!validFactTitle(title)) throw new Error('Titel: 1-30 Zeichen');

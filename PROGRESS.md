@@ -7,6 +7,8 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-29 (D-075): **Schnitt-Vergleich abschaltbar** — Schalter im
+Admin unter Einrichtung, wirkt sofort auf alle Handys.
 Seit 2026-09-29 (D-074): **Protokoll-Zeilen gefüllt** — Getränke-Pille und
 Bearbeiten/Löschen als Vollflächen, „Doppelt?“ ohne Pille.
 Seit 2026-09-29 (D-073): **Getränke-Protokoll im Admin** — jedes Getränk
@@ -395,6 +397,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Getränke heute mit Vergleich zum eigenen Schnitt bis zur gleichen Uhrzeit (D-072)
 - [x] Getränke-Protokoll im Admin: Einträge einzeln bearbeiten, löschen, nachtragen (D-073)
 - [x] Protokoll-Zeilen: gefüllte Getränke-Pillen und Knöpfe, „Doppelt?“ ohne Pille (D-074)
+- [x] Schnitt-Vergleich im Admin ein-/ausschaltbar (D-075)
 - [ ] Inspiration landonorris.com: Entwürfe L1, L2, L3, L5 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)

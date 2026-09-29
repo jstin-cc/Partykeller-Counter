@@ -938,6 +938,8 @@ export function createDb(dbPath) {
       funfactSeconds: Number(getSetting('funfact_seconds', '30')),
       // seasonal: Saison-Akzente an (Standard) oder im Admin abgeschaltet (D-071)
       seasonal: getSetting('seasonal', '1') !== '0',
+      // paceCompare: Vergleich mit dem eigenen Schnitt im Dashboard (D-072/D-075)
+      paceCompare: getSetting('pace_compare', '1') !== '0',
       customFacts: listFacts(),
       records: getRecords(),
       funStats: getFunStats(),
