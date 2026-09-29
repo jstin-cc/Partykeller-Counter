@@ -1778,3 +1778,17 @@ umhängen, löschen oder nachtragen.
 doppelt. Die alte Korrektur arbeitete blind: „−1“ nahm das jüngste Getränk
 der Sorte, „+1“ legte eines mit geschätzter Uhrzeit an.
 
+## D-077 (2026-09-29): Abend-Name im Archiv ist der Knopf zum Benennen
+
+**Entscheidung:** Der eigene Knopf „Benennen“ auf der Archiv-Karte
+(D-076) entfällt. Für Admins ist der Name unter dem Datum selbst anklickbar
+und trägt einen kleinen Stift. Ohne Namen steht dort leise „Namen geben“.
+Ein Tipp öffnet wie bisher das kleine Fenster für den Namen. Ohne
+Admin-Login bleibt der Name reiner Text. Der TV-Knopf heißt kurz
+„Auf den TV“ (bzw. „✓ Auf dem TV“), damit die Knopfreihe am Handy nicht
+umbricht.
+
+**Begründung:** Wunsch des Nutzers. Mit vier Knöpfen brachen die
+Beschriftungen am Handy auf zwei Zeilen um. Der Name sitzt ohnehin dort,
+wo man ihn ändern will.
+

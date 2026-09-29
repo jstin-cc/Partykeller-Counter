@@ -7,6 +7,8 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-29 (D-077): **Archiv: Name anklickbar** — Tipp auf den Namen
+(oder „Namen geben“) benennt den Abend, eigener Knopf entfällt.
 Seit 2026-09-29 (D-076): **Archiv ohne ±1-Korrektur** — Korrekturen nur
 noch im Getränke-Protokoll; die Archiv-Karte hat „Benennen“ und „Protokoll“
 (springt ins Protokoll dieses Abends).
@@ -405,6 +407,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Protokoll-Zeilen: gefüllte Getränke-Pillen und Knöpfe, „Doppelt?“ ohne Pille (D-074)
 - [x] Schnitt-Vergleich im Admin ein-/ausschaltbar (D-075)
 - [x] Abend-Archiv: ±1-Korrektur raus, Sprung ins Protokoll (D-076)
+- [x] Abend-Archiv: Name anklickbar statt Knopf „Benennen“ (D-077)
 - [ ] Inspiration landonorris.com: Entwürfe L1, L2, L3, L5 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)

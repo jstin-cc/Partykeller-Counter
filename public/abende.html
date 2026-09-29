@@ -71,6 +71,16 @@
     color: var(--gold); margin-top: 2px;
   }
 
+  /* Admin: der Name ist der Knopf zum Benennen (D-077) */
+  .name-edit {
+    display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+    background: none; border: none; padding: 0; cursor: pointer; text-align: left;
+  }
+  .name-edit svg { width: 13px; height: 13px; flex: none; opacity: 0.55; }
+  .name-edit:hover svg { opacity: 1; }
+  .name-edit.empty { color: var(--ink-muted); font-weight: 600; font-size: 13px; }
+  .name-edit.empty:hover { color: var(--gold); }
+
   /* Verlauf des Abends (D-029): Kurve über die Stunden, alle Getränke zusammen */
   .night-chart { display: flex; flex-direction: column; gap: 5px; }
   .night-chart .chart-head {
@@ -115,7 +125,7 @@
   .name-row { display: flex; gap: 8px; align-items: stretch; }
   .name-row .field { font-size: 16px; padding: 10px 12px; }
 
-  /* Admin-Werkzeuge je Abend: CSV-Download, Benennen, Protokoll, auf dem TV zeigen */
+  /* Admin-Werkzeuge je Abend: CSV-Download, Protokoll, auf dem TV zeigen */
   .night-actions { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
   .night-btn {
     flex: 1;
@@ -228,7 +238,7 @@ if (getSession().token) {
   $('back').textContent = '‹ Zurück';
 }
 
-// Admin-Werkzeuge (Benennen, Protokoll, TV-Anzeige) erscheinen nur mit Admin-Login aus
+// Admin-Werkzeuge (Name, Protokoll, TV-Anzeige) erscheinen nur mit Admin-Login aus
 // derselben Browser-Session (Token wie in admin.html, bereichsgetrennt D-019)
 const adminToken = sessionStorage.getItem(`${AREA.keyPrefix}_admin_token`);
 let ws = null;               // WS nur für Admin-Aktionen + Live-Refresh
@@ -422,8 +432,19 @@ function buildCard(night) {
   dt.className = 'night-date';
   dt.textContent = date;
   head.append(wd, dt);
-  // Vom Admin vergebener Name (D-028) – steht unter dem Datum, falls gesetzt
-  if (night.name) {
+  // Vom Admin vergebener Name (D-028) – steht unter dem Datum, falls gesetzt.
+  // Für den Admin ist er zugleich der Knopf zum Benennen (D-077); ohne Namen
+  // steht dort leise „Namen geben“.
+  if (adminToken) {
+    const nm = document.createElement('button');
+    nm.type = 'button';
+    nm.className = 'night-name name-edit' + (night.name ? '' : ' empty');
+    nm.textContent = night.name || 'Namen geben';
+    nm.title = night.name ? 'Namen ändern' : 'Diesem Abend einen Namen geben';
+    nm.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>');
+    nm.addEventListener('click', () => openEdit(night.day));
+    head.appendChild(nm);
+  } else if (night.name) {
     const nm = document.createElement('div');
     nm.className = 'night-name';
     nm.textContent = night.name;
@@ -491,10 +512,6 @@ function buildCard(night) {
       downloadCsv(`/export/archive/${night.day}`, `${AREA.id}-abend-${night.day}.csv`));
     actions.appendChild(csv);
 
-    const edit = document.createElement('button');
-    edit.className = 'night-btn';
-    edit.textContent = 'Benennen';
-    edit.addEventListener('click', () => openEdit(night.day));
     // Getränke dieses Abends einzeln korrigieren: im Getränke-Protokoll (D-076)
     const log = document.createElement('a');
     log.className = 'night-btn';
@@ -505,9 +522,10 @@ function buildCard(night) {
     tv.className = 'night-btn';
     const onTv = board.mode === 'archive' && board.day === night.day;
     tv.classList.toggle('on-tv', onTv);
-    tv.textContent = onTv ? '✓ Läuft auf dem TV' : 'Auf dem TV zeigen';
+    tv.textContent = onTv ? '✓ Auf dem TV' : 'Auf den TV';
+    tv.title = onTv ? 'Dieser Abend läuft gerade auf dem TV' : 'Diesen Abend auf dem TV zeigen';
     tv.addEventListener('click', () => send({ type: 'setBoardMode', mode: 'archive', day: night.day }));
-    actions.append(edit, log, tv);
+    actions.append(log, tv);
     card.appendChild(actions);
   }
   return card;
