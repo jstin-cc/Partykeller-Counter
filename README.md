@@ -150,7 +150,7 @@ Partykeller-Bereich.
 
 Auf `/<bereich>/abende` liefert **„⬇ CSV"** die Teilnehmerliste eines einzelnen
 Abends, **„⬇ Alle Abende als CSV"** oben rechts alle Abende in einer Datei.
-Beide Knöpfe erscheinen **nur mit Admin-Login** — genauso wie „Bearbeiten" und
+Beide Knöpfe erscheinen **nur mit Admin-Login** — genauso wie „Benennen“, „Protokoll“ und
 „Auf dem TV zeigen"; ohne gültiges Admin-Token antworten die Endpunkte mit 403
 (D-027). Die Karten mit Sieger, Teilnehmerzahl und Tagessummen bleiben für alle
 sichtbar.
