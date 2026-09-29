@@ -1666,3 +1666,69 @@ Mitternacht hin und wieder weiter. Die Deko kommt ohne Internet und ohne neue
 Abhängigkeit aus (SVG, CSS, Canvas). Weil sie nie über Zahlen oder Knöpfen
 liegt, stört sie das Zählen nicht.
 
+## D-072 (2026-09-29): Getränke heute mit Vergleich zum eigenen Schnitt
+
+**Entscheidung:** Im Zählen-Tab steht rechts neben der großen Zahl „Getränke
+heute“ ein kleines Dreieck mit dem Abstand zum eigenen Schnitt, darunter
+„über/unter Ø x · um diese Zeit“ (Entwurf A aus „Getränke heute vs.
+Schnitt“).
+
+- Verglichen wird mit dem **Schnitt der früheren Abende bis zur gleichen
+  Uhrzeit**, nicht mit ganzen Abenden. Sonst stünde früh am Abend fast immer
+  ein ▼.
+- Der Server liefert in `/api/players/:id/stats` das Feld `pace`:
+  `{ nights, slots }`, 96 Viertelstunden ab 06:00. Jeder Wert ist der
+  Schnitt der Getränke bis zum Ende dieser Viertelstunde, nur über Abende,
+  an denen die Person dabei war. Der laufende Abend zählt nicht mit.
+- Das Handy liest den Wert für jetzt ab (innerhalb der Viertelstunde linear)
+  und rechnet jede Minute neu, weil der Vergleichswert auch ohne neues
+  Getränk mit der Uhr wandert.
+- ▲ in Gold, ▼ in Grau (weniger trinken ist kein Fehler). Liegt der Abstand
+  unter 0,5, steht „±0 · genau im Ø“. Vor dem ersten Getränk des Abends gibt
+  es kein ▼, nur den Schnitt. Ohne frühere Abende steht „erster Abend“.
+- `?jetzt=` stellt auch diese Uhr (wie bei den Saison-Akzenten).
+
+**Begründung:** Wunsch des Nutzers. Die Uhrzeit ist leichter zu verstehen
+als „seit dem ersten Getränk“. Dafür zieht ein spät begonnener Abend den
+Schnitt für frühe Uhrzeiten etwas nach unten.
+
+## D-073 (2026-09-29): Getränke-Protokoll im Admin
+
+**Entscheidung:** Der Admin bekommt neben „Konten“ einen Bereich
+**Protokoll** (Entwurf „Admin: Getränke-Protokoll“). Er zeigt jedes
+gezählte Getränk eines Abends einzeln, das neueste zuerst und nach Stunde
+gruppiert. Filtern lässt sich nach Konto und Sorte, zwischen den Abenden
+blättert man mit ‹ ›.
+
+- **Bearbeiten:** Konto, Sorte und Uhrzeit. Die Uhrzeit muss im selben Abend
+  bleiben und darf nicht in der Zukunft liegen. Ein Hinweis sagt vorher, was
+  mit den Zählern passiert („Das Bier wandert von Flo zu Lena.“).
+- **Löschen** mit Rückgängig. Rückgängig trägt denselben Eintrag mit
+  derselben Uhrzeit wieder ein. **Nachtragen** legt ein Getränk mit Uhrzeit
+  an.
+- Die **All-Time-Zähler ziehen immer mit**, wie bei der Archiv-Korrektur,
+  damit Rangliste, Archiv und Rekorde zusammenpassen. Korrekturen über +/−
+  in der Kontenliste landen weiterhin nicht im Log (D-005) und erscheinen
+  deshalb nicht im Protokoll.
+- **Doppelt getippt?** Ein Konto hat dasselbe Getränk innerhalb von 5 s
+  zweimal gezählt. Die Zeilen tragen den Chip „Doppelt?“, die Seitenleiste
+  listet die Paare mit „Einen löschen“ (entfernt den zweiten Eintrag).
+  Daneben stehen die Zahlen des Abends und die Getränke je Stunde.
+- Lesen: `GET /<bereich>/api/log/<tag>`, nur mit Admin-Token. Ändern per
+  WebSocket: `editLog`, `deleteLog`, `addLog`, nur für Admins, vom Server
+  geprüft. Die Liste lädt bei jedem neuen Stand neu. Eine offene Bearbeitung
+  bleibt dabei stehen.
+- Aufbau: Breit schaltet über der Hauptspalte ein Umschalter
+  *Konten | Protokoll*, und die Seitenleiste zeigt im Protokoll oben die
+  Zahlen und Doppeltipps. Schmal wird der Umschalter oben vierteilig
+  (*Konten | Protokoll | TV | Mehr*). Am Handy öffnet ein Tipp auf die Zeile
+  ein Blatt von unten mit Löschen/Speichern. Die Zahlen des Abends fallen
+  dort weg, die Doppeltipps stehen nur da, wenn es welche gibt. Im ⋯-Menü
+  eines Kontos führt „Im Protokoll ansehen“ direkt zu dessen Getränken von
+  heute.
+
+**Begründung:** Wunsch des Nutzers. Bisher ließ sich ein Fehltipp nur als
+„−1 an diesem Abend“ korrigieren. Welches Getränk das war (Uhrzeit, Sorte),
+war nicht zu sehen, und ein falsch zugeordnetes Getränk ließ sich nicht
+umhängen.
+

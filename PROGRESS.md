@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-29 (D-073): **Getränke-Protokoll im Admin** — jedes Getränk
+eines Abends einzeln sehen, umhängen (Konto, Sorte, Uhrzeit), löschen mit
+Rückgängig und nachtragen; Zähler ziehen mit, Doppeltipps werden markiert.
+Seit 2026-09-29 (D-072): **Getränke heute mit Vergleich** — ▲/▼ und Abstand
+zum eigenen Schnitt der früheren Abende bis zur gleichen Uhrzeit.
 Seit 2026-09-28 (D-071): **Saison-Akzente** — Oktoberfest (blau-weiße
 Wimpel), Halloween, Winter, Silvester (Countdown, Feuerwerk) und Fasching
 schalten sich nach dem Datum selbst ein; im Admin abschaltbar.
@@ -385,6 +390,8 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Tab-Wechsel Zählen/Profil gleitet von der Seite des Tabs herein (D-069)
 - [x] Design-Durchsicht: „Tagessieger“ einheitlich, Archiv-Kopf am Handy, Startseite ohne Untertitel (D-070)
 - [x] Saison-Akzente: Oktoberfest, Halloween, Winter, Silvester, Fasching (D-071)
+- [x] Getränke heute mit Vergleich zum eigenen Schnitt bis zur gleichen Uhrzeit (D-072)
+- [x] Getränke-Protokoll im Admin: Einträge einzeln bearbeiten, löschen, nachtragen (D-073)
 - [ ] Inspiration landonorris.com: Entwürfe L1, L2, L3, L5 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)
