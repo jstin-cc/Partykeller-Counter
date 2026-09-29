@@ -111,11 +111,11 @@
     font-size: 11px; color: var(--ink-muted); font-variant-numeric: tabular-nums;
   }
 
-  /* Abend benennen: sitzt im Bearbeiten-Modal, also nur für Admins sichtbar */
+  /* Abend benennen: eigenes kleines Fenster, nur für Admins (D-076) */
   .name-row { display: flex; gap: 8px; align-items: stretch; }
   .name-row .field { font-size: 16px; padding: 10px 12px; }
 
-  /* Admin-Werkzeuge je Abend: CSV-Download, Bearbeiten, auf dem TV zeigen */
+  /* Admin-Werkzeuge je Abend: CSV-Download, Benennen, Protokoll, auf dem TV zeigen */
   .night-actions { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
   .night-btn {
     flex: 1;
@@ -123,6 +123,8 @@
     border-radius: var(--radius); padding: 9px 12px; font-weight: 600; font-size: 13px;
     cursor: pointer; font-family: 'Work Sans', sans-serif;
   }
+  a.night-btn { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; }
+  a.night-btn:hover { color: var(--ink); }
   .night-btn.on-tv { background: var(--green); color: var(--bg); border-color: var(--green); }
   .modal-backdrop {
     position: fixed; inset: 0; background: var(--scrim);
@@ -131,24 +133,8 @@
   }
   .edit-card {
     background: var(--surface); border-radius: var(--radius-lg);
-    padding: 24px; width: 100%; max-width: 640px; max-height: 86vh;
+    padding: 24px; width: 100%; max-width: 520px; max-height: 86vh;
     display: flex; flex-direction: column; gap: 14px;
-  }
-  #edit-rows { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-  .edit-row {
-    display: flex; align-items: center; gap: 10px; padding: 10px 14px; flex-wrap: wrap;
-    background: var(--surface-2); border: 1px solid var(--glass-edge); border-radius: var(--radius);
-  }
-  .edit-row .name { flex: 1; min-width: 120px; font-family:'Bitter',serif; font-weight:700; font-size:15px; }
-  .edit-step { display: flex; align-items: center; gap: 5px; }
-  .edit-step button {
-    width: 28px; height: 28px; border-radius: var(--radius); border: none; font-size: 15px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    background: var(--surface); color: var(--ink);
-  }
-  .edit-step .val {
-    width: 30px; text-align: center; font-family:'Bitter',serif; font-weight:700; font-size:15px;
-    font-variant-numeric: tabular-nums;
   }
   /* Kurze Fehlermeldung, die auch ohne offenes Modal sichtbar ist */
   .toast {
@@ -204,17 +190,15 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<!-- Modal: Abend bearbeiten (nur Admin) – Getränke einzelner Spieler korrigieren -->
+<!-- Modal: Abend benennen (nur Admin, D-028). Getränke korrigiert der Admin
+     seit D-076 im Getränke-Protokoll, nicht mehr hier. -->
 <div id="edit-modal" class="modal-backdrop" hidden>
   <div class="glass edit-card">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Abend bearbeiten: <span id="edit-day-label"></span></h2>
+      <h2 style="font-family:'Bitter',serif;font-weight:800;font-size:22px;color:var(--creme);margin:0;">Abend benennen: <span id="edit-day-label"></span></h2>
       <button id="close-edit" class="link-btn">Schließen</button>
     </div>
-    <p style="font-size:13px;color:var(--ink-muted);margin:0;line-height:1.5;">Korrekturen ändern das Getränke-Log dieses Abends <strong>und</strong> die All-Time-Zähler.</p>
     <div id="edit-error" class="error-msg" style="min-height:0;"></div>
-
-    <!-- Abend benennen (D-028): erscheint nur hier, also erst nach „Bearbeiten" -->
     <div>
       <label for="edit-name-input" class="eyebrow" style="display:block;margin-bottom:6px;">Name des Abends</label>
       <div class="name-row">
@@ -226,8 +210,6 @@
         Steht auf der Abend-Karte und im TV-Titel, wenn der Abend dort läuft.
       </div>
     </div>
-
-    <div id="edit-rows"></div>
   </div>
 </div>
 
@@ -246,7 +228,7 @@ if (getSession().token) {
   $('back').textContent = '‹ Zurück';
 }
 
-// Admin-Werkzeuge (Bearbeiten, TV-Anzeige) erscheinen nur mit Admin-Login aus
+// Admin-Werkzeuge (Benennen, Protokoll, TV-Anzeige) erscheinen nur mit Admin-Login aus
 // derselben Browser-Session (Token wie in admin.html, bereichsgetrennt D-019)
 const adminToken = sessionStorage.getItem(`${AREA.keyPrefix}_admin_token`);
 let ws = null;               // WS nur für Admin-Aktionen + Live-Refresh
@@ -496,7 +478,7 @@ function buildCard(night) {
   shareRow.appendChild(story);
   card.appendChild(shareRow);
 
-  // Übergabedatei, Korrekturen und TV-Anzeige bleiben dem Admin vorbehalten
+  // Übergabedatei, Name, Protokoll und TV-Anzeige bleiben dem Admin vorbehalten
   if (adminToken) {
     const actions = document.createElement('div');
     actions.className = 'night-actions';
@@ -511,15 +493,21 @@ function buildCard(night) {
 
     const edit = document.createElement('button');
     edit.className = 'night-btn';
-    edit.textContent = 'Bearbeiten';
+    edit.textContent = 'Benennen';
     edit.addEventListener('click', () => openEdit(night.day));
+    // Getränke dieses Abends einzeln korrigieren: im Getränke-Protokoll (D-076)
+    const log = document.createElement('a');
+    log.className = 'night-btn';
+    log.href = `admin?protokoll=${night.day}`;
+    log.textContent = 'Protokoll';
+    log.title = 'Getränke dieses Abends einzeln ansehen und korrigieren';
     const tv = document.createElement('button');
     tv.className = 'night-btn';
     const onTv = board.mode === 'archive' && board.day === night.day;
     tv.classList.toggle('on-tv', onTv);
     tv.textContent = onTv ? '✓ Läuft auf dem TV' : 'Auf dem TV zeigen';
     tv.addEventListener('click', () => send({ type: 'setBoardMode', mode: 'archive', day: night.day }));
-    actions.append(edit, tv);
+    actions.append(edit, log, tv);
     card.appendChild(actions);
   }
   return card;
@@ -567,8 +555,8 @@ async function load() {
   renderCards();
 }
 
-// --- Abend bearbeiten (Admin): Detail laden, Getränke je Spieler ±1 ---
-async function openEdit(day) {
+// --- Abend benennen (Admin) ---
+function openEdit(day) {
   editDay = day;
   $('edit-day-label').textContent = fmtDay(day).date;
   $('edit-error').textContent = '';
@@ -576,7 +564,7 @@ async function openEdit(day) {
   // Feld schreiben, in dem gerade getippt wird.
   $('edit-name-input').value = nights.find((n) => n.day === day)?.name ?? '';
   $('edit-modal').hidden = false;
-  await refreshEdit();
+  $('edit-name-input').focus();
 }
 
 // Abend benennen (D-028); leeres Feld entfernt den Namen wieder
@@ -584,64 +572,23 @@ function saveNightName() {
   if (!editDay) return;
   send({ type: 'setNightName', day: editDay, name: $('edit-name-input').value.trim() });
   showToast($('edit-name-input').value.trim() ? 'Name gespeichert.' : 'Name entfernt.', true);
+  closeEdit();
 }
-
-async function refreshEdit() {
-  if (!editDay) return;
-  const res = await fetch(`${AREA.base}/api/archive/${editDay}`);
-  if (!res.ok) return;
-  const { players } = await res.json();
-  const box = $('edit-rows');
-  box.textContent = '';
-  for (const p of players) {
-    const row = document.createElement('div');
-    row.className = 'edit-row';
-    const name = document.createElement('div');
-    name.className = 'name';
-    name.textContent = p.name;
-    row.appendChild(name);
-    for (const [drink, value, color, label] of [
-      ['beer', p.beers, 'var(--amber)', 'Bier'],
-      ['shot', p.shots, 'var(--brick)', 'Shots'],
-      ['mix', p.mixes, 'var(--mix)', 'Mischen'],
-    ]) {
-      const step = document.createElement('div');
-      step.className = 'edit-step';
-      step.title = label;
-      const dec = document.createElement('button');
-      dec.textContent = '–';
-      dec.disabled = value === 0;
-      dec.addEventListener('click', () => send({ type: 'adjustArchive', day: editDay, playerId: p.id, drink, delta: -1 }));
-      const val = document.createElement('span');
-      val.className = 'val';
-      val.style.color = color;
-      val.textContent = value;
-      const inc = document.createElement('button');
-      inc.textContent = '+';
-      inc.style.cssText = `background:${color};color:var(--bg);`;
-      inc.addEventListener('click', () => send({ type: 'adjustArchive', day: editDay, playerId: p.id, drink, delta: 1 }));
-      step.append(dec, val, inc);
-      row.appendChild(step);
-    }
-    box.appendChild(row);
-  }
-}
+function closeEdit() { $('edit-modal').hidden = true; editDay = null; }
 
 $('export-all').addEventListener('click', () =>
   downloadCsv('/export/archive', `${AREA.id}-abende-gesamt.csv`));
 $('save-name').addEventListener('click', saveNightName);
 $('edit-name-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveNightName(); });
-$('close-edit').addEventListener('click', () => { $('edit-modal').hidden = true; editDay = null; load(); });
+$('close-edit').addEventListener('click', closeEdit);
 $('tv-live').addEventListener('click', () => send({ type: 'setBoardMode', mode: 'alltime' }));
 
-// Admin: über den State-Broadcast bleiben TV-Status und Modal aktuell
-// (jede eigene Korrektur löst einen Broadcast aus)
+// Admin: über den State-Broadcast bleiben TV-Status und Abend-Namen aktuell
 if (adminToken) {
   ws = connectState({
     onState(state) {
       board = { mode: state.boardMode ?? 'alltime', day: state.boardDay ?? null };
-      load();   // Archiv-Liste kann sich durch Korrekturen/neue Getränke ändern
-      if (editDay) refreshEdit();
+      load();   // Archiv-Liste ändert sich durch neue Getränke und Namen
     },
     onError: showEditError,
   });

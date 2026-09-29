@@ -57,7 +57,7 @@ function createApiRouter(area) {
   // Abend-Archiv: alle Party-Tage mit Sieger, Teilnehmern und Gesamtmengen
   router.get('/archive', (_req, res) => res.json({ days: db.getArchive() }));
 
-  // Detail eines Party-Tags (u. a. für die Archiv-Bearbeitung im Admin)
+  // Detail eines Party-Tags (Story-Grafik im Archiv)
   router.get('/archive/:day', (req, res) => {
     if (!validDayString(req.params.day)) return res.status(400).json({ error: 'Ungültiger Tag' });
     res.json(db.getArchiveDay(req.params.day));

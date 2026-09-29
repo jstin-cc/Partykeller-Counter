@@ -138,17 +138,6 @@ function createHandlers(area) {
       if (!db.deleteFact(id)) throw new Error('Meldung nicht gefunden');
     },
 
-    // Archiv-Korrektur: ±1 Getränk eines Spielers an einem vergangenen Party-Tag
-    // (wirkt auf Log UND All-Time-Zähler, siehe db.adjustArchiveDrink)
-    adjustArchive(auth, { day, playerId, drink, delta }) {
-      requireAdmin(auth);
-      if (!validDayString(day)) throw new Error('Ungültiger Archiv-Tag');
-      if (!['beer', 'shot', 'mix'].includes(drink)) throw new Error('Unbekanntes Getränk');
-      if (delta !== 1 && delta !== -1) throw new Error('delta muss +1 oder -1 sein');
-      db.adjustArchiveDrink(playerId, day, drink, delta);
-    },
-
-    // Abend im Archiv benennen (Admin, D-028); leerer Name entfernt die Benennung
     // Getränke-Protokoll (D-073): einzelne Log-Einträge ändern, löschen,
     // nachtragen — die Zähler ziehen in db.js mit
     editLog(auth, { id, playerId, drink, ts }) {

@@ -800,6 +800,13 @@ function enterDashboard() {
   $('login-view').hidden = true;
   $('dash-view').hidden = false;
   loadArchiveDays();
+  // Aus dem Abend-Archiv: admin?protokoll=<tag> öffnet gleich das Protokoll
+  // dieses Abends (D-076)
+  const wanted = new URLSearchParams(location.search).get('protokoll');
+  if (wanted && /^\d{4}-\d{2}-\d{2}$/.test(wanted)) {
+    proto.day = wanted;
+    setSection('protokoll');
+  }
   ws = connectState({
     onState(state) {
       players = state.players;
