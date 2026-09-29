@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-29 (D-076): **Archiv ohne ±1-Korrektur** — Korrekturen nur
+noch im Getränke-Protokoll; die Archiv-Karte hat „Benennen“ und „Protokoll“
+(springt ins Protokoll dieses Abends).
 Seit 2026-09-29: **Fix Umschalter mit vier Feldern** — der grüne Balken
 gleitet jetzt auch aufs vierte Feld (Protokoll-Filter „Mischen“, Admin-Reiter
 „Mehr“ am Handy); vorher blieb er links stehen und die Schrift verschwand.
@@ -401,6 +404,7 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Getränke-Protokoll im Admin: Einträge einzeln bearbeiten, löschen, nachtragen (D-073)
 - [x] Protokoll-Zeilen: gefüllte Getränke-Pillen und Knöpfe, „Doppelt?“ ohne Pille (D-074)
 - [x] Schnitt-Vergleich im Admin ein-/ausschaltbar (D-075)
+- [x] Abend-Archiv: ±1-Korrektur raus, Sprung ins Protokoll (D-076)
 - [ ] Inspiration landonorris.com: Entwürfe L1, L2, L3, L5 (warten auf Auswahl)
 
 ## Verifikation (2026-09-10, D-049)

@@ -211,14 +211,6 @@ export function createDb(dbPath) {
     playerLogsAll: db.prepare(
       'SELECT drink, ts FROM drink_log WHERE player_id = ? ORDER BY ts'
     ),
-    // Archiv-Korrektur: jüngsten Log-Eintrag der Sorte in diesem Party-Tag löschen
-    deleteNewestDayLog: db.prepare(
-      `DELETE FROM drink_log WHERE id = (
-         SELECT id FROM drink_log
-         WHERE player_id = ? AND drink = ? AND ts >= ? AND ts < ?
-         ORDER BY ts DESC, id DESC LIMIT 1
-       )`
-    ),
     // Getränke-Protokoll im Admin (D-073): einzelne Einträge eines Abends
     dayLogEntries: db.prepare(
       'SELECT id, player_id, drink, ts FROM drink_log WHERE ts >= ? AND ts < ? ORDER BY ts DESC, id DESC'
@@ -226,9 +218,6 @@ export function createDb(dbPath) {
     getLogEntry: db.prepare('SELECT id, player_id, drink, ts FROM drink_log WHERE id = ?'),
     updateLogEntry: db.prepare('UPDATE drink_log SET player_id = ?, drink = ?, ts = ? WHERE id = ?'),
     deleteLogEntry: db.prepare('DELETE FROM drink_log WHERE id = ?'),
-    lastLogTsOfDay: db.prepare(
-      'SELECT MAX(ts) AS ts FROM drink_log WHERE player_id = ? AND ts >= ? AND ts < ?'
-    ),
     // Durstigste Stunde des laufenden Party-Tags
     topHourToday: db.prepare(
       `SELECT strftime('%H', ts/1000, 'unixepoch', 'localtime') AS hour, COUNT(*) AS n
@@ -642,32 +631,11 @@ export function createDb(dbPath) {
     return rows;
   }
 
-  // Archiv-Korrektur (Admin): ein Getränk an einem bestimmten Party-Tag ergänzen
-  // oder entfernen. Wirkt auf drink_log UND den All-Time-Zähler, damit Rangliste,
-  // Rekorde und Archiv konsistent bleiben.
-  const adjustArchiveDrink = db.transaction((playerId, day, drink, delta) => {
-    if (!getPlayer(playerId)) throw new Error('Nutzer nicht gefunden');
-    invalidateHistory();
-    const [start, end] = partyDayRangeMs(day);
-    if (delta === -1) {
-      if (stmts.deleteNewestDayLog.run(playerId, drink, start, end).changes === 0) {
-        throw new Error('An diesem Abend ist nichts mehr zum Entfernen');
-      }
-    } else {
-      // Zeitstempel hinter das letzte Getränk des Spielers an diesem Abend legen
-      // (sonst 20:00), damit Reihenfolge/Tiebreak plausibel bleiben.
-      const last = stmts.lastLogTsOfDay.get(playerId, start, end)?.ts;
-      const ts = Math.min(last ? last + 1000 : start + 14 * 60 * 60 * 1000, end - 1);
-      stmts.insertLog.run(playerId, drink, ts);
-    }
-    incrementDrink(playerId, drink, delta);
-  });
-
   // --- Getränke-Protokoll (D-073) -------------------------------------------
   // Der Admin sieht jedes gezählte Getränk eines Abends einzeln und kann es
-  // umhängen (Konto, Sorte, Uhrzeit), löschen oder nachtragen. Wie bei der
-  // Archiv-Korrektur ziehen die All-Time-Zähler immer mit, damit Rangliste,
-  // Archiv und Rekorde zusammenpassen.
+  // umhängen (Konto, Sorte, Uhrzeit), löschen oder nachtragen. Die
+  // All-Time-Zähler ziehen immer mit, damit Rangliste, Archiv und Rekorde
+  // zusammenpassen. (Ersetzt die frühere ±1-Korrektur im Archiv, D-076.)
   function getDayLog(day) {
     const [start, end] = partyDayRangeMs(day);
     const names = new Map(stmts.listPlayers.all().map((p) => [p.id, p.name]));
@@ -1179,7 +1147,7 @@ export function createDb(dbPath) {
     createPlayer, getPlayer, getPlayerByName, countPlayers,
     incrementDrink, addLogEntry, logDrink, setCounter, renamePlayer, setHidden,
     getRecords, listFacts, addFact, updateFact, deleteFact,
-    getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
+    getArchive, getArchiveDay, getExportNights, getPlayerStats,
     getDayLog, editLogEntry, deleteLogEntry, addLogAdmin,
     getNightName, setNightName,
     setPinHash, deletePlayer, resetAll, getState, rankedPlayers,

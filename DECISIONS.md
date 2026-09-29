@@ -1758,3 +1758,23 @@ WebSocket mit `setPaceCompare` (nur Admin). Die Handys übernehmen die
 abschalten lassen, z. B. wenn er an einem Abend nicht passt. Umgesetzt ist
 er wie der Schalter für die Saison-Akzente (D-071).
 
+## D-076 (2026-09-29): Archiv ohne eigene Korrektur, dafür Sprung ins Protokoll
+
+**Entscheidung:** Die ±1-Korrektur je Spieler und Getränk im Abend-Archiv
+entfällt. Getränke eines Abends korrigiert der Admin nur noch im
+Getränke-Protokoll (D-073). Dort sieht er jedes Getränk einzeln und kann es
+umhängen, löschen oder nachtragen.
+
+- Auf den Archiv-Karten stehen für Admins jetzt **Benennen** (kleines
+  Fenster nur mit dem Namen des Abends, D-028) und **Protokoll**. Protokoll
+  öffnet `admin?protokoll=<tag>`, der Admin landet direkt im Protokoll
+  dieses Abends.
+- Server: WebSocket-Nachricht `adjustArchive`, `db.adjustArchiveDrink` und
+  die beiden nur dafür genutzten Abfragen sind entfernt.
+  `GET /api/archive/:day` bleibt, weil Story-Grafik und TV-Archiv ihn
+  brauchen.
+
+**Begründung:** Wunsch des Nutzers. Zwei Wege zur selben Korrektur wären
+doppelt. Die alte Korrektur arbeitete blind: „−1“ nahm das jüngste Getränk
+der Sorte, „+1“ legte eines mit geschätzter Uhrzeit an.
+
