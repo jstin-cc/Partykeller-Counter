@@ -119,6 +119,23 @@
   .drink .label { color: var(--on); opacity: 0.68; }
   .drink .split > .sep { background: currentColor; opacity: 0.22; }
 
+  /* Getränke heute mit Tempo-Vergleich (D-072): Zahl in der Mitte, rechts
+     daneben Dreieck, Abstand und Schnitt bis zur gleichen Uhrzeit */
+  .today-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; column-gap: 14px; }
+  .today-row > #today-total { grid-column: 2; }
+  .pace {
+    grid-column: 3; justify-self: start; display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+    padding-top: 6px; text-align: left; font-size: 12.5px; line-height: 1.25; color: var(--ink-muted); white-space: pre-line;
+  }
+  .pace-diff { display: flex; align-items: center; gap: 6px; }
+  .pace-diff .num { font-size: 22px; line-height: 1; }
+  .pace-tri { display: block; width: 14px; height: 12px; fill: currentColor; }
+  .pace[data-dir="up"] .pace-diff { color: var(--gold); }
+  .pace[data-dir="down"] .pace-tri { transform: rotate(180deg); }
+  .pace[data-dir="even"] .pace-diff { color: var(--creme); }
+  .pace[data-dir="even"] .pace-tri { display: none; }
+  .pace[data-dir="none"] .pace-diff { display: none; }
+
   /* Kopf der Seite (D-040): Namenszeichen, Name, Zugehörigkeit — steht über
      den Tabs und gilt damit für beide Ansichten. */
   /* Tab-Wechsel Zählen/Profil (D-069): der neue Inhalt gleitet von der Seite
@@ -225,7 +242,18 @@
 
       <div class="card" style="text-align:center;padding:18px;">
         <div class="eyebrow">Getränke heute</div>
-        <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px color-mix(in oklab, var(--green) 45%, transparent);">0</div>
+        <!-- Rechts neben der Zahl: Vergleich mit dem eigenen Schnitt bis zur
+             gleichen Uhrzeit (D-072) -->
+        <div class="today-row">
+          <div id="today-total" class="num" style="font-size:76px;line-height:1;color:var(--green);text-shadow:0 0 30px color-mix(in oklab, var(--green) 45%, transparent);">0</div>
+          <div id="pace" class="pace" data-dir="none" hidden>
+            <div class="pace-diff">
+              <svg class="pace-tri" viewBox="0 0 14 12" aria-hidden="true"><path d="M7 0 L14 12 L0 12 Z"/></svg>
+              <span id="pace-diff" class="num"></span>
+            </div>
+            <span id="pace-cap"></span>
+          </div>
+        </div>
       </div>
 
       <button id="add-beer" class="drink" type="button" aria-label="Bier hinzufügen" style="--fill:var(--amber);--on:var(--bg);">
@@ -411,7 +439,7 @@
 import { AREA } from './js/area.js';
 import { getSession, clearSession, rememberName } from './js/api.js';
 import { connectState } from './js/ws-client.js';
-import { onSeason, setSeasonEnabled, newYear, mmss } from './js/season.js';
+import { onSeason, setSeasonEnabled, newYear, mmss, now as seasonNow } from './js/season.js';
 
 const { token, playerId } = getSession();
 const $ = (id) => document.getElementById(id);
@@ -471,6 +499,54 @@ if (!token || !playerId) {
     prev[key] = value;
   }
 
+  // --- Tempo-Vergleich (D-072) ---
+  // Der Server liefert je Viertelstunde ab 06:00, wie viele Getränke der
+  // Spieler an früheren Abenden im Schnitt bis dahin hatte. Hier wird der Wert
+  // für jetzt abgelesen (innerhalb der Viertelstunde linear) und mit heute
+  // verglichen. Er wandert mit der Uhr, daher auch ohne neues Getränk jede Minute.
+  let paceCurve = null;
+  let todayCount = 0;
+  const SLOT = 15 * 60 * 1000;
+  const fmt1 = (n) => n.toLocaleString('de-DE', { maximumFractionDigits: 1 });
+  function paceNow() {
+    const t = seasonNow();   // ?jetzt= stellt zum Ausprobieren auch diese Uhr
+    const start = new Date(t);
+    if (start.getHours() < 6) start.setDate(start.getDate() - 1);
+    start.setHours(6, 0, 0, 0);
+    const offset = t - start;
+    const i = Math.min(95, Math.floor(offset / SLOT));
+    const before = i > 0 ? paceCurve.slots[i - 1] : 0;
+    return before + (paceCurve.slots[i] - before) * ((offset - i * SLOT) / SLOT);
+  }
+  function renderPace() {
+    const el = $('pace');
+    if (!paceCurve) { el.hidden = true; return; }
+    let dir = 'none', diff = '', cap = '', title = '';
+    if (!paceCurve.nights) {
+      cap = 'erster Abend';
+    } else {
+      const avg = Math.round(paceNow() * 10) / 10;
+      const d = Math.round((todayCount - avg) * 10) / 10;
+      title = `An deinen bisherigen Abenden hattest du um diese Zeit im Schnitt ${fmt1(avg)} Getränke.`;
+      if (todayCount === 0) {
+        // Kein ▼ zum Start des Abends; vor dem ersten Getränk nur der Schnitt
+        if (avg < 0.5) { el.hidden = true; return; }
+        cap = `Ø ${fmt1(avg)}\num diese Zeit`;
+      } else if (Math.abs(d) < 0.5) {
+        dir = 'even'; diff = '±0'; cap = `genau im Ø ${fmt1(avg)}\num diese Zeit`;
+      } else {
+        dir = d > 0 ? 'up' : 'down'; diff = fmt1(Math.abs(d));
+        cap = `${d > 0 ? 'über' : 'unter'} Ø ${fmt1(avg)}\num diese Zeit`;
+      }
+    }
+    el.dataset.dir = dir;
+    $('pace-diff').textContent = diff;
+    $('pace-cap').textContent = cap;
+    el.title = title;
+    el.hidden = false;
+  }
+  setInterval(renderPace, 60 * 1000);
+
   // --- Persönliche Statistik + Achievements (REST, aktualisiert bei eigener Änderung) ---
   // '2026-09-25' -> '25.09.2026'
   const fmtDay = (iso) => { const [y, m, d] = iso.split('-'); return `${d}.${m}.${y}`; };
@@ -479,7 +555,9 @@ if (!token || !playerId) {
     try {
       const res = await fetch(`${AREA.base}/api/players/${encodeURIComponent(playerId)}/stats`);
       if (!res.ok) return;
-      const { days, best, avgPerNight, achievements, visitBadge } = await res.json();
+      const { days, best, avgPerNight, achievements, visitBadge, pace } = await res.json();
+      paceCurve = pace ?? null;
+      renderPace();
       statDays = days;
       renderSince();
       bump('stat-days', days);
@@ -774,6 +852,8 @@ if (!token || !playerId) {
       const joinedDay = joined ? fmtDay(joined[0]) : null;
       if (joinedDay !== joinedAt) { joinedAt = joinedDay; renderSince(); }
       bump('today-total', me.beersToday + me.shotsToday + me.mixesToday);
+      todayCount = me.beersToday + me.shotsToday + me.mixesToday;
+      renderPace();
       bump('beers-today', me.beersToday);
       bump('beers-total', me.beers);
       bump('shots-today', me.shotsToday);

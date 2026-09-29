@@ -731,9 +731,29 @@ export function createDb(dbPath) {
       if (w.playerId === id) award('dayWinner', day);
     }
 
+    // Tempo-Vergleich (D-072): wie viele Getränke hatte der Spieler an
+    // früheren Abenden im Schnitt bis zu einer Uhrzeit? 96 Viertelstunden ab
+    // 06:00, jeweils kumuliert bis zum Ende der Viertelstunde. Der laufende
+    // Abend zählt nicht mit, sonst liefe der Schnitt beim Trinken mit.
+    const SLOT = 15 * 60 * 1000;
+    const slots = new Array(96).fill(0);
+    let nights = 0;
+    for (const [day, logs] of perDay) {
+      if (day === today) continue;
+      nights += 1;
+      const [start] = partyDayRangeMs(day);
+      for (const l of logs) slots[Math.min(95, Math.max(0, Math.floor((l.ts - start) / SLOT)))] += 1;
+    }
+    let run = 0;
+    const pace = {
+      nights,
+      slots: slots.map((n) => { run += n; return nights ? Math.round((run / nights) * 100) / 100 : 0; }),
+    };
+
     return {
       days: rows.length,
       best,
+      pace,
       // Treue-Abzeichen: null, solange die erste Stufe nicht erreicht ist (D-031)
       visitBadge: visitBadge(rows.length),
       // Ø Getränke pro Abend (nur geloggte Getränke, eine Nachkommastelle)
