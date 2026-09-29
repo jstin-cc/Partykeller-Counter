@@ -233,20 +233,24 @@
   .p-row .avatar { width: 32px; height: 32px; font-size: 14px; }
   .p-name { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
   .p-name .n { font-family: 'Bitter', serif; font-weight: 700; font-size: 16px; color: var(--creme); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .chip-gold { color: var(--gold); }
+  /* „Doppelt?“ als reiner Hinweis in Gold, ohne Pille drumherum */
+  .p-flag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); white-space: nowrap; }
+  /* Getränk als gefüllte Pille in der Getränkefarbe, Schrift im Kontrast —
+     wie die Gesamt-Pille auf dem TV (D-051) und die Getränkefelder am Handy */
   .p-pill {
     width: 96px; flex: none; box-sizing: border-box; text-align: center; padding: 4px 0; border-radius: 999px;
-    font-family: 'Bitter', serif; font-weight: 700; font-size: 13px;
-    color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 55%, transparent); background: color-mix(in oklab, var(--c) 14%, transparent);
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 13px;
+    background: var(--c); color: var(--on);
   }
-  .p-pill.beer { --c: var(--amber); } .p-pill.shot { --c: var(--brick); } .p-pill.mix { --c: var(--mix); }
+  .p-pill.beer { --c: var(--amber); --on: var(--bg); } .p-pill.shot { --c: var(--brick); --on: var(--ink); } .p-pill.mix { --c: var(--mix); --on: var(--bg); }
   .p-act { width: 76px; flex: none; display: flex; gap: 4px; justify-content: flex-end; }
+  /* Bearbeiten und Löschen als gefüllte Kreise im selben Stil */
   .p-ico {
-    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--glass-edge); background: transparent; color: var(--ink-muted);
+    width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--green); color: var(--bg);
     display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;
   }
-  .p-ico:hover { color: var(--ink); background: var(--surface-2); }
-  .p-ico.del { color: var(--brick); }
+  .p-ico:hover { filter: brightness(1.1); }
+  .p-ico.del { background: var(--brick); color: var(--ink); }
   .p-ico svg { width: 15px; height: 15px; }
   .p-row.gone { background: transparent; border: 1px dashed color-mix(in oklab, var(--brick) 60%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
   .p-row.gone .p-time { color: var(--ink-muted); text-decoration: line-through; }
@@ -378,7 +382,7 @@
     .p-act { width: auto; }
     .p-ico.del { display: none; }
     .p-row { cursor: pointer; }
-    .p-ico.edit { border: none; width: 20px; }
+    .p-ico.edit { width: 20px; background: transparent; color: var(--ink-muted); }
     .p-ico.edit .i-pen { display: none; }
     .p-ico.edit .i-go { display: block; }
     .p-stats-part { display: none; }
@@ -1555,7 +1559,13 @@ function protoRow(e, dup) {
     if (title) c.title = title;
     who.appendChild(c);
   };
-  if (dup) chip('chip-gold', 'Doppelt?', `Gleiches Getränk innerhalb von ${DUP_SECONDS} Sekunden`);
+  if (dup) {
+    const flag = document.createElement('span');
+    flag.className = 'p-flag';
+    flag.textContent = 'Doppelt?';
+    flag.title = `Gleiches Getränk innerhalb von ${DUP_SECONDS} Sekunden`;
+    who.appendChild(flag);
+  }
   if (proto.added.has(`${e.playerId}|${e.drink}|${e.ts}`)) chip('chip-muted', 'nachgetragen');
   else if (proto.edited.has(e.id)) chip('chip-muted', 'bearbeitet');
 

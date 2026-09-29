@@ -1732,3 +1732,16 @@ blättert man mit ‹ ›.
 war nicht zu sehen, und ein falsch zugeordnetes Getränk ließ sich nicht
 umhängen.
 
+## D-074 (2026-09-29): Protokoll-Zeilen mit gefüllten Pillen
+
+**Entscheidung:** Im Getränke-Protokoll (D-073) ist die Getränke-Pille voll
+in der Getränkefarbe gefüllt. Die Schrift steht im Kontrast darauf: dunkel
+auf Bier und Mische, hell auf Shot. Das ist dieselbe Paarung wie bei den
+Getränkefeldern am Handy und wie bei der Gesamt-Pille auf dem TV (D-051).
+Bearbeiten und Löschen sind gefüllte Kreise im selben Stil: Bearbeiten in
+der Akzentfarbe, Löschen in Brick. „Doppelt?“ steht als goldener Hinweis
+ohne Pille drumherum. Am Handy bleibt rechts der schlichte Pfeil.
+
+**Begründung:** Wunsch des Nutzers. Die gefüllten Pillen sind auf einen
+Blick zu unterscheiden, die Umriss-Pillen wirkten neben den Zeilen blass.
+
