@@ -197,13 +197,135 @@
   .btn-danger { background: transparent; border: 1px solid var(--brick); color: var(--brick); border-radius: var(--radius); padding: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .btn-danger:hover { background: color-mix(in oklab, var(--brick) 12%, transparent); }
 
+  /* Hauptspalte: Konten | Protokoll (D-073). Breit schaltet ein eigener
+     Umschalter über der Spalte, schmal der Umschalter oben (vier Teile). */
+  .v-tabs { --tabs: 2; width: 300px; }
+  .v-tabs .tab-btn { font-size: 14px; padding: 9px; }
+  .view { display: flex; flex-direction: column; gap: 14px; }
+  .adm:not([data-v="protokoll"]) .v-proto, .adm[data-v="protokoll"] .v-konten { display: none; }
+  .adm:not([data-v="protokoll"]) .grp-proto { display: none; }
+  .adm:not([data-v="protokoll"]) .grp-tv > .sec:first-child { margin-top: 0; }
+
+  /* Getränke-Protokoll (D-073) */
+  .p-tools { display: flex; align-items: center; gap: 10px; }
+  .p-nav { width: 40px; height: 40px; padding: 0; font-size: 18px; color: var(--ink); flex: none; }
+  .p-nav:disabled { opacity: 0.4; cursor: default; }
+  .p-day { height: 40px; padding: 0 14px; font-size: 14px; font-weight: 600; min-width: 230px; cursor: pointer; }
+  .p-add { margin-left: auto; height: 40px; padding: 0 18px; font-size: 14px; white-space: nowrap; }
+  .p-person { height: 38px; padding: 0 12px; font-size: 14px; width: 190px; cursor: pointer; }
+  .p-filter { --tabs: 4; width: 360px; flex: none; }
+  .p-filter .tab-btn { font-size: 13px; padding: 8px 6px; }
+  .p-head { display: flex; align-items: center; gap: 14px; padding: 4px 17px 0; font-family: 'Bitter', serif; font-weight: 600; font-size: 12px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+  .p-head .h-time { width: 78px; }
+  .p-head .h-name { flex: 1; padding-left: 46px; }
+  .p-head .h-drink { width: 96px; text-align: center; }
+  .p-head .h-act { width: 76px; }
+  #p-rows { display: flex; flex-direction: column; gap: 6px; }
+  .p-hour { display: flex; align-items: baseline; gap: 10px; padding: 8px 4px 2px; font-size: 12px; color: var(--ink-muted); }
+  .p-hour b { font-family: 'Bitter', serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; }
+  .p-row {
+    position: relative; display: flex; align-items: center; gap: 14px; padding: 8px 10px 8px 16px; min-height: 50px; box-sizing: border-box;
+    background: var(--surface); border: 1px solid var(--glass-edge); border-radius: var(--radius-lg);
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
+  .p-time { width: 78px; font-size: 17px; color: var(--creme); flex: none; }
+  .p-time .ss { font-size: 12px; font-weight: 600; color: var(--ink-muted); }
+  .p-row .avatar { width: 32px; height: 32px; font-size: 14px; }
+  .p-name { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+  .p-name .n { font-family: 'Bitter', serif; font-weight: 700; font-size: 16px; color: var(--creme); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip-gold { color: var(--gold); }
+  .p-pill {
+    width: 96px; flex: none; box-sizing: border-box; text-align: center; padding: 4px 0; border-radius: 999px;
+    font-family: 'Bitter', serif; font-weight: 700; font-size: 13px;
+    color: var(--c); border: 1px solid color-mix(in oklab, var(--c) 55%, transparent); background: color-mix(in oklab, var(--c) 14%, transparent);
+  }
+  .p-pill.beer { --c: var(--amber); } .p-pill.shot { --c: var(--brick); } .p-pill.mix { --c: var(--mix); }
+  .p-act { width: 76px; flex: none; display: flex; gap: 4px; justify-content: flex-end; }
+  .p-ico {
+    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--glass-edge); background: transparent; color: var(--ink-muted);
+    display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;
+  }
+  .p-ico:hover { color: var(--ink); background: var(--surface-2); }
+  .p-ico.del { color: var(--brick); }
+  .p-ico svg { width: 15px; height: 15px; }
+  .p-row.gone { background: transparent; border: 1px dashed color-mix(in oklab, var(--brick) 60%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .p-row.gone .p-time { color: var(--ink-muted); text-decoration: line-through; }
+  .p-gone-text { flex: 1; font-size: 14px; color: var(--ink-muted); }
+  .p-gone-text s { text-decoration: line-through; }
+  .p-undo { background: none; border: none; padding: 6px 4px; font-size: 14px; font-weight: 700; color: var(--green); cursor: pointer; font-family: inherit; }
+  .p-undo:hover { color: var(--gold); }
+  .p-empty { padding: 18px; text-align: center; color: var(--ink-muted); font-size: 14px; }
+  /* Bearbeiten: am Rechner klappt die Zeile auf, am Handy kommt ein Blatt von unten */
+  .p-edit { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; background: var(--surface-2); border: 1px solid var(--green); border-radius: var(--radius-lg); }
+  .p-edit-fields { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+  .p-field { display: flex; flex-direction: column; gap: 6px; }
+  .p-field .input-flat { height: 40px; box-sizing: border-box; padding: 0 12px; font-size: 15px; font-weight: 600; background: var(--surface-alt); }
+  .p-field input[type="time"] { width: 120px; color-scheme: dark; }
+  .p-field select { width: 170px; cursor: pointer; }
+  .p-seg { display: flex; gap: 6px; }
+  .p-seg button {
+    height: 40px; padding: 0 16px; border-radius: var(--radius); font-family: 'Bitter', serif; font-weight: 700; font-size: 14px; cursor: pointer;
+    background: transparent; color: var(--c); border: 1px solid var(--glass-edge);
+  }
+  .p-seg button.on { background: var(--c); color: var(--bg); border-color: var(--c); }
+  .p-seg button.shot.on { color: var(--ink); }
+  .p-seg .beer { --c: var(--amber); } .p-seg .shot { --c: var(--brick); } .p-seg .mix { --c: var(--mix); }
+  .p-edit-btns { margin-left: auto; display: flex; gap: 10px; }
+  .p-edit-btns button { height: 40px; padding: 0 16px; font-size: 14px; }
+  .p-edit .p-del-btn { display: none; }
+  .p-sheet-head { display: none; }
+  /* Seitenleiste im Protokoll: Zahlen des Abends und mögliche Doppeltipps */
+  .p-totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+  .p-totals .num { font-size: 28px; display: block; }
+  .p-totals .lbl2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); }
+  .p-hist-wrap { border-top: 1px solid var(--glass-edge); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .p-hist { display: flex; align-items: flex-end; gap: 6px; height: 84px; }
+  .p-hist > div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; min-width: 0; }
+  .p-hist .v { font-size: 11px; font-weight: 600; color: var(--creme); font-variant-numeric: tabular-nums; }
+  .p-hist .bar { width: 100%; border-radius: 6px 6px 2px 2px; background: var(--green); }
+  .p-hist-labels { display: flex; gap: 6px; }
+  .p-hist-labels span { flex: 1; min-width: 0; text-align: center; font-size: 11px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .p-dup { display: flex; align-items: center; gap: 10px; padding-top: 10px; border-top: 1px solid var(--glass-edge); }
+  .p-dup .who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .p-dup .who b { font-family: 'Bitter', serif; font-size: 15px; color: var(--creme); }
+  .p-dup .who span { font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .p-dup .btn-danger { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
+  .modal-backdrop.p-sheet { align-items: flex-end; }
+  .modal-backdrop.p-sheet .p-edit {
+    width: 100%; max-width: 560px; box-sizing: border-box; border: none; border-top: 1px solid var(--glass-edge); border-radius: 22px 22px 0 0;
+    padding: 10px 20px calc(24px + env(safe-area-inset-bottom)); gap: 16px;
+    background: linear-gradient(var(--surface-2), var(--surface-2)), var(--bg); box-shadow: 0 -16px 40px oklch(0 0 0 / 0.45);
+  }
+  .p-sheet .p-sheet-head { display: flex; flex-direction: column; gap: 12px; }
+  .p-sheet .grip { align-self: center; width: 40px; height: 4px; border-radius: 999px; background: var(--glass-edge); }
+  .p-sheet .p-sheet-title { display: flex; align-items: flex-start; gap: 12px; }
+  .p-sheet .p-sheet-title h2 { margin: 0; font-family: 'Bitter', serif; font-weight: 800; font-size: 21px; color: var(--creme); }
+  .p-sheet .p-sheet-title .sub { font-size: 13.5px; color: var(--ink-muted); font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .p-sheet .p-sheet-title .quiet { margin-left: auto; padding: 6px 0; }
+  .p-sheet .p-edit-fields { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; }
+  .p-sheet .p-field select, .p-sheet .p-field input[type="time"] { width: 100%; height: 46px; font-size: 16px; }
+  .p-sheet .p-field-drink { grid-column: 1 / -1; }
+  .p-sheet .p-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .p-sheet .p-seg button { height: 46px; font-size: 15px; }
+  .p-sheet .p-edit-btns { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .p-sheet .p-edit-btns button { height: 48px; font-size: 15px; }
+  .p-sheet .p-edit-btns .p-cancel { display: none; }
+  .p-sheet .p-del-btn { display: block; }
+
   /* Schmaler als zwei Spalten: Umschalter statt Seitenleiste */
   @media (max-width: 1180px) {
-    .m-tabs { display: flex; }
+    .m-tabs { display: flex; --tabs: 4; }
+    .v-tabs { display: none; }
     .adm-grid { display: block; }
     .adm-grid aside { position: static; }
     .adm[data-m="konten"] aside, .adm[data-m="tv"] main, .adm[data-m="mehr"] main { display: none; }
     .adm[data-m="tv"] .grp-more, .adm[data-m="mehr"] .grp-tv { display: none; }
+    .adm[data-m="tv"] .grp-proto, .adm[data-m="mehr"] .grp-proto,
+    .adm[data-m="protokoll"] .grp-tv, .adm[data-m="protokoll"] .grp-more { display: none; }
+    /* Im Protokoll stehen Zahlen und Doppeltipps über der Liste */
+    .adm[data-m="protokoll"] .adm-grid { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+    .adm[data-m="protokoll"] aside { order: -1; }
+    .adm[data-m="protokoll"] .grp-proto > .sec:first-child { margin-top: 0; }
     .adm[data-m="mehr"] .grp-more > .sec:first-child { margin-top: 0; }
     .adm-grid aside { max-width: 560px; }
   }
@@ -239,7 +361,30 @@
     .st.mix::before { content: 'Mischen'; color: var(--mix); }
     .st input { width: 34px; font-size: 17px; }
     .sl { grid-template-columns: 96px minmax(0, 1fr) 64px; }
+    .m-tabs .tab-btn { font-size: 13.5px; padding: 9px 2px; }
+    /* Protokoll am Handy: kompakte Zeilen, ein Tipp öffnet das Blatt */
+    .p-tools { flex-wrap: wrap; }
+    .p-day { flex: 1; min-width: 0; height: 44px; }
+    .p-nav { width: 44px; height: 44px; }
+    .p-add { margin-left: 0; width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 0; }
+    .p-add::before { content: '+'; font-size: 22px; line-height: 1; }
+    .p-person { flex: 1; min-width: 0; height: 40px; }
+    .p-filter { width: 100%; }
+    .p-head { display: none; }
+    .p-row { gap: 12px; padding: 10px 12px 10px 14px; }
+    .p-time { width: 50px; font-size: 16px; }
+    .p-time .ss, .p-row .avatar { display: none; }
+    .p-pill { width: 70px; font-size: 12.5px; padding: 3px 0; }
+    .p-act { width: auto; }
+    .p-ico.del { display: none; }
+    .p-row { cursor: pointer; }
+    .p-ico.edit { border: none; width: 20px; }
+    .p-ico.edit .i-pen { display: none; }
+    .p-ico.edit .i-go { display: block; }
+    .p-stats-part { display: none; }
+    .adm:not([data-dups]) .p-dup-part { display: none; }
   }
+  .p-ico .i-go { display: none; }
   .modal-backdrop {
     position: fixed; inset: 0; background: var(--scrim);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -314,7 +459,7 @@
 <div id="dash-view" hidden style="min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;">
   <div class="admin-watermark" style="right:-200px;top:-160px;width:700px;height:700px;opacity:0.16;transform:rotate(20deg);"></div>
 
-  <div id="adm" class="adm" data-m="konten">
+  <div id="adm" class="adm" data-m="konten" data-v="konten">
     <header class="adm-head">
       <img src="assets/logo.png" alt="SV Partykeller" class="logo">
       <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:36px;width:auto;object-fit:contain;">
@@ -336,12 +481,20 @@
     <div id="m-tabs" class="tabs m-tabs" role="tablist" data-pos="0">
       <div class="tab-indicator"></div>
       <button type="button" class="tab-btn active" data-m="konten">Konten</button>
+      <button type="button" class="tab-btn" data-m="protokoll">Protokoll</button>
       <button type="button" class="tab-btn" data-m="tv">TV</button>
       <button type="button" class="tab-btn" data-m="mehr">Mehr</button>
     </div>
 
     <div class="adm-grid">
       <main>
+        <div id="v-tabs" class="tabs v-tabs" role="tablist" data-pos="0">
+          <div class="tab-indicator"></div>
+          <button type="button" class="tab-btn active" data-v="konten">Konten</button>
+          <button type="button" class="tab-btn" data-v="protokoll">Protokoll</button>
+        </div>
+
+        <div class="view v-konten">
         <div class="sec"><span class="sec-title">Konten</span><span id="k-count" class="sec-hint"></span></div>
         <div class="k-tools">
           <input id="k-search" class="input-flat search" type="search" placeholder="🔍  Name suchen" autocomplete="off" aria-label="Name suchen">
@@ -357,9 +510,52 @@
           <div class="h-name">Name</div><div class="h-st">Bier</div><div class="h-st">Shots</div><div class="h-st">Mischen</div><div class="h-total">Gesamt</div><div class="h-more"></div>
         </div>
         <div id="rows"></div>
+        </div>
+
+        <!-- Getränke-Protokoll (D-073): jedes gezählte Getränk eines Abends -->
+        <div class="view v-proto">
+          <div class="sec"><span class="sec-title">Protokoll</span><span id="p-count" class="sec-hint"></span></div>
+          <div class="p-tools">
+            <button id="p-prev" type="button" class="btn-flat p-nav" aria-label="Vorheriger Abend">‹</button>
+            <select id="p-day" class="input-flat p-day" aria-label="Abend"></select>
+            <button id="p-next" type="button" class="btn-flat p-nav" aria-label="Nächster Abend">›</button>
+            <button id="p-add" type="button" class="btn-green p-add" aria-label="Getränk nachtragen">+ Getränk nachtragen</button>
+          </div>
+          <div class="p-tools">
+            <select id="p-person" class="input-flat p-person" aria-label="Konto filtern"><option value="">Alle Konten</option></select>
+            <div id="p-filter" class="tabs p-filter" role="tablist" data-pos="0">
+              <div class="tab-indicator"></div>
+              <button type="button" class="tab-btn active" data-drink="">Alle</button>
+              <button type="button" class="tab-btn" data-drink="beer">Bier</button>
+              <button type="button" class="tab-btn" data-drink="shot">Shots</button>
+              <button type="button" class="tab-btn" data-drink="mix">Mischen</button>
+            </div>
+          </div>
+          <div class="p-head" aria-hidden="true">
+            <div class="h-time">Zeit</div><div class="h-name">Konto</div><div class="h-drink">Getränk</div><div class="h-act"></div>
+          </div>
+          <div id="p-rows"></div>
+        </div>
       </main>
 
       <aside id="adm-side">
+        <div class="grp grp-proto">
+          <div class="sec p-stats-part"><span class="sec-title">Dieser Abend</span></div>
+          <div class="card side p-stats-part">
+            <div id="p-totals" class="p-totals"></div>
+            <div class="p-hist-wrap">
+              <div id="p-hist" class="p-hist"></div>
+              <div id="p-hist-labels" class="p-hist-labels"></div>
+              <div id="p-span" class="hint"></div>
+            </div>
+          </div>
+          <div class="sec p-dup-part"><span class="sec-title">Doppelt getippt?</span><span id="p-dup-count" class="sec-hint"></span></div>
+          <div class="card side p-dup-part">
+            <div class="hint">Gleiches Getränk vom selben Konto innerhalb von 5 Sekunden.</div>
+            <div id="p-dups"></div>
+          </div>
+        </div>
+
         <div class="grp grp-tv">
           <div class="sec"><span class="sec-title">TV-Anzeige</span></div>
           <div class="card side">
@@ -440,6 +636,9 @@
     </div>
   </form>
 </div>
+
+<!-- Protokoll am Handy: Eintrag bearbeiten als Blatt von unten (D-073) -->
+<div id="p-sheet" class="modal-backdrop p-sheet" hidden></div>
 
 <!-- Modal: Alles zurücksetzen – Admin-Passwort erneut nötig -->
 <div id="reset-modal" class="modal-backdrop" hidden>
@@ -600,6 +799,8 @@ function enterDashboard() {
       renderFactSheet();
       renderNow();
       renderRows();
+      renderPersonFilter();
+      scheduleProtoLoad();
       updateJoinField(state.joinUrl ?? '');
       updateSeasonal(state.seasonal !== false);
       updateBoardMode(state.boardMode ?? 'alltime', state.boardDay);
@@ -1063,13 +1264,622 @@ filterBtns.forEach((b, i) => b.addEventListener('click', () => {
   renderRows();
 }));
 
-// --- Umschalter Konten | TV | Mehr (nur schmal sichtbar) ---
+// --- Umschalter ---
+// Schmal: Konten | Protokoll | TV | Mehr (data-m). Breit steht die
+// Seitenleiste immer daneben, und über der Hauptspalte schaltet ein eigener
+// Umschalter Konten | Protokoll (data-v). Beide bleiben im Gleichschritt.
 const mBtns = [...$('m-tabs').querySelectorAll('.tab-btn')];
-mBtns.forEach((b, i) => b.addEventListener('click', () => {
-  $('adm').dataset.m = b.dataset.m;
-  mBtns.forEach((x) => x.classList.toggle('active', x === b));
-  $('m-tabs').dataset.pos = String(i);
+const vBtns = [...$('v-tabs').querySelectorAll('.tab-btn')];
+function setSection(m) {
+  const adm = $('adm');
+  adm.dataset.m = m;
+  if (m === 'konten' || m === 'protokoll') adm.dataset.v = m;
+  mBtns.forEach((x, i) => { x.classList.toggle('active', x.dataset.m === m); if (x.dataset.m === m) $('m-tabs').dataset.pos = String(i); });
+  const v = adm.dataset.v ?? 'konten';
+  vBtns.forEach((x, i) => { x.classList.toggle('active', x.dataset.v === v); if (x.dataset.v === v) $('v-tabs').dataset.pos = String(i); });
+  if (v === 'protokoll') openProtocol();
+  fitSide();
+}
+mBtns.forEach((b) => b.addEventListener('click', () => setSection(b.dataset.m)));
+vBtns.forEach((b) => b.addEventListener('click', () => setSection(b.dataset.v)));
+
+// --- Getränke-Protokoll (D-073) ------------------------------------------
+// Jedes gezählte Getränk eines Abends einzeln: umhängen (Konto, Sorte,
+// Uhrzeit), löschen mit Rückgängig, nachtragen. Der Server zieht die Zähler
+// mit. Die Liste lädt per REST (nur mit Admin-Token) und neu, sobald ein
+// neuer Stand kommt — also auch, wenn gerade jemand trinkt.
+const DRINK = {
+  beer: { label: 'Bier', many: 'Bier', the: 'Das Bier', one: 'ein Bier', to: 'zum Bier' },
+  shot: { label: 'Shot', many: 'Shots', the: 'Der Shot', one: 'einen Shot', to: 'zum Shot' },
+  mix: { label: 'Mische', many: 'Mischen', the: 'Die Mische', one: 'eine Mische', to: 'zur Mische' },
+};
+const DUP_SECONDS = 5;
+const pad2 = (n) => String(n).padStart(2, '0');
+const hhmm = (ts) => { const d = new Date(ts); return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; };
+const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const ICON_PEN = '<svg class="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>'
+  + '<svg class="i-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+const ICON_BIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/><path d="M10 11v6M14 11v6"/></svg>';
+
+// Party-Tag wie auf dem Server: bis 6 Uhr früh gehört alles zum Vortag
+function partyDay(ts = Date.now()) {
+  const d = new Date(ts);
+  if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+// Uhrzeit „HH:MM“ an einem Party-Tag -> Zeitstempel (vor 6 Uhr: Folgetag)
+function tsAt(day, time) {
+  const [y, m, d] = day.split('-').map(Number);
+  const [h, mi] = time.split(':').map(Number);
+  return new Date(y, m - 1, d + (h < 6 ? 1 : 0), h, mi, 0, 0).getTime();
+}
+
+const proto = {
+  day: partyDay(),
+  days: [],            // [{ day, name }] neueste zuerst
+  entries: [],         // vom Server, neueste zuerst
+  gone: new Map(),     // id -> Eintrag, hier gelöscht (für Rückgängig)
+  edited: new Set(),   // ids, die in dieser Sitzung bearbeitet wurden
+  added: new Set(),    // „playerId|drink|ts“ der nachgetragenen Einträge
+  person: '',
+  drink: '',
+  edit: null,          // { id | null (neu), playerId, drink, time, orig }
+  pending: false,
+};
+let protoTimer = null;
+let protoDaysAt = 0;
+
+function protoVisible() {
+  const adm = $('adm');
+  if (adm.dataset.v !== 'protokoll') return false;
+  return !matchMedia('(max-width: 1180px)').matches || adm.dataset.m === 'protokoll';
+}
+
+function openProtocol() {
+  loadProtoDays();
+  loadProto();
+}
+
+async function loadProtoDays(force = false) {
+  if (!force && Date.now() - protoDaysAt < 30_000) return;
+  protoDaysAt = Date.now();
+  try {
+    const res = await fetch(`${AREA.base}/api/archive`);
+    if (!res.ok) return;
+    const { days } = await res.json();
+    const today = partyDay();
+    proto.days = days.map((d) => ({ day: d.day, name: d.name }));
+    if (!proto.days.some((d) => d.day === today)) proto.days.unshift({ day: today, name: '' });
+    if (!proto.days.some((d) => d.day === proto.day)) proto.days.unshift({ day: proto.day, name: '' });
+    proto.days.sort((a, b) => b.day.localeCompare(a.day));
+    renderProtoDays();
+  } catch { /* nächster Versuch beim nächsten Öffnen */ }
+}
+
+function dayLabel({ day, name }) {
+  const [y, m, d] = day.split('-').map(Number);
+  const wd = WEEKDAY[new Date(y, m - 1, d).getDay()];
+  const base = `${wd} ${pad2(d)}.${pad2(m)}.`;
+  const label = day === partyDay() ? `Heute · ${base}` : `${base}${y !== new Date().getFullYear() ? y : ''}`;
+  return name ? `${label} · „${name}“` : label;
+}
+
+function renderProtoDays() {
+  const sel = $('p-day');
+  sel.textContent = '';
+  for (const d of proto.days) {
+    const opt = document.createElement('option');
+    opt.value = d.day;
+    opt.textContent = dayLabel(d);
+    sel.appendChild(opt);
+  }
+  sel.value = proto.day;
+  const i = proto.days.findIndex((d) => d.day === proto.day);
+  $('p-next').disabled = i <= 0;
+  $('p-prev').disabled = i < 0 || i >= proto.days.length - 1;
+}
+
+function setProtoDay(day) {
+  if (day === proto.day) return;
+  proto.day = day;
+  proto.gone.clear();
+  proto.edit = null;
+  proto.entries = [];
+  renderProtoDays();
+  renderProto();
+  loadProto();
+}
+$('p-day').addEventListener('change', () => setProtoDay($('p-day').value));
+// Die Liste ist neueste zuerst: ‹ geht zurück in die Vergangenheit
+$('p-prev').addEventListener('click', () => {
+  const i = proto.days.findIndex((d) => d.day === proto.day);
+  if (i >= 0 && i < proto.days.length - 1) setProtoDay(proto.days[i + 1].day);
+});
+$('p-next').addEventListener('click', () => {
+  const i = proto.days.findIndex((d) => d.day === proto.day);
+  if (i > 0) setProtoDay(proto.days[i - 1].day);
+});
+
+async function loadProto() {
+  const day = proto.day;
+  try {
+    const res = await fetch(`${AREA.base}/api/log/${day}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) {
+      if (res.status === 403) showError('Admin-Anmeldung abgelaufen – bitte neu anmelden.');
+      return;
+    }
+    const data = await res.json();
+    if (day !== proto.day) return;   // inzwischen anderer Abend gewählt
+    proto.entries = data.entries;
+    renderProto();
+  } catch { /* Offline-Moment: der nächste Stand lädt erneut */ }
+}
+
+function scheduleProtoLoad() {
+  if (!protoVisible()) return;
+  clearTimeout(protoTimer);
+  protoTimer = setTimeout(loadProto, 300);
+}
+
+// Personen-Filter aus dem Stand (alle Konten, alphabetisch)
+function renderPersonFilter() {
+  const sel = $('p-person');
+  if (document.activeElement === sel) return;
+  const sorted = [...players].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  sel.textContent = '';
+  sel.appendChild(new Option('Alle Konten', ''));
+  for (const p of sorted) sel.appendChild(new Option(p.name, p.id));
+  sel.value = sorted.some((p) => p.id === proto.person) ? proto.person : '';
+}
+$('p-person').addEventListener('change', () => { proto.person = $('p-person').value; renderProto(); });
+
+const pFilterBtns = [...$('p-filter').querySelectorAll('.tab-btn')];
+pFilterBtns.forEach((b, i) => b.addEventListener('click', () => {
+  proto.drink = b.dataset.drink;
+  pFilterBtns.forEach((x) => x.classList.toggle('active', x === b));
+  $('p-filter').dataset.pos = String(i);
+  renderProto();
 }));
+
+// Gleiches Konto, gleiches Getränk, höchstens DUP_SECONDS auseinander
+function findDups(entries) {
+  const last = new Map();
+  const ids = new Set();
+  const pairs = [];
+  for (const e of [...entries].sort((a, b) => a.ts - b.ts || a.id - b.id)) {
+    const key = `${e.playerId}|${e.drink}`;
+    const prev = last.get(key);
+    if (prev && e.ts - prev.ts <= DUP_SECONDS * 1000) {
+      ids.add(e.id); ids.add(prev.id);
+      pairs.push({ first: prev, second: e });
+    }
+    last.set(key, e);
+  }
+  return { ids, pairs };
+}
+
+function renderProto() {
+  const box = $('p-rows');
+  // Offenes Bearbeiten in der Zeile nicht wegwerfen, weil irgendwo jemand trinkt
+  if (proto.edit && !isSheet() && box.querySelector('.p-edit')?.contains(document.activeElement)) {
+    proto.pending = true;
+    renderProtoSide();
+    return;
+  }
+  proto.pending = false;
+  box.textContent = '';
+
+  const live = proto.entries;
+  const { ids: dupIds } = findDups(live);
+  const people = new Set(live.map((e) => e.playerId)).size;
+  $('p-count').textContent = live.length
+    ? `${live.length} ${live.length === 1 ? 'Getränk' : 'Getränke'} · ${people} ${people === 1 ? 'Konto' : 'Konten'}`
+    : '';
+
+  // Gelöschte Einträge bleiben an ihrer Stelle stehen, bis Rückgängig oder Abendwechsel
+  const all = live.map((e) => ({ ...e, isGone: false }))
+    .concat([...proto.gone.values()].map((e) => ({ ...e, isGone: true })));
+  if (proto.edit && proto.edit.id === null) all.push({ id: null, playerId: proto.edit.playerId, drink: proto.edit.drink, ts: tsAt(proto.day, proto.edit.time), isNew: true });
+  const shown = all
+    .filter((e) => e.isNew || ((!proto.person || e.playerId === proto.person) && (!proto.drink || e.drink === proto.drink)))
+    .sort((a, b) => b.ts - a.ts || (b.id ?? Infinity) - (a.id ?? Infinity));
+
+  if (!shown.length) {
+    const empty = document.createElement('div');
+    empty.className = 'p-empty';
+    empty.textContent = live.length ? 'Keine Einträge für diesen Filter.'
+      : proto.day === partyDay() ? 'Heute wurde noch nichts gezählt.' : 'An diesem Abend wurde nichts gezählt.';
+    box.appendChild(empty);
+  }
+
+  let hourKey = null;
+  let hourHead = null;
+  let hourCount = 0;
+  const flushHour = () => { if (hourHead) hourHead.querySelector('span').textContent = hourCount === 1 ? '1 Getränk' : `${hourCount} Getränke`; };
+  for (const e of shown) {
+    const d = new Date(e.ts);
+    const key = `${partyDay(e.ts)} ${d.getHours()}`;
+    if (key !== hourKey) {
+      flushHour();
+      hourKey = key;
+      hourCount = 0;
+      hourHead = document.createElement('div');
+      hourHead.className = 'p-hour';
+      const h = d.getHours();
+      hourHead.innerHTML = `<b>${pad2(h)}–${pad2((h + 1) % 24)} Uhr</b><span></span>`;
+      box.appendChild(hourHead);
+    }
+    if (!e.isGone && !e.isNew) hourCount += 1;
+
+    const editingThis = proto.edit && (e.isNew ? proto.edit.id === null : proto.edit.id === e.id);
+    if (editingThis && !isSheet()) { box.appendChild(buildEditor()); continue; }
+    if (e.isNew) continue;
+    box.appendChild(e.isGone ? goneRow(e) : protoRow(e, dupIds.has(e.id)));
+  }
+  flushHour();
+  renderProtoSide();
+}
+
+function nameOf(playerId, fallback = '—') {
+  return players.find((p) => p.id === playerId)?.name ?? fallback;
+}
+
+function protoRow(e, dup) {
+  const row = document.createElement('div');
+  row.className = 'p-row';
+  const time = document.createElement('div');
+  time.className = 'p-time num';
+  const d = new Date(e.ts);
+  time.append(hhmm(e.ts));
+  const ss = document.createElement('span');
+  ss.className = 'ss';
+  ss.textContent = `:${pad2(d.getSeconds())}`;
+  time.appendChild(ss);
+
+  const name = nameOf(e.playerId, e.name);
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.textContent = [...name][0]?.toUpperCase() ?? '?';
+
+  const who = document.createElement('div');
+  who.className = 'p-name';
+  const n = document.createElement('span');
+  n.className = 'n';
+  n.textContent = name;
+  who.appendChild(n);
+  const chip = (cls, text, title) => {
+    const c = document.createElement('span');
+    c.className = `chip ${cls}`;
+    c.textContent = text;
+    if (title) c.title = title;
+    who.appendChild(c);
+  };
+  if (dup) chip('chip-gold', 'Doppelt?', `Gleiches Getränk innerhalb von ${DUP_SECONDS} Sekunden`);
+  if (proto.added.has(`${e.playerId}|${e.drink}|${e.ts}`)) chip('chip-muted', 'nachgetragen');
+  else if (proto.edited.has(e.id)) chip('chip-muted', 'bearbeitet');
+
+  const pill = document.createElement('span');
+  pill.className = `p-pill ${e.drink}`;
+  pill.textContent = DRINK[e.drink].label;
+
+  const act = document.createElement('div');
+  act.className = 'p-act';
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'p-ico edit';
+  edit.title = 'Bearbeiten';
+  edit.setAttribute('aria-label', `Eintrag von ${name} um ${hhmm(e.ts)} bearbeiten`);
+  edit.innerHTML = ICON_PEN;
+  edit.addEventListener('click', () => startEdit(e));
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.className = 'p-ico del';
+  del.title = 'Löschen';
+  del.setAttribute('aria-label', `Eintrag von ${name} um ${hhmm(e.ts)} löschen`);
+  del.innerHTML = ICON_BIN;
+  del.addEventListener('click', () => removeEntry(e));
+  act.append(edit, del);
+
+  row.append(time, avatar, who, pill, act);
+  // Am Handy ist die ganze Zeile der Knopf (der Stift-Knopf bleibt für die Tastatur)
+  row.addEventListener('click', (ev) => { if (isSheet() && !ev.target.closest('button')) startEdit(e); });
+  return row;
+}
+
+function goneRow(e) {
+  const row = document.createElement('div');
+  row.className = 'p-row gone';
+  const time = document.createElement('div');
+  time.className = 'p-time num';
+  time.textContent = hhmm(e.ts);
+  const text = document.createElement('div');
+  text.className = 'p-gone-text';
+  const s = document.createElement('s');
+  s.textContent = `${nameOf(e.playerId, e.name)} · ${DRINK[e.drink].label}`;
+  text.append(s, ' – gelöscht');
+  const undo = document.createElement('button');
+  undo.type = 'button';
+  undo.className = 'p-undo';
+  undo.textContent = '↶ Rückgängig';
+  undo.addEventListener('click', () => {
+    proto.gone.delete(e.id);
+    send({ type: 'addLog', playerId: e.playerId, drink: e.drink, ts: e.ts });
+    renderProto();
+  });
+  row.append(time, text, undo);
+  return row;
+}
+
+function removeEntry(e) {
+  send({ type: 'deleteLog', id: e.id });
+  proto.gone.set(e.id, e);
+  proto.entries = proto.entries.filter((x) => x.id !== e.id);
+  if (proto.edit && proto.edit.id === e.id) closeEditor();
+  renderProto();
+}
+
+// --- Bearbeiten ---
+const isSheet = () => matchMedia('(max-width: 760px)').matches;
+
+function startEdit(e) {
+  proto.edit = { id: e.id, playerId: e.playerId, drink: e.drink, time: hhmm(e.ts), orig: e };
+  showEditor();
+}
+
+$('p-add').addEventListener('click', () => {
+  // Heute: jetzt; an einem früheren Abend: kurz nach dem letzten Getränk
+  const today = proto.day === partyDay();
+  const last = proto.entries[0];
+  const time = today ? hhmm(Date.now()) : last ? hhmm(last.ts + 60_000) : '22:00';
+  const who = proto.person || last?.playerId || [...players].sort((a, b) => a.name.localeCompare(b.name, 'de'))[0]?.id;
+  if (!who) { showError('Noch keine Konten.'); return; }
+  proto.edit = { id: null, playerId: who, drink: proto.drink || 'beer', time, orig: null };
+  showEditor();
+});
+
+function showEditor() {
+  if (isSheet()) {
+    const sheet = $('p-sheet');
+    sheet.textContent = '';
+    sheet.appendChild(buildEditor());
+    sheet.hidden = false;
+    renderProto();
+  } else {
+    renderProto();
+    $('p-rows').querySelector('.p-edit input')?.focus();
+  }
+}
+
+function closeEditor() {
+  proto.edit = null;
+  $('p-sheet').hidden = true;
+  $('p-sheet').textContent = '';
+  renderProto();
+}
+$('p-sheet').addEventListener('click', (e) => { if (e.target === $('p-sheet')) closeEditor(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && proto.edit) closeEditor(); });
+
+function editorHint() {
+  const ed = proto.edit;
+  const now = DRINK[ed.drink];
+  const name = nameOf(ed.playerId);
+  if (!ed.orig) return `Zählt bei ${name} ${now.one} dazu.`;
+  const was = DRINK[ed.orig.drink];
+  const oldName = nameOf(ed.orig.playerId, ed.orig.name);
+  if (ed.playerId !== ed.orig.playerId) {
+    return `${was.the} wandert von ${oldName} zu ${name}${ed.drink !== ed.orig.drink ? ` und wird ${now.to}` : ''}.`;
+  }
+  if (ed.drink !== ed.orig.drink) return `${name}: ${was.many} −1, ${now.many} +1.`;
+  if (ed.time !== hhmm(ed.orig.ts)) return 'Nur die Uhrzeit ändert sich, die Zähler bleiben.';
+  return `Die Zähler von ${name} werden mit angepasst.`;
+}
+
+function buildEditor() {
+  const ed = proto.edit;
+  const form = document.createElement('form');
+  form.className = 'p-edit';
+
+  // Kopf nur im Blatt am Handy
+  const head = document.createElement('div');
+  head.className = 'p-sheet-head';
+  head.innerHTML = '<div class="grip"></div><div class="p-sheet-title"><div><h2></h2><div class="sub"></div></div><button type="button" class="quiet">Abbrechen</button></div>';
+  head.querySelector('h2').textContent = ed.orig ? 'Eintrag bearbeiten' : 'Getränk nachtragen';
+  if (ed.orig) {
+    const d = new Date(ed.orig.ts);
+    head.querySelector('.sub').textContent =
+      `${nameOf(ed.orig.playerId, ed.orig.name)} · ${DRINK[ed.orig.drink].label} · ${hhmm(ed.orig.ts)}:${pad2(d.getSeconds())}`;
+  } else {
+    head.querySelector('.sub').textContent = dayLabel(proto.days.find((d) => d.day === proto.day) ?? { day: proto.day, name: '' });
+  }
+  head.querySelector('.quiet').addEventListener('click', closeEditor);
+
+  const fields = document.createElement('div');
+  fields.className = 'p-edit-fields';
+
+  const timeField = document.createElement('label');
+  timeField.className = 'p-field';
+  timeField.innerHTML = '<span class="lbl">Uhrzeit</span>';
+  const time = document.createElement('input');
+  time.type = 'time';
+  time.required = true;
+  time.className = 'input-flat';
+  time.value = ed.time;
+  timeField.appendChild(time);
+
+  const personField = document.createElement('label');
+  personField.className = 'p-field';
+  personField.innerHTML = '<span class="lbl">Konto</span>';
+  const person = document.createElement('select');
+  person.className = 'input-flat';
+  for (const p of [...players].sort((a, b) => a.name.localeCompare(b.name, 'de'))) person.appendChild(new Option(p.name, p.id));
+  person.value = ed.playerId;
+  personField.appendChild(person);
+
+  const drinkField = document.createElement('div');
+  drinkField.className = 'p-field p-field-drink';
+  drinkField.innerHTML = '<span class="lbl">Getränk</span>';
+  const seg = document.createElement('div');
+  seg.className = 'p-seg';
+  for (const k of Object.keys(DRINK)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = k + (ed.drink === k ? ' on' : '');
+    b.textContent = DRINK[k].label;
+    b.setAttribute('aria-pressed', String(ed.drink === k));
+    b.addEventListener('click', () => {
+      ed.drink = k;
+      seg.querySelectorAll('button').forEach((x) => {
+        x.classList.toggle('on', x === b);
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      hint.textContent = editorHint();
+    });
+    seg.appendChild(b);
+  }
+  drinkField.appendChild(seg);
+
+  const btns = document.createElement('div');
+  btns.className = 'p-edit-btns';
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.className = 'btn-flat p-cancel';
+  cancel.textContent = 'Abbrechen';
+  cancel.addEventListener('click', closeEditor);
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.className = 'btn-danger p-del-btn';
+  del.textContent = ed.orig ? 'Löschen' : 'Abbrechen';
+  del.addEventListener('click', () => { if (ed.orig) removeEntry(ed.orig); closeEditor(); });
+  const save = document.createElement('button');
+  save.className = 'btn-green';
+  save.textContent = 'Speichern';
+  btns.append(cancel, del, save);
+
+  fields.append(timeField, personField, drinkField);
+  if (!isSheet()) fields.appendChild(btns);
+
+  const hint = document.createElement('div');
+  hint.className = 'hint';
+  hint.textContent = editorHint();
+
+  time.addEventListener('input', () => { ed.time = time.value; hint.textContent = editorHint(); });
+  person.addEventListener('change', () => { ed.playerId = person.value; hint.textContent = editorHint(); });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!ed.time) return;
+    // Unveränderte Uhrzeit: Sekunden des Originals behalten (Reihenfolge, Doppeltipps)
+    const ts = ed.orig && ed.time === hhmm(ed.orig.ts) ? ed.orig.ts : tsAt(proto.day, ed.time);
+    if (ts > Date.now() + 60_000) { showError('Die Uhrzeit liegt in der Zukunft.'); return; }
+    if (ed.orig) {
+      send({ type: 'editLog', id: ed.orig.id, playerId: ed.playerId, drink: ed.drink, ts });
+      proto.edited.add(ed.orig.id);
+    } else {
+      send({ type: 'addLog', playerId: ed.playerId, drink: ed.drink, ts });
+      proto.added.add(`${ed.playerId}|${ed.drink}|${ts}`);
+    }
+    closeEditor();
+  });
+
+  form.append(head, fields, hint);
+  if (isSheet()) form.appendChild(btns);
+  return form;
+}
+
+// Seitenleiste: Zahlen des Abends, Verlauf je Stunde, mögliche Doppeltipps
+function renderProtoSide() {
+  const live = proto.entries;
+  const totals = $('p-totals');
+  totals.textContent = '';
+  for (const [k, color] of [['beer', 'var(--amber)'], ['shot', 'var(--brick)'], ['mix', 'var(--mix)']]) {
+    const cell = document.createElement('div');
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.style.color = color;
+    num.textContent = live.filter((e) => e.drink === k).length;
+    const lbl = document.createElement('span');
+    lbl.className = 'lbl2';
+    lbl.textContent = DRINK[k].many;
+    cell.append(num, lbl);
+    totals.appendChild(cell);
+  }
+
+  const hist = $('p-hist');
+  const labels = $('p-hist-labels');
+  hist.textContent = '';
+  labels.textContent = '';
+  const byHour = new Map();   // Stunden ab 18 Uhr gezählt, nach Mitternacht weiter
+  for (const e of live) {
+    const h = new Date(e.ts).getHours();
+    const k = h < 6 ? h + 24 : h;
+    byHour.set(k, (byHour.get(k) ?? 0) + 1);
+  }
+  const keys = [...byHour.keys()];
+  if (keys.length) {
+    const from = Math.min(...keys), to = Math.max(...keys);
+    const max = Math.max(...byHour.values());
+    for (let k = from; k <= to; k++) {
+      const n = byHour.get(k) ?? 0;
+      const col = document.createElement('div');
+      col.innerHTML = `<span class="v">${n || ''}</span><div class="bar" style="height:${n ? Math.round(4 + (54 * n) / max) : 2}px"></div>`;
+      hist.appendChild(col);
+      const lab = document.createElement('span');
+      lab.textContent = pad2(k % 24);
+      labels.appendChild(lab);
+    }
+  }
+  const sorted = [...live].sort((a, b) => a.ts - b.ts);
+  $('p-span').textContent = sorted.length
+    ? `Erstes Getränk ${hhmm(sorted[0].ts)} · letztes ${hhmm(sorted[sorted.length - 1].ts)}`
+    : 'Noch nichts gezählt.';
+
+  const { pairs } = findDups(live);
+  $('p-dup-count').textContent = pairs.length ? String(pairs.length) : '';
+  if (pairs.length) $('adm').dataset.dups = ''; else delete $('adm').dataset.dups;
+  const box = $('p-dups');
+  box.textContent = '';
+  if (!pairs.length) {
+    const none = document.createElement('div');
+    none.style.cssText = 'font-size:14px;color:var(--creme);';
+    none.textContent = 'Nichts Auffälliges an diesem Abend.';
+    box.appendChild(none);
+  }
+  for (const { first, second } of pairs) {
+    const row = document.createElement('div');
+    row.className = 'p-dup';
+    const who = document.createElement('div');
+    who.className = 'who';
+    const b = document.createElement('b');
+    b.textContent = nameOf(second.playerId, second.name);
+    const s = document.createElement('span');
+    s.textContent = `2× ${DRINK[second.drink].label} in ${Math.round((second.ts - first.ts) / 1000)} s · ${hhmm(second.ts)}`;
+    who.append(b, s);
+    const fix = document.createElement('button');
+    fix.type = 'button';
+    fix.className = 'btn-danger';
+    fix.textContent = 'Einen löschen';
+    fix.addEventListener('click', () => removeEntry(second));
+    row.append(who, fix);
+    box.appendChild(row);
+  }
+  fitSide();
+}
+
+// Bearbeiten in der Zeile verlassen: aufgeschobenen Neuaufbau nachholen
+$('p-rows').addEventListener('focusout', () => {
+  setTimeout(() => {
+    if (proto.pending && !$('p-rows').querySelector('.p-edit')?.contains(document.activeElement)) renderProto();
+  }, 0);
+});
+
+// Aus der Kontenliste direkt ins Protokoll dieser Person (heute)
+function showInProtocol(p) {
+  proto.person = p.id;
+  setProtoDay(partyDay());
+  renderPersonFilter();
+  setSection('protokoll');
+}
 
 // Die Seitenleiste läuft mit (sticky). Ist sie höher als das Fenster, klebt
 // sie erst, wenn ihr unteres Ende sichtbar ist — sonst wäre die Danger Zone
@@ -1214,6 +2024,7 @@ function renderRows() {
     const menu = moreMenu(`p${p.id}`, [
       { label: '✎ Umbenennen', run: () => { editingId = p.id; renderRows(); } },
       { label: '🔑 PIN ändern', run: () => openPinModal(p) },
+      { label: '☰ Im Protokoll ansehen', run: () => showInProtocol(p) },
       // Sichtbarkeit im TV-Scoreboard und in der Anmeldeliste
       p.hidden
         ? { label: '👁 Auf dem TV einblenden', run: () => send({ type: 'setHidden', id: p.id, hidden: false }) }

@@ -219,6 +219,13 @@ export function createDb(dbPath) {
          ORDER BY ts DESC, id DESC LIMIT 1
        )`
     ),
+    // Getränke-Protokoll im Admin (D-073): einzelne Einträge eines Abends
+    dayLogEntries: db.prepare(
+      'SELECT id, player_id, drink, ts FROM drink_log WHERE ts >= ? AND ts < ? ORDER BY ts DESC, id DESC'
+    ),
+    getLogEntry: db.prepare('SELECT id, player_id, drink, ts FROM drink_log WHERE id = ?'),
+    updateLogEntry: db.prepare('UPDATE drink_log SET player_id = ?, drink = ?, ts = ? WHERE id = ?'),
+    deleteLogEntry: db.prepare('DELETE FROM drink_log WHERE id = ?'),
     lastLogTsOfDay: db.prepare(
       'SELECT MAX(ts) AS ts FROM drink_log WHERE player_id = ? AND ts >= ? AND ts < ?'
     ),
@@ -656,6 +663,49 @@ export function createDb(dbPath) {
     incrementDrink(playerId, drink, delta);
   });
 
+  // --- Getränke-Protokoll (D-073) -------------------------------------------
+  // Der Admin sieht jedes gezählte Getränk eines Abends einzeln und kann es
+  // umhängen (Konto, Sorte, Uhrzeit), löschen oder nachtragen. Wie bei der
+  // Archiv-Korrektur ziehen die All-Time-Zähler immer mit, damit Rangliste,
+  // Archiv und Rekorde zusammenpassen.
+  function getDayLog(day) {
+    const [start, end] = partyDayRangeMs(day);
+    const names = new Map(stmts.listPlayers.all().map((p) => [p.id, p.name]));
+    return {
+      day,
+      entries: stmts.dayLogEntries.all(start, end).map((r) => ({
+        id: r.id, playerId: r.player_id, name: names.get(r.player_id) ?? '—', drink: r.drink, ts: r.ts,
+      })),
+    };
+  }
+
+  const editLogEntry = db.transaction((id, playerId, drink, ts) => {
+    const row = stmts.getLogEntry.get(id);
+    if (!row) throw new Error('Eintrag nicht gefunden');
+    if (!getPlayer(playerId)) throw new Error('Konto nicht gefunden');
+    if (partyDayString(ts) !== partyDayString(row.ts)) throw new Error('Die Uhrzeit muss im selben Abend bleiben');
+    if (ts > Date.now() + 60 * 1000) throw new Error('Die Uhrzeit liegt in der Zukunft');
+    invalidateHistory();
+    stmts.updateLogEntry.run(playerId, drink, ts, id);
+    if (playerId !== row.player_id || drink !== row.drink) {
+      incrementDrink(row.player_id, row.drink, -1);
+      incrementDrink(playerId, drink, 1);
+    }
+  });
+
+  const deleteLogEntry = db.transaction((id) => {
+    const row = stmts.getLogEntry.get(id);
+    if (!row) throw new Error('Eintrag nicht gefunden');
+    invalidateHistory();
+    stmts.deleteLogEntry.run(id);
+    incrementDrink(row.player_id, row.drink, -1);
+  });
+
+  function addLogAdmin(playerId, drink, ts) {
+    if (ts > Date.now() + 60 * 1000) throw new Error('Die Uhrzeit liegt in der Zukunft');
+    if (!logDrink(playerId, drink, ts)) throw new Error('Konto nicht gefunden');
+  }
+
   // Treue-Abzeichen (D-031): Stufen nach der Anzahl besuchter Abende. Es gilt
   // immer nur die höchste erreichte Stufe; unter der ersten Schwelle gibt es
   // gar keins.
@@ -731,9 +781,29 @@ export function createDb(dbPath) {
       if (w.playerId === id) award('dayWinner', day);
     }
 
+    // Tempo-Vergleich (D-072): wie viele Getränke hatte der Spieler an
+    // früheren Abenden im Schnitt bis zu einer Uhrzeit? 96 Viertelstunden ab
+    // 06:00, jeweils kumuliert bis zum Ende der Viertelstunde. Der laufende
+    // Abend zählt nicht mit, sonst liefe der Schnitt beim Trinken mit.
+    const SLOT = 15 * 60 * 1000;
+    const slots = new Array(96).fill(0);
+    let nights = 0;
+    for (const [day, logs] of perDay) {
+      if (day === today) continue;
+      nights += 1;
+      const [start] = partyDayRangeMs(day);
+      for (const l of logs) slots[Math.min(95, Math.max(0, Math.floor((l.ts - start) / SLOT)))] += 1;
+    }
+    let run = 0;
+    const pace = {
+      nights,
+      slots: slots.map((n) => { run += n; return nights ? Math.round((run / nights) * 100) / 100 : 0; }),
+    };
+
     return {
       days: rows.length,
       best,
+      pace,
       // Treue-Abzeichen: null, solange die erste Stufe nicht erreicht ist (D-031)
       visitBadge: visitBadge(rows.length),
       // Ø Getränke pro Abend (nur geloggte Getränke, eine Nachkommastelle)
@@ -1108,6 +1178,7 @@ export function createDb(dbPath) {
     incrementDrink, addLogEntry, logDrink, setCounter, renamePlayer, setHidden,
     getRecords, listFacts, addFact, updateFact, deleteFact,
     getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
+    getDayLog, editLogEntry, deleteLogEntry, addLogAdmin,
     getNightName, setNightName,
     setPinHash, deletePlayer, resetAll, getState, rankedPlayers,
     exportBackup, importBackup,

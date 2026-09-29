@@ -76,6 +76,14 @@ function createApiRouter(area) {
     return true;
   }
 
+  // Getränke-Protokoll eines Abends (D-073): jedes Getränk einzeln, mit Uhrzeit —
+  // nur für Admins, wie die Exporte
+  router.get('/log/:day', (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    if (!validDayString(req.params.day)) return res.status(400).json({ error: 'Ungültiger Tag' });
+    res.json(db.getDayLog(req.params.day));
+  });
+
   function sendCsv(res, filename, csv) {
     res.type('text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
