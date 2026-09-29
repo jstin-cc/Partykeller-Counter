@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-09-29: **Fix Umschalter mit vier Feldern** — der grüne Balken
+gleitet jetzt auch aufs vierte Feld (Protokoll-Filter „Mischen“, Admin-Reiter
+„Mehr“ am Handy); vorher blieb er links stehen und die Schrift verschwand.
 Seit 2026-09-29 (D-075): **Schnitt-Vergleich abschaltbar** — Schalter im
 Admin unter Einrichtung, wirkt sofort auf alle Handys.
 Seit 2026-09-29 (D-074): **Protokoll-Zeilen gefüllt** — Getränke-Pille und

@@ -251,6 +251,7 @@ a:hover { color: var(--gold); }
 }
 .tabs[data-pos="1"] .tab-indicator { transform: translateX(calc(100% + 6px)); }
 .tabs[data-pos="2"] .tab-indicator { transform: translateX(calc(200% + 12px)); }
+.tabs[data-pos="3"] .tab-indicator { transform: translateX(calc(300% + 18px)); }
 @media (prefers-reduced-motion: reduce) { .tab-indicator { transition: none; } }
 
 .num { font-variant-numeric: tabular-nums; font-family: 'Bitter', serif; font-weight: 800; }
