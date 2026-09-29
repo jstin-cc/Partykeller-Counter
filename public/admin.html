@@ -610,6 +610,11 @@
               <input id="seasonal-toggle" class="switch" type="checkbox" checked>
             </label>
             <div id="seasonal-hint" class="hint"></div>
+            <div class="lbl" style="margin-top:6px;">Schnitt-Vergleich</div>
+            <label class="switch-row" for="pace-toggle">
+              <span>Im Dashboard neben „Getränke heute“ ▲/▼ zum eigenen Schnitt bis zur gleichen Uhrzeit</span>
+              <input id="pace-toggle" class="switch" type="checkbox" checked>
+            </label>
             <div class="lbl" style="margin-top:6px;">Sicherung</div>
             <button id="backup-save" type="button" class="btn-flat" style="padding:11px;font-size:14px;font-weight:700;color:var(--ink);">⬇ Backup herunterladen</button>
             <div id="backup-hint" class="hint"></div>
@@ -807,6 +812,7 @@ function enterDashboard() {
       scheduleProtoLoad();
       updateJoinField(state.joinUrl ?? '');
       updateSeasonal(state.seasonal !== false);
+      $('pace-toggle').checked = state.paceCompare !== false;
       updateBoardMode(state.boardMode ?? 'alltime', state.boardDay);
       updateSpeed(state.scrollSeconds ?? 3.2);
       updateFunfact(state.funfactSeconds ?? 30);
@@ -1159,6 +1165,8 @@ function updateSeasonal(on) {
     : s ? `Gerade aktiv: ${SEASON_NAME[s]}` : 'Gerade ist kein Anlass.';
 }
 $('seasonal-toggle').addEventListener('change', (e) => send({ type: 'setSeasonal', on: e.target.checked }));
+// Schnitt-Vergleich im Dashboard (D-075)
+$('pace-toggle').addEventListener('change', (e) => send({ type: 'setPaceCompare', on: e.target.checked }));
 
 $('join-save').addEventListener('click', () => {
   send({ type: 'setJoinUrl', url: $('join-url').value });

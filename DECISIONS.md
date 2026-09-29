@@ -1745,3 +1745,16 @@ ohne Pille drumherum. Am Handy bleibt rechts der schlichte Pfeil.
 **Begründung:** Wunsch des Nutzers. Die gefüllten Pillen sind auf einen
 Blick zu unterscheiden, die Umriss-Pillen wirkten neben den Zeilen blass.
 
+## D-075 (2026-09-29): Schnitt-Vergleich im Admin abschaltbar
+
+**Entscheidung:** Admin, Einrichtung: neuer Schalter **Schnitt-Vergleich**.
+Er blendet ▲/▼ und den Abstand neben „Getränke heute“ (D-072) auf allen
+Handys des Bereichs ein oder aus. Die Einstellung heißt `pace_compare`
+(Standard an) und kommt im State als `paceCompare`. Geschaltet wird per
+WebSocket mit `setPaceCompare` (nur Admin). Die Handys übernehmen die
+Änderung sofort, ohne neu zu laden.
+
+**Begründung:** Wunsch des Nutzers. Der Vergleich soll sich pro Bereich
+abschalten lassen, z. B. wenn er an einem Abend nicht passt. Umgesetzt ist
+er wie der Schalter für die Saison-Akzente (D-071).
+

@@ -505,6 +505,7 @@ if (!token || !playerId) {
   // für jetzt abgelesen (innerhalb der Viertelstunde linear) und mit heute
   // verglichen. Er wandert mit der Uhr, daher auch ohne neues Getränk jede Minute.
   let paceCurve = null;
+  let paceOn = true;
   let todayCount = 0;
   const SLOT = 15 * 60 * 1000;
   const fmt1 = (n) => n.toLocaleString('de-DE', { maximumFractionDigits: 1 });
@@ -520,7 +521,7 @@ if (!token || !playerId) {
   }
   function renderPace() {
     const el = $('pace');
-    if (!paceCurve) { el.hidden = true; return; }
+    if (!paceOn || !paceCurve) { el.hidden = true; return; }
     let dir = 'none', diff = '', cap = '', title = '';
     if (!paceCurve.nights) {
       cap = 'erster Abend';
@@ -835,8 +836,9 @@ if (!token || !playerId) {
   let statsTimer = null;
 
   const ws = connectState({
-    onState({ players, seasonal }) {
+    onState({ players, seasonal, paceCompare }) {
       setSeasonEnabled(seasonal);   // Saison-Akzente (D-071), im Admin abschaltbar
+      paceOn = paceCompare !== false;   // Schnitt-Vergleich (D-075), ebenso
       const me = players.find((p) => p.id === playerId);
       if (!me) {
         // Account wurde (vom Admin) gelöscht
