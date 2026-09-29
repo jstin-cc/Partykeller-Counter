@@ -142,6 +142,27 @@ function createHandlers(area) {
     },
 
     // Abend im Archiv benennen (Admin, D-028); leerer Name entfernt die Benennung
+    // Getränke-Protokoll (D-073): einzelne Log-Einträge ändern, löschen,
+    // nachtragen — die Zähler ziehen in db.js mit
+    editLog(auth, { id, playerId, drink, ts }) {
+      requireAdmin(auth);
+      if (!Number.isSafeInteger(id)) throw new Error('Ungültiger Eintrag');
+      checkLogFields(playerId, drink, ts);
+      area.db.editLogEntry(id, playerId, drink, ts);
+    },
+
+    deleteLog(auth, { id }) {
+      requireAdmin(auth);
+      if (!Number.isSafeInteger(id)) throw new Error('Ungültiger Eintrag');
+      area.db.deleteLogEntry(id);
+    },
+
+    addLog(auth, { playerId, drink, ts }) {
+      requireAdmin(auth);
+      checkLogFields(playerId, drink, ts);
+      area.db.addLogAdmin(playerId, drink, ts);
+    },
+
     setNightName(auth, { day, name }) {
       requireAdmin(auth);
       if (!validDayString(day)) throw new Error('Ungültiger Archiv-Tag');
@@ -180,6 +201,12 @@ function createHandlers(area) {
       area.setFactIndex(index);
     },
   };
+}
+
+function checkLogFields(playerId, drink, ts) {
+  if (typeof playerId !== 'string' || !playerId) throw new Error('Ungültiges Konto');
+  if (!['beer', 'shot', 'mix'].includes(drink)) throw new Error('Unbekanntes Getränk');
+  if (!Number.isSafeInteger(ts) || ts <= 0) throw new Error('Ungültige Uhrzeit');
 }
 
 function requireAdmin(auth) {

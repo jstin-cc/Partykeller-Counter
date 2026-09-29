@@ -219,6 +219,13 @@ export function createDb(dbPath) {
          ORDER BY ts DESC, id DESC LIMIT 1
        )`
     ),
+    // Getränke-Protokoll im Admin (D-073): einzelne Einträge eines Abends
+    dayLogEntries: db.prepare(
+      'SELECT id, player_id, drink, ts FROM drink_log WHERE ts >= ? AND ts < ? ORDER BY ts DESC, id DESC'
+    ),
+    getLogEntry: db.prepare('SELECT id, player_id, drink, ts FROM drink_log WHERE id = ?'),
+    updateLogEntry: db.prepare('UPDATE drink_log SET player_id = ?, drink = ?, ts = ? WHERE id = ?'),
+    deleteLogEntry: db.prepare('DELETE FROM drink_log WHERE id = ?'),
     lastLogTsOfDay: db.prepare(
       'SELECT MAX(ts) AS ts FROM drink_log WHERE player_id = ? AND ts >= ? AND ts < ?'
     ),
@@ -655,6 +662,49 @@ export function createDb(dbPath) {
     }
     incrementDrink(playerId, drink, delta);
   });
+
+  // --- Getränke-Protokoll (D-073) -------------------------------------------
+  // Der Admin sieht jedes gezählte Getränk eines Abends einzeln und kann es
+  // umhängen (Konto, Sorte, Uhrzeit), löschen oder nachtragen. Wie bei der
+  // Archiv-Korrektur ziehen die All-Time-Zähler immer mit, damit Rangliste,
+  // Archiv und Rekorde zusammenpassen.
+  function getDayLog(day) {
+    const [start, end] = partyDayRangeMs(day);
+    const names = new Map(stmts.listPlayers.all().map((p) => [p.id, p.name]));
+    return {
+      day,
+      entries: stmts.dayLogEntries.all(start, end).map((r) => ({
+        id: r.id, playerId: r.player_id, name: names.get(r.player_id) ?? '—', drink: r.drink, ts: r.ts,
+      })),
+    };
+  }
+
+  const editLogEntry = db.transaction((id, playerId, drink, ts) => {
+    const row = stmts.getLogEntry.get(id);
+    if (!row) throw new Error('Eintrag nicht gefunden');
+    if (!getPlayer(playerId)) throw new Error('Konto nicht gefunden');
+    if (partyDayString(ts) !== partyDayString(row.ts)) throw new Error('Die Uhrzeit muss im selben Abend bleiben');
+    if (ts > Date.now() + 60 * 1000) throw new Error('Die Uhrzeit liegt in der Zukunft');
+    invalidateHistory();
+    stmts.updateLogEntry.run(playerId, drink, ts, id);
+    if (playerId !== row.player_id || drink !== row.drink) {
+      incrementDrink(row.player_id, row.drink, -1);
+      incrementDrink(playerId, drink, 1);
+    }
+  });
+
+  const deleteLogEntry = db.transaction((id) => {
+    const row = stmts.getLogEntry.get(id);
+    if (!row) throw new Error('Eintrag nicht gefunden');
+    invalidateHistory();
+    stmts.deleteLogEntry.run(id);
+    incrementDrink(row.player_id, row.drink, -1);
+  });
+
+  function addLogAdmin(playerId, drink, ts) {
+    if (ts > Date.now() + 60 * 1000) throw new Error('Die Uhrzeit liegt in der Zukunft');
+    if (!logDrink(playerId, drink, ts)) throw new Error('Konto nicht gefunden');
+  }
 
   // Treue-Abzeichen (D-031): Stufen nach der Anzahl besuchter Abende. Es gilt
   // immer nur die höchste erreichte Stufe; unter der ersten Schwelle gibt es
@@ -1128,6 +1178,7 @@ export function createDb(dbPath) {
     incrementDrink, addLogEntry, logDrink, setCounter, renamePlayer, setHidden,
     getRecords, listFacts, addFact, updateFact, deleteFact,
     getArchive, getArchiveDay, adjustArchiveDrink, getExportNights, getPlayerStats,
+    getDayLog, editLogEntry, deleteLogEntry, addLogAdmin,
     getNightName, setNightName,
     setPinHash, deletePlayer, resetAll, getState, rankedPlayers,
     exportBackup, importBackup,
