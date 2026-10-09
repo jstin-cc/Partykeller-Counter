@@ -171,10 +171,16 @@ const $ = (id) => document.getElementById(id);
 const read = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
 
 // Sitzungen aus dem localStorage (Schlüssel wie in js/api.js)
-for (const a of AREAS) {
-  a.session = read(`${a.prefix}_token`)
-    ? { playerId: read(`${a.prefix}_player_id`), name: read(`${a.prefix}_player_name`) }
-    : null;
+function readSessions() {
+  for (const a of AREAS) {
+    a.session = read(`${a.prefix}_token`)
+      ? { playerId: read(`${a.prefix}_player_id`), name: read(`${a.prefix}_player_name`) }
+      : null;
+  }
+  // Farben wie im Kopf-Skript: Navy nur, wenn nur die Youngstars angemeldet sind
+  const ysOnly = AREAS[1].session && !AREAS[0].session;
+  document.documentElement.dataset.area = ysOnly ? 'youngstars' : 'partykeller';
+  document.querySelector('meta[name="theme-color"]').content = ysOnly ? '#020817' : '#010f05';
 }
 
 function plural(n, one, many) { return `${n} ${n === 1 ? one : many}`; }
@@ -182,7 +188,10 @@ function plural(n, one, many) { return `${n} ${n === 1 ? one : many}`; }
 // Stand des heutigen Abends; null, wenn der Server nicht antwortet
 async function today(a) {
   try {
-    const res = await fetch(`${a.base}/api/state`);
+    // no-store: Beim Zurückblättern nimmt der Browser sonst die alte Antwort
+    // aus dem Cache — ein eben angelegtes Konto fehlt darin, und die
+    // Begrüßung verschwand
+    const res = await fetch(`${a.base}/api/state`, { cache: 'no-store' });
     if (!res.ok) return null;
     const { players } = await res.json();
     const visible = players.filter((p) => !p.hidden);
@@ -281,21 +290,33 @@ for (const row of document.querySelectorAll('.area-row')) {
   });
 }
 
-renderHello();
-renderRows();
-
 // Live-Stand nachladen. Der Server kennt den aktuellen Namen (nach einer
 // Umbenennung im Admin); ein gelöschtes Konto wird nicht mehr begrüßt.
-await Promise.all(AREAS.map(async (a) => {
-  a.today = await today(a);
-  if (a.session && a.today) {
-    const me = a.today.players.find((p) => p.id === a.session.playerId);
-    if (me) a.session.name = me.name;
-    else a.session = null;
-  }
-}));
-renderHello();
-renderRows();
+async function refresh() {
+  readSessions();
+  renderHello();
+  renderRows();
+  await Promise.all(AREAS.map(async (a) => {
+    a.today = await today(a);
+    if (a.session && a.today) {
+      const me = a.today.players.find((p) => p.id === a.session.playerId);
+      if (me) a.session.name = me.name;
+      else a.session = null;
+    }
+  }));
+  renderHello();
+  renderRows();
+}
+
+refresh();
+
+// Zurück aus Anmeldung oder Dashboard: Der Browser zeigt die Seite aus dem
+// Zwischenspeicher (bfcache), so wie sie vor dem Anmelden aussah — neu lesen.
+window.addEventListener('pageshow', (e) => {
+  if (!e.persisted) return;
+  for (const el of document.querySelectorAll('[style*="view-transition-name"]')) el.style.viewTransitionName = '';
+  refresh();
+});
 </script>
 </body>
 </html>

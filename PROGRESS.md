@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09: **Fix Startseite: Name fehlte nach „Zurück“** — nach dem
+Anmelden zeigte die Startseite beim Zurückblättern den alten Stand aus dem
+Browser-Cache ohne Begrüßung; sie liest Anmeldung und Stand jetzt neu.
 Seit 2026-10-09 (D-078): **Neue Startseite nach Entwurf S3** — wer am
 Handy schon angemeldet ist, wird mit Namenskreis begrüßt und kommt mit
 „Weiter zählen ›“ direkt ins Dashboard; beide Bereiche stehen als
