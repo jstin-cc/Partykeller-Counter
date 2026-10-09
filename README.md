@@ -138,7 +138,7 @@ Partykeller-Bereich.
 
 | Route | Screen |
 |---|---|
-| `/` | Auswahlseite: Partykeller oder Youngstars? |
+| `/` | Auswahlseite: beide Bereiche als Glas-Tafel mit dem Stand von heute („23 Getränke · 7 dabei“ bzw. „heute noch ruhig“) und Links zum TV. Ist das Handy schon angemeldet, begrüßt sie mit Namenskreis („Servus, Basti!“) und „Weiter zählen ›“ direkt ins Dashboard; bei beiden Bereichen gibt es je einen Knopf |
 | `/<bereich>/` | Nutzer-Login (Name wählen/anlegen; PIN optional, rate-limitiert). Das Konto, mit dem sich dieses Handy zuletzt angemeldet hat, steht oben. Beim Anmelden gleiten Namenskreis und Name in den Dashboard-Kopf (View Transitions; ältere Browser wechseln hart) |
 | `/<bereich>/onboarding` | Drei Willkommens-Seiten nach dem Anlegen eines Kontos (Getränke tracken, Rangliste auf dem Fernseher, Profil-Tab) mit Punkten, „Weiter“ und „Überspringen“; danach das Dashboard. Nur für neue Konten, beim Anmelden kommt sie nicht |
 | `/<bereich>/dashboard` | Nutzer-Dashboard (im Kopf ab dem ersten Abendsieg ein Lorbeer um den Namenskreis und „n× Tagessieger“) mit zwei Tabs — **Zählen** (oben „Getränke heute“, rechts daneben ▲/▼ mit dem Abstand zum eigenen Schnitt der früheren Abende bis zur gleichen Uhrzeit; darunter drei ganzflächige Knöpfe in der Getränkefarbe — antippen zählt +1, mit Heute & Gesamt direkt auf der Fläche) und **Profil** (eine Ranglisten-Karte, oben umschaltbar zwischen heute und all-time, inkl. wer direkt vor/hinter einem liegt und **„Ganze Rangliste ansehen"** als Blatt von unten mit markierter eigener Zeile, Abende, bester Abend, Ø pro Abend, Verteilung, Anteil am Haus, Abzeichen mit Zähler — u. a. 👑 Tagessieger und das 🎖 Treue-Abzeichen ab 10 Abenden). Youngstars: Bier steht zuunterst |

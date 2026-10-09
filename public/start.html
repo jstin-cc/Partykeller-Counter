@@ -4,100 +4,298 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Partykeller – Bereich wählen</title>
+<meta name="theme-color" content="#010f05">
+<script>
+  // Startseite nach Entwurf S3 (D-078): Ist das Handy nur bei den Youngstars
+  // angemeldet, trägt die Seite deren Farben, sonst die des Partykellers.
+  // Gesetzt vor dem ersten Bild, wie das Bereichs-Skript der übrigen Seiten.
+  (() => {
+    let pk = false, ys = false;
+    try { pk = !!localStorage.getItem('pk_token'); ys = !!localStorage.getItem('ys_token'); } catch {}
+    document.documentElement.dataset.area = ys && !pk ? 'youngstars' : 'partykeller';
+    if (ys && !pk) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#020817');
+  })();
+</script>
 <link rel="icon" href="assets/cones-flat.png">
-<meta name="theme-color" content="#04070d">
 <link rel="stylesheet" href="css/theme.css">
 <style>
-  /* Neutraler dunkler Auftakt zwischen beiden Welten */
-  body { background: oklch(0.13 0.015 220); }
-  .choice-wrap {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 26px;
-    padding: 28px 20px;
+  /* Bereichsfarben lokal auf eine Zeile legen — beide Bereiche stehen auf
+     derselben Seite, html[data-area] gilt aber nur für einen */
+  .area-pk {
+    --green: oklch(0.64 0.15 152); --gold: oklch(0.80 0.15 83);
+    --bg: oklch(0.15 0.035 155); --glass-edge: oklch(0.92 0.02 160 / 0.12);
   }
-  .choice-title {
-    font-family: 'Bitter', serif;
-    font-weight: 800;
-    font-size: 26px;
-    color: oklch(0.92 0.02 90);
-    text-align: center;
-    margin: 0;
+  .area-ys {
+    --green: oklch(0.72 0.17 55); --gold: oklch(0.80 0.14 75);
+    --bg: oklch(0.15 0.045 260); --glass-edge: oklch(0.92 0.02 260 / 0.12);
   }
-  .choice-cards {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
-    max-width: 760px;
+
+  body {
+    background: linear-gradient(160deg, var(--bg) 0%, oklch(0.13 0.025 200) 62%, oklch(0.13 0.03 232) 100%) fixed;
   }
-  .choice-card {
-    flex: 1 1 280px;
-    max-width: 360px;
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    text-decoration: none;
-    border-radius: var(--radius-lg);
-    border: 1px solid oklch(0.92 0.02 220 / 0.14);
-    padding: 28px 22px;
-    transition: transform 0.15s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+  .login-watermark {
+    position: fixed; left: -140px; top: -100px; width: 520px; height: 520px;
+    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
+    opacity: 0.22; pointer-events: none; z-index: 0;
   }
-  .choice-card:active { transform: scale(0.98); }
-  .choice-card:hover { transform: translateY(-3px); }
-  .choice-card .name {
-    font-family: 'Bitter', serif;
-    font-weight: 800;
-    font-size: 20px;
+  .start-logos { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .start-logos img { width: auto; object-fit: contain; }
+
+  /* Begrüßung für alle, die an diesem Handy schon angemeldet sind */
+  .hello { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; margin-top: 12px; }
+  .big-avatar {
+    width: 84px; height: 84px; font-size: 36px; font-weight: 800;
+    border: 2px solid color-mix(in oklab, var(--gold) 70%, transparent);
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--gold) 12%, transparent);
   }
-  .choice-card .hint { font-size: 13px; opacity: 0.75; }
-  .card-pk {
-    background: linear-gradient(180deg, oklch(0.21 0.04 155), oklch(0.15 0.035 155));
-    color: oklch(0.92 0.035 88);
+  .hello h1, .choose-title {
+    font-family: 'Bitter', serif; font-weight: 800; font-size: 30px; color: var(--creme); margin: 0;
+    text-align: center; text-wrap: balance;
   }
-  .card-pk:hover { border-color: oklch(0.64 0.15 152 / 0.6); box-shadow: 0 10px 34px oklch(0.64 0.15 152 / 0.22); color: oklch(0.92 0.035 88); }
-  .card-ys {
-    background: linear-gradient(180deg, oklch(0.21 0.05 260), oklch(0.15 0.045 260));
-    color: oklch(0.93 0.02 75);
+  .hello-sub { font-size: 14px; color: var(--ink-muted); display: flex; align-items: center; gap: 8px; }
+  .hello-sub:empty { display: none; }
+  .continue { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .cta {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--green); color: var(--bg); text-decoration: none;
+    font-weight: 700; font-size: 16px; border-radius: var(--radius); padding: 16px;
   }
-  .card-ys:hover { border-color: oklch(0.72 0.17 55 / 0.6); box-shadow: 0 10px 34px oklch(0.72 0.17 55 / 0.22); color: oklch(0.93 0.02 75); }
-  .card-pk .name { color: oklch(0.80 0.15 83); }
-  .card-ys .name { color: oklch(0.75 0.16 55); }
+  .cta:hover { color: var(--bg); filter: brightness(1.08); }
+
+  .divider { display: flex; align-items: center; gap: 12px; color: var(--ink-muted); font-size: 13px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: oklch(0.95 0.01 95 / 0.15); }
+
+  /* Bereiche als Glas-Tafel wie die Anmeldeliste (D-044) */
+  .tafel {
+    background: var(--surface);
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid oklch(0.92 0.02 200 / 0.12);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .area-row {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    text-decoration: none; color: var(--ink);
+    transition: background-color 0.2s ease;
+  }
+  .area-row + .area-row { border-top: 1px solid oklch(0.92 0.02 200 / 0.12); }
+  .area-row:hover { color: var(--ink); background: var(--surface-2); }
+  .area-row:active { transform: scale(0.99); }
+  .thumb {
+    width: 64px; height: 48px; flex-shrink: 0; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); border: 1px solid var(--glass-edge);
+  }
+  .thumb img { max-width: 56px; max-height: 40px; }
+  .area-row .ys-glow { filter: drop-shadow(0 0 8px oklch(0.70 0.19 40 / 0.45)); }
+  .area-text { flex: 1; min-width: 0; }
+  .area-name { font-family: 'Bitter', serif; font-weight: 700; font-size: 17px; }
+  .me-pill {
+    font-family: 'Work Sans', sans-serif; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--bg); background: var(--green); border-radius: 999px;
+    padding: 2px 8px; margin-left: 8px; vertical-align: 2px;
+  }
+  .area-state { font-size: 13px; color: var(--ink-muted); display: flex; align-items: center; gap: 7px; margin-top: 3px; }
+  .area-state:empty { display: none; }
+  .chevron { color: var(--green); font-size: 22px; }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--ink-muted); opacity: 0.5; }
+  .dot.live { background: var(--green); opacity: 1; box-shadow: 0 0 0 3px color-mix(in oklab, var(--green) 25%, transparent); }
+
+  .start-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 16px; margin-top: auto; padding-top: 12px; font-size: 13px; color: var(--ink-muted); }
+  .start-links a { color: var(--ink-muted); text-decoration: none; }
+  .start-links a:hover { color: var(--gold); }
 </style>
 </head>
 <body>
-<div class="choice-wrap">
-  <h1 class="choice-title">Wo wird heute gezählt?</h1>
-  <div class="choice-cards">
-    <a class="choice-card card-pk" href="/partykeller/">
-      <img src="assets/logo.png" alt="SV Partykeller" style="height:96px;width:auto;object-fit:contain;">
-      <div class="name">Partykeller</div>
-      <div class="hint">Zur Anmeldung ›</div>
-    </a>
-    <a class="choice-card card-ys" href="/youngstars/">
-      <img src="assets/youngstars-logo.png" alt="Youngstars" style="height:72px;width:auto;object-fit:contain;filter:drop-shadow(0 0 16px oklch(0.70 0.19 40 / 0.4));">
-      <div class="name">Youngstars</div>
-      <div class="hint">Zur Anmeldung ›</div>
-    </a>
+<div class="screen">
+  <div class="login-watermark"></div>
+
+  <div class="screen-inner" style="padding:32px 24px;gap:22px;">
+    <div class="start-logos">
+      <img src="assets/logo.png" alt="SV Partykeller" style="height:64px;">
+      <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:40px;">
+    </div>
+
+    <section id="hello" class="hello" hidden>
+      <div id="hello-avatar" class="avatar big-avatar"></div>
+      <h1 id="hello-title"></h1>
+      <div id="hello-sub" class="hello-sub"></div>
+      <div id="continue" class="continue"></div>
+    </section>
+
+    <h1 id="choose-title" class="choose-title">Wo wird heute gezählt?</h1>
+    <div id="divider" class="divider" hidden>oder Bereich wählen</div>
+
+    <nav class="tafel" aria-label="Bereich wählen">
+      <a class="area-row area-pk" href="/partykeller/" data-area="partykeller">
+        <div class="thumb"><img src="assets/logo.png" alt=""></div>
+        <div class="area-text">
+          <div class="area-name">Partykeller</div>
+          <div class="area-state"></div>
+        </div>
+        <div class="chevron">›</div>
+      </a>
+      <a class="area-row area-ys" href="/youngstars/" data-area="youngstars">
+        <div class="thumb"><img class="ys-glow" src="assets/youngstars-logo.png" alt=""></div>
+        <div class="area-text">
+          <div class="area-name">Youngstars</div>
+          <div class="area-state"></div>
+        </div>
+        <div class="chevron">›</div>
+      </a>
+    </nav>
+
+    <div class="start-links">
+      <span>Für den TV:</span>
+      <a href="/partykeller/tv">Partykeller-TV</a>
+      <a href="/youngstars/tv">Youngstars-TV</a>
+    </div>
   </div>
+
+  <img src="assets/footer-woods.png" alt="" class="footer-woods">
 </div>
-<script>
-  // Übergang (D-068): Das Logo der angetippten Karte gleitet in den Kopf der
-  // Anmeldung. Nur die gewählte Karte bekommt den Namen — beide Logos stehen
-  // auf der Anmeldeseite der Youngstars, nur eins soll sich bewegen.
-  document.querySelector('.card-pk').addEventListener('click', (e) => {
-    e.currentTarget.querySelector('img').style.viewTransitionName = 'area-logo';
+
+<script type="module">
+// Startseite nach Entwurf S3 (D-078). Wer an diesem Handy schon angemeldet
+// ist, wird begrüßt und kommt mit einem Tipp zurück ins Dashboard. Darunter
+// stehen beide Bereiche mit dem Stand von heute. Ohne Server-Antwort fehlen
+// nur die Live-Zeilen — die Links funktionieren weiter.
+
+const AREAS = [
+  { id: 'partykeller', base: '/partykeller', prefix: 'pk', label: 'Partykeller', cont: 'Weiter im Partykeller ›', cls: 'area-pk' },
+  { id: 'youngstars', base: '/youngstars', prefix: 'ys', label: 'Youngstars', cont: 'Weiter bei den Youngstars ›', cls: 'area-ys' },
+];
+
+const $ = (id) => document.getElementById(id);
+const read = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+
+// Sitzungen aus dem localStorage (Schlüssel wie in js/api.js)
+for (const a of AREAS) {
+  a.session = read(`${a.prefix}_token`)
+    ? { playerId: read(`${a.prefix}_player_id`), name: read(`${a.prefix}_player_name`) }
+    : null;
+}
+
+function plural(n, one, many) { return `${n} ${n === 1 ? one : many}`; }
+
+// Stand des heutigen Abends; null, wenn der Server nicht antwortet
+async function today(a) {
+  try {
+    const res = await fetch(`${a.base}/api/state`);
+    if (!res.ok) return null;
+    const { players } = await res.json();
+    const visible = players.filter((p) => !p.hidden);
+    const counts = visible.map((p) => p.beersToday + p.shotsToday + p.mixesToday);
+    return {
+      players,
+      total: counts.reduce((s, n) => s + n, 0),
+      active: counts.filter((n) => n > 0).length,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function setState(el, live, text) {
+  el.textContent = '';
+  const dot = document.createElement('span');
+  dot.className = live ? 'dot live' : 'dot';
+  el.append(dot, text);
+}
+
+function renderRows() {
+  for (const a of AREAS) {
+    const row = document.querySelector(`.area-row[data-area="${a.id}"]`);
+    const name = row.querySelector('.area-name');
+    name.querySelector('.me-pill')?.remove();
+    if (a.session) {
+      const pill = document.createElement('span');
+      pill.className = 'me-pill';
+      pill.textContent = 'Du';
+      name.append(pill);
+    }
+    const state = row.querySelector('.area-state');
+    if (!a.today) state.textContent = '';
+    else if (a.today.total > 0) setState(state, true, `${plural(a.today.total, 'Getränk', 'Getränke')} · ${a.today.active} dabei`);
+    else setState(state, false, 'heute noch ruhig');
+  }
+}
+
+function renderHello() {
+  const mine = AREAS.filter((a) => a.session?.name);
+  $('hello').hidden = mine.length === 0;
+  $('divider').hidden = mine.length === 0;
+  $('choose-title').hidden = mine.length > 0;
+  if (!mine.length) return;
+
+  // Bei beiden Bereichen gibt es zwei Knöpfe; der Name steht nur, wenn er
+  // in beiden gleich ist
+  const names = [...new Set(mine.map((a) => a.session.name))];
+  const name = names.length === 1 ? names[0] : null;
+  const title = $('hello-title');
+  title.textContent = '';
+  if (name) {
+    const nameText = document.createElement('span');   // nur der Name, für den Übergang
+    nameText.id = 'hello-name';
+    nameText.textContent = name;
+    title.append('Servus, ', nameText, '!');
+  } else {
+    title.textContent = 'Servus!';
+  }
+  $('hello-avatar').hidden = !name;
+  $('hello-avatar').textContent = name ? name.charAt(0).toUpperCase() : '';
+
+  const sub = $('hello-sub');
+  sub.textContent = '';
+  if (mine.length === 1 && mine[0].today) {
+    const { label, today: t } = mine[0];
+    setState(sub, t.total > 0, t.total > 0
+      ? `${label} · heute schon ${plural(t.total, 'Getränk', 'Getränke')}`
+      : `${label} · heute noch ruhig`);
+  }
+
+  const box = $('continue');
+  box.textContent = '';
+  for (const a of mine) {
+    const link = document.createElement('a');
+    link.className = `cta ${a.cls}`;
+    link.href = `${a.base}/dashboard`;
+    link.textContent = mine.length === 1 ? 'Weiter zählen ›' : a.cont;
+    // Übergang (D-068): Namenskreis und Name gleiten in den Dashboard-Kopf
+    link.addEventListener('click', () => {
+      if (!name) return;
+      $('hello-avatar').style.viewTransitionName = 'me-avatar';
+      $('hello-name').style.viewTransitionName = 'me-name';
+    });
+    box.append(link);
+  }
+}
+
+// Übergang (D-068): Das Logo der angetippten Zeile gleitet in den Kopf der
+// Anmeldung. Nur die gewählte Zeile bekommt den Namen — beide Logos stehen
+// auf der Anmeldeseite der Youngstars, nur eins soll sich bewegen.
+for (const row of document.querySelectorAll('.area-row')) {
+  row.addEventListener('click', () => {
+    row.querySelector('img').style.viewTransitionName = row.dataset.area === 'youngstars' ? 'ys-logo' : 'area-logo';
   });
-  document.querySelector('.card-ys').addEventListener('click', (e) => {
-    e.currentTarget.querySelector('img').style.viewTransitionName = 'ys-logo';
-  });
+}
+
+renderHello();
+renderRows();
+
+// Live-Stand nachladen. Der Server kennt den aktuellen Namen (nach einer
+// Umbenennung im Admin); ein gelöschtes Konto wird nicht mehr begrüßt.
+await Promise.all(AREAS.map(async (a) => {
+  a.today = await today(a);
+  if (a.session && a.today) {
+    const me = a.today.players.find((p) => p.id === a.session.playerId);
+    if (me) a.session.name = me.name;
+    else a.session = null;
+  }
+}));
+renderHello();
+renderRows();
 </script>
 </body>
 </html>

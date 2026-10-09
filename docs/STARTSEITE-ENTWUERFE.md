@@ -1,6 +1,8 @@
 # Startseite / Bereichsauswahl: Entwürfe S1–S4 (Stand 2026-10-09)
 
-**Status:** Entwürfe, noch nicht umgesetzt — wartet auf Auswahl.
+**Status:** S3 ist umgesetzt (D-078), als eigenständige Seite: ohne
+Anmeldung steht die Glas-Tafel unter „Wo wird heute gezählt?“. S1, S2 und
+S4 bleiben Entwürfe.
 
 Die Bilder in `docs/startseite/` sind echte HTML-Mockups mit `theme.css` und
 den Assets aus `public/assets/`, im Browser aufgenommen (Desktop 1440 px,
@@ -67,7 +69,7 @@ Youngstars-TV“**. Damit findet man die TV-Ansicht am Laptop ohne die Adresse.
   `GET /partykeller/api/state` und `/youngstars/api/state`, einmal beim
   Laden. Es gibt keinen WebSocket und keine Server-Änderung.
 
-## S3 – „Weiter als …“ (Baustein, kombinierbar)
+## S3 – „Weiter als …“ ✅ umgesetzt (D-078)
 
 ![S3](startseite/s3.png)
 

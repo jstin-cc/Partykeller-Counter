@@ -1792,3 +1792,35 @@ umbricht.
 Beschriftungen am Handy auf zwei Zeilen um. Der Name sitzt ohnehin dort,
 wo man ihn ändern will.
 
+## D-078 (2026-10-09): Startseite nach Entwurf S3 („Weiter als …“)
+
+**Entscheidung:** Die Bereichsauswahl `/` (`public/start.html`) folgt
+Entwurf S3 aus `docs/STARTSEITE-ENTWUERFE.md`.
+
+- Ist das Handy in einem Bereich angemeldet (`pk_token` bzw. `ys_token`),
+  begrüßt die Seite mit großem Namenskreis, „Servus, ‹Name›!“, einer Zeile
+  zum Stand des Bereichs und dem Knopf **„Weiter zählen ›“** direkt ins
+  Dashboard. Namenskreis und Name gleiten dabei wie beim Anmelden in den
+  Dashboard-Kopf (D-068).
+- Ist das Handy in **beiden** Bereichen angemeldet, gibt es zwei Knöpfe
+  („Weiter im Partykeller ›“, „Weiter bei den Youngstars ›“). Der Name
+  steht nur, wenn er in beiden gleich ist.
+- Darunter, bzw. ohne Anmeldung unter „Wo wird heute gezählt?“, stehen
+  beide Bereiche als Glas-Tafel wie die Anmeldeliste. Jede Zeile zeigt
+  Logo, Namen, die Pille **Du** am eigenen Bereich und den Stand von
+  heute: „23 Getränke · 7 dabei“ oder „heute noch ruhig“. Eine Zeile führt
+  wie bisher zur Anmeldung, dort lässt sich auch das Konto wechseln.
+- Unten stehen Links zur TV-Ansicht beider Bereiche.
+- Die Seite trägt die Farben des Partykellers, mit Zapfen und Wald. Nur
+  wenn das Handy ausschließlich bei den Youngstars angemeldet ist, trägt
+  sie Navy.
+- Live-Daten kommen einmal beim Laden aus `GET /<bereich>/api/state`.
+  Der Name kommt vom Server, damit Umbenennungen im Admin greifen. Ein
+  gelöschtes Konto wird nicht begrüßt. Antwortet der Server nicht, fehlen
+  nur die Live-Zeilen. Es gibt keine Server-Änderung und keine neue
+  Abhängigkeit.
+
+**Begründung:** Wunsch des Nutzers. Die alte Auswahlseite war leer und
+fast schwarz und hatte nichts vom Look der übrigen Seiten. Der häufigste
+Weg ist ein Gast, der wiederkommt. Er braucht jetzt einen Tipp statt zwei
+Seiten.
