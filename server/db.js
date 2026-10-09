@@ -12,11 +12,12 @@ export function partyDayStartMs(now = Date.now()) {
   return d.getTime();
 }
 
-// 'YYYY-MM-DD' -> [startMs, endMs) des Party-Tags (06:00 bis 06:00 Folgetag)
+// 'YYYY-MM-DD' -> [startMs, endMs) des Party-Tags (06:00 bis 06:00 Folgetag).
+// Das Ende als eigenes Datum, nicht als +24 h: In der Nacht der Zeitumstellung
+// hat der Party-Tag 23 bzw. 25 Stunden (D-084).
 export function partyDayRangeMs(day) {
   const [y, m, d] = day.split('-').map(Number);
-  const start = new Date(y, m - 1, d, 6, 0, 0, 0).getTime();
-  return [start, start + 24 * 60 * 60 * 1000];
+  return [new Date(y, m - 1, d, 6, 0, 0, 0).getTime(), new Date(y, m - 1, d + 1, 6, 0, 0, 0).getTime()];
 }
 
 export function validDayString(day) {
@@ -144,19 +145,22 @@ export function createDb(dbPath) {
     // Tages-Aggregate über VERGANGENE Party-Tage (ts < Tagesstart), D-047:
     // sie laufen einmal in den Historien-Cache; der laufende Tag kommt aus den
     // *Today-Abfragen (ts >= Tagesstart, über idx_drink_log_ts) dazu.
-    // Party-Tag beginnt 06:00, daher ts um 6 h (21600 s) zurückschieben, bevor
-    // das Datum gebildet wird (entspricht partyDayStartMs, aber in SQL).
+    // Party-Tag beginnt 06:00, daher erst in Ortszeit umrechnen und DANN 6 h
+    // zurückschieben, bevor das Datum gebildet wird (entspricht
+    // partyDayStartMs, aber in SQL). Andersherum (erst 6 h abziehen, dann
+    // Ortszeit) rutschte in der Nacht der Zeitumstellung die Stunde 05:00–06:00
+    // bzw. 06:00–07:00 in den falschen Abend (D-084).
     // Rekorde: Getränke je Sorte, Spieler und Party-Tag
     pastDayCounts: db.prepare(
       `SELECT drink, player_id,
-              date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
+              date(ts/1000, 'unixepoch', 'localtime', '-6 hours') AS day,
               COUNT(*) AS n
        FROM drink_log WHERE ts < ?
        GROUP BY drink, player_id, day`
     ),
     // Verlauf eines Abends: Getränke je Party-Tag und Uhr-Stunde (alle zusammen)
     pastArchiveHours: db.prepare(
-      `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
+      `SELECT date(ts/1000, 'unixepoch', 'localtime', '-6 hours') AS day,
               CAST(strftime('%H', ts/1000, 'unixepoch', 'localtime') AS INTEGER) AS hour,
               COUNT(*) AS n
        FROM drink_log WHERE ts < ?
@@ -175,7 +179,7 @@ export function createDb(dbPath) {
     deleteSetting: db.prepare('DELETE FROM settings WHERE key = ?'),
     // Persönliche Statistik: Getränke des Spielers je Party-Tag
     playerDays: db.prepare(
-      `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day, COUNT(*) AS n
+      `SELECT date(ts/1000, 'unixepoch', 'localtime', '-6 hours') AS day, COUNT(*) AS n
        FROM drink_log WHERE player_id = ?
        GROUP BY day ORDER BY day`
     ),
@@ -190,7 +194,7 @@ export function createDb(dbPath) {
     ),
     // Gesamt je Spieler und Party-Tag inkl. letztem Zeitstempel (Tagessieger-Tiebreak)
     pastDayPlayerTotals: db.prepare(
-      `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
+      `SELECT date(ts/1000, 'unixepoch', 'localtime', '-6 hours') AS day,
               player_id, COUNT(*) AS n, MAX(ts) AS last_ts
        FROM drink_log WHERE ts < ?
        GROUP BY day, player_id`
@@ -202,7 +206,7 @@ export function createDb(dbPath) {
     ),
     // Erstes Getränk jedes Party-Tags (SQLite: bare column folgt MIN(ts))
     pastDayFirstLogs: db.prepare(
-      `SELECT date((ts/1000) - 21600, 'unixepoch', 'localtime') AS day,
+      `SELECT date(ts/1000, 'unixepoch', 'localtime', '-6 hours') AS day,
               player_id, MIN(ts) AS ts
        FROM drink_log WHERE ts < ?
        GROUP BY day`
