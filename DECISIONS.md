@@ -1919,3 +1919,32 @@ wie bisher hart. Es gibt keine neue Abhängigkeit.
 
 **Begründung:** Wunsch des Nutzers („gefällt mir, umsetzen“). Die Seiten
 sollen wie eine App wirken statt wie einzelne Seiten.
+
+## D-081 (2026-10-09): Seitenübergänge auch ohne View Transitions (Firefox)
+
+**Entscheidung:** Firefox und Safari vor 18.2 können keine View Transitions
+zwischen zwei Seiten. Dort wechselten die Seiten bisher hart. Für sie spielt
+`js/vt.js` den Übergang jetzt auf der neuen Seite selbst nach. Erkannt wird
+das daran, dass `CSSViewTransitionRule` fehlt.
+
+- Die alte Seite merkt sich zusätzlich, wo die benannten Elemente standen
+  (Logo, Zurück, Titel, Namenskreis, Name), und die Grundfarbe des
+  Bereichs.
+- Die neue Seite setzt schon im `<head>` `data-vt-ersatz`. Die
+  `.vt-stufe`-Blöcke gleiten aus der Richtung herein (P2 + P6), und der
+  Titel blendet ein.
+- Sobald die Seite steht, fliegen gleichnamige Elemente von ihrer alten
+  Stelle an die neue (FLIP mit der Web Animations API). Das sind der
+  Namenskreis, „Abend-Archiv“ → Titel und das Logo aus der Kachel (P4).
+  Was schon an derselben Stelle steht (Kopf, Zapfen), bleibt einfach stehen
+  (P1, P3).
+- Bei der Farbflut (P5) liegt die alte Bereichsfarbe hinter der Seite, und
+  der `<body>` wird als Kreis vom Tipp aus aufgedeckt.
+- Auch beim Zurückblättern aus dem Zwischenspeicher wird der Übergang
+  nachgespielt.
+
+In Chrome und ab Safari 18.2 bleibt alles bei D-080. Bei „Bewegung
+reduzieren“ passiert nichts.
+
+**Begründung:** Rückmeldung des Nutzers: „Funktioniert überhaupt nicht in
+Firefox“.
