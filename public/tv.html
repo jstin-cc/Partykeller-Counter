@@ -148,7 +148,20 @@
   }
   @media (prefers-reduced-motion: reduce) { .row.pk-rowflash::after { animation: none; } }
   .col-rank { width: 70px; font-family:'Bitter',serif; font-weight:700; font-size:24px; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
-  .col-name { flex: 1; font-family:'Bitter',serif; font-weight:700; font-size:28px; }
+  .col-name { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; font-family:'Bitter',serif; font-weight:700; font-size:28px; }
+  /* Aufstiegspfeil (D-079): „▲ 2" neben dem Namen, blendet nach ~4 s aus */
+  .climb {
+    font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--gold);
+    white-space: nowrap; font-variant-numeric: tabular-nums; animation: climb 4.2s ease both;
+  }
+  @keyframes climb {
+    0% { opacity: 0; transform: translateY(10px); }
+    8% { opacity: 1; transform: none; }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes climb-fade { 0%, 100% { opacity: 0; } 6%, 88% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .climb { animation-name: climb-fade; } }
   .col-beer { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--amber); font-variant-numeric:tabular-nums; }
   .col-shot { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--brick); font-variant-numeric:tabular-nums; }
   .col-mix { width:120px; text-align:right; font-family:'Bitter',serif; font-weight:700; font-size:28px; color:var(--mix); font-variant-numeric:tabular-nums; }
@@ -320,6 +333,7 @@ import { connectState } from './js/ws-client.js';
 import { factList, fmtDay } from './js/facts.js';
 import { onSeason, setSeasonEnabled, newYear, mmss } from './js/season.js';
 import { createSeasonFx } from './js/seasonfx.js';
+import { rollNumber } from './js/motion.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -357,7 +371,6 @@ function renderQr(url) {
 const fmtMixes = (n) => `${n} ${n === 1 ? 'Mische' : 'Mischen'}`;
 
 // kurze Animationen (Reflow erzwingt Neustart)
-function pop(el) { el.classList.remove('pk-pop'); void el.offsetWidth; el.classList.add('pk-pop'); }
 function flash(el) { el.classList.remove('pk-flash'); void el.offsetWidth; el.classList.add('pk-flash'); }
 
 const prevPod = { 1: null, 2: null, 3: null };
@@ -366,16 +379,17 @@ function fillPodium(el, p, slot) {
   el.hidden = !p;
   if (!p) { prevPod[slot] = null; return; }
   const totalEl = el.querySelector('[data-f=total]');
+  const prev = prevPod[slot];
+  const climbed = !modeSwitching && prev && prev.id === p.id && p.total > prev.total;
   el.querySelector('[data-f=name]').textContent = p.name;
-  totalEl.textContent = p.total;
+  // gleicher Mensch, mehr Getränke: die Zahl rollt hoch (D-079)
+  if (climbed) rollNumber(totalEl, p.total);
+  else totalEl.textContent = p.total;
   el.querySelector('[data-f=beers]').textContent = `${p.beers} Bier`;
   el.querySelector('[data-f=shots]').textContent = `${p.shots} Shots`;
   el.querySelector('[data-f=mixes]').textContent = fmtMixes(p.mixes);
 
-  const prev = prevPod[slot];
-  if (!modeSwitching && prev && prev.id === p.id && p.total > prev.total) {
-    pop(totalEl);                                    // gleicher Mensch, mehr Getränke
-  } else if (!modeSwitching && prev && prev.id !== p.id) {
+  if (!modeSwitching && prev && prev.id !== p.id) {
     flash(el.querySelector('.podium-card'));         // neuer Name auf diesem Podestplatz
     if (slot === 1 && currentMode !== 'archive') seasonLeader(p.name);
   }
@@ -411,10 +425,41 @@ function rowsIn(h) {
   return Math.max(1, Math.floor((h + GAP) / (ROW_H + GAP)));
 }
 
-function popEl(el) { el.classList.remove('pk-pop'); void el.offsetWidth; el.classList.add('pk-pop'); }
 function rowFlash(el) { el.classList.remove('pk-rowflash'); void el.offsetWidth; el.classList.add('pk-rowflash'); }
 
-// prev = Vorwerte desselben Spielers; gestiegene Zähler bekommen direkt „Pop",
+// Aufstieg in der Rangliste (D-079): „▲ n" neben dem Namen, ein paar Sekunden
+// lang. Die Zeilen werden bei Umsortierung neu gebaut — der Pfeil läuft dann
+// mit negativer Verzögerung an der Stelle weiter, an der er gerade war.
+const CLIMB_MS = 4200;
+const CLIMB_START = 450;    // erst nachdem die Zeile an ihren Platz geglitten ist
+const climbs = {};          // id -> { n, at }
+let prevRanks = null;       // id -> Platz beim letzten Stand (gleicher Modus)
+
+function noteClimbs(rows) {
+  const ranks = new Map(rows.map((r) => [r.id, r.rank]));
+  if (prevRanks && !modeSwitching) {
+    for (const r of rows) {
+      const before = prevRanks.get(r.id);
+      if (r.rank > 3 && before && before > r.rank) climbs[r.id] = { n: before - r.rank, at: Date.now() };
+    }
+  }
+  prevRanks = ranks;
+}
+
+function climbChip(id) {
+  const c = climbs[id];
+  if (!c) return null;
+  const elapsed = Date.now() - c.at;
+  if (elapsed > CLIMB_START + CLIMB_MS) { delete climbs[id]; return null; }
+  const chip = document.createElement('span');
+  chip.className = 'climb';
+  chip.textContent = `▲ ${c.n}`;
+  chip.style.animationDelay = `${CLIMB_START - elapsed}ms`;
+  chip.addEventListener('animationend', () => chip.remove(), { once: true });
+  return chip;
+}
+
+// prev = Vorwerte desselben Spielers; gestiegene Zähler rollen hoch (D-079),
 // die ganze Zeile leuchtet kurz auf.
 function buildRow(p, prev) {
   const row = document.createElement('div');
@@ -431,14 +476,18 @@ function buildRow(p, prev) {
     const cell = document.createElement('div');
     cell.className = cls;
     // Die Gesamtzahl steht in der gefüllten Pille, alles andere direkt in der Zelle
-    if (cls === 'col-total') {
-      const pill = document.createElement('span');
-      pill.textContent = text;
-      cell.appendChild(pill);
+    // (der Name ebenfalls in einem eigenen Span, daneben ggf. der Aufstiegspfeil)
+    const up = key && prev && p[key] > prev[key];
+    if (cls === 'col-total' || cls === 'col-name') {
+      const span = document.createElement('span');
+      span.textContent = up ? prev[key] : text;
+      cell.appendChild(span);
+      const chip = cls === 'col-name' && climbChip(p.id);
+      if (chip) cell.appendChild(chip);
     } else {
-      cell.textContent = text;
+      cell.textContent = up ? prev[key] : text;
     }
-    if (key && prev && p[key] > prev[key]) (cell.firstElementChild ?? cell).classList.add('pk-pop');
+    if (up) rollNumber(cell.firstElementChild ?? cell, text);
     row.appendChild(cell);
   }
   if (prev && p.total > prev.total) row.classList.add('pk-rowflash');
@@ -534,8 +583,8 @@ function updateRowsInPlace(list) {
     const set = (cls, val, key) => {
       const cell = el.querySelector('.' + cls);
       const target = cell.firstElementChild ?? cell;   // Gesamt steht in der Pille
-      if (target.textContent !== String(val)) target.textContent = val;
-      if (key && prev && val > prev[key]) popEl(target);
+      if (key && prev && val > prev[key]) rollNumber(target, val);
+      else if (target.textContent !== String(val)) target.textContent = val;
     };
     set('col-rank', p.rank);
     set('col-name', p.name);
@@ -673,6 +722,7 @@ function applyState(state, mode) {
   const suffix = mode === 'today' ? 'heute' : mode === 'archive' ? 'an dem Abend' : 'gesamt';
   $('totals').textContent = `${beers} Bier · ${shots} Shots · ${fmtMixes(mixes)} ${suffix}`;
 
+  noteClimbs(rows);
   fillPodium($('pod-1'), rows[0], 1);
   fillPodium($('pod-2'), rows[1], 2);
   fillPodium($('pod-3'), rows[2], 3);
