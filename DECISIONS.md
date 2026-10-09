@@ -2026,3 +2026,20 @@ achten, dass es auch auf Firefox und auf dem iPhone läuft“.
 **Begründung:** Wunsch des Nutzers nach einer vollständigen Prüfung auf
 Bugs und Unsauberkeiten. Zeitumstellung und Absturz waren echte Fehler
 (nachgestellt und nach dem Fix gegengeprüft), der Rest Härtung.
+
+## D-085 (2026-10-09): `allowScripts` für better-sqlite3; Hilfe bei Node-Wechsel
+
+**Entscheidung:** `package.json` erhält `"allowScripts": { "better-sqlite3":
+true }` (ohne Versions-Pin). README bekommt einen Abschnitt zum Fehler
+„was compiled against a different Node.js version“ mit
+`npm rebuild better-sqlite3` als Abhilfe.
+
+**Begründung:** Der Nutzer hat auf Node 24 gewechselt; im alten
+`node_modules` lag noch das Binary für Node 22, und `npm install` baut es
+bei unverändertem Paket nicht neu — der Server startete nicht. npm 11.16
+warnt außerdem bei jedem Install, dass das Install-Skript von
+better-sqlite3 nicht freigegeben ist; laut npm-Doku wird eine künftige
+Version solche Skripte blockieren, dann käme gar kein Binary mehr an.
+Name ohne Pin, damit die Freigabe bei Updates im `^12`-Bereich nicht
+erneut nötig ist. Ältere npm-Versionen ignorieren das Feld. Keine neue
+Dependency.

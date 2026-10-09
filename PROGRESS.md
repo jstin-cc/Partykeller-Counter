@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09 (D-085): **Start nach Node-Update** — README erklärt den
+Fehler „compiled against a different Node.js version“
+(`npm rebuild better-sqlite3`), `package.json` gibt das Install-Skript von
+better-sqlite3 für npm ≥ 11.16 frei (`allowScripts`).
 Seit 2026-10-09 (D-084): **Gesamtprüfung mit Fixes** — Abende sind in
 der Nacht der Zeitumstellung (nächste: 24./25.10.) richtig getrennt, eine
 kaputte Anfrage kann den Server nicht mehr abschießen, um 06:00 springen
