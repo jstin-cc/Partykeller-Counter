@@ -1,13 +1,13 @@
 import { WebSocketServer } from 'ws';
 import { config } from './config.js';
-import { verifyToken, tokenArea, hashPin } from './auth.js';
+import { verifyToken, tokenArea, hashPin, checkPassword } from './auth.js';
 import { validName, validPin, validFactTitle, validFactText, validNightName, normalizeJoinUrl } from './validate.js';
-import { validDayString } from './db.js';
+import { validDayString, partyDayStartMs } from './db.js';
 
 // Nachrichten-Contract siehe PLAN.md §5; Server validiert alles.
 // Ein Handler-Satz pro Bereich (D-019): db und Increment-Buckets hängen am
 // jeweiligen Bereich, damit sich Partykeller und Youngstars nie vermischen.
-function createHandlers(area) {
+function createHandlers(area, loginLimiter) {
   const db = area.db;
 
   return {
@@ -172,12 +172,20 @@ function createHandlers(area) {
       if (!db.deletePlayer(id)) throw new Error('Nutzer nicht gefunden');
     },
 
-    reset(auth, { confirm, password }) {
+    reset(auth, { confirm, password }, ip) {
       requireAdmin(auth);
       if (confirm !== 'RESET') throw new Error('Reset braucht confirm: "RESET"');
       // Eigenes Lösch-Passwort (RESET_PASSWORD, getrennt vom Admin-Login);
       // gilt für beide Bereiche, löscht aber nur die DB dieses Bereichs (D-019).
-      if (password !== config.resetPassword) throw new Error('Falsches Passwort');
+      // Zeitkonstant verglichen und mit derselben Fehlversuch-Sperre wie der
+      // Login und das Einspielen einer Sicherung (D-084).
+      const wait = loginLimiter.blockedFor(ip);
+      if (wait !== null) throw new Error(`Zu viele Fehlversuche – bitte ${wait} Sekunden warten.`);
+      if (!checkPassword(password, config.resetPassword)) {
+        loginLimiter.fail(ip);
+        throw new Error('Falsches Passwort');
+      }
+      loginLimiter.clear(ip);
       db.resetAll();
     },
 
@@ -229,13 +237,13 @@ function createIncrementThrottle() {
 // Ein WebSocketServer pro Bereich: /partykeller/ws und /youngstars/ws
 // (Alt-Pfad /ws bleibt für den Partykeller erhalten). Broadcasts gehen nur an
 // die Clients des eigenen Bereichs; area.broadcast wird hier gesetzt.
-export function setupWs(server, areas) {
+export function setupWs(server, areas, { loginLimiter }) {
   for (const area of areas) {
     // maxPayload: die größte legitime Nachricht (Fact-Text) ist unter 1 KB;
     // Standard wären 100 MB, die ein Client dem Server aufdrücken könnte.
     const wss = new WebSocketServer({ noServer: true, maxPayload: 16 * 1024 });
     wss.on('error', (err) => console.error(`[${area.id}] WebSocket-Server: ${err.message}`));
-    const handlers = createHandlers(area);
+    const handlers = createHandlers(area, loginLimiter);
     const allowIncrement = createIncrementThrottle();
     area.wss = wss;
 
@@ -308,6 +316,22 @@ export function setupWs(server, areas) {
 
     armFactTimer();
 
+    // Tageswechsel (D-084): Um 06:00 beginnt ein neuer Party-Tag, und alle
+    // Heute-Werte springen auf 0. Ohne eigenen Broadcast sähen TV und Handys
+    // das erst beim nächsten Getränk — der TV im Modus „Heute" zeigte bis
+    // dahin den ganzen Tag die Zahlen der letzten Nacht.
+    let dayTimer = null;
+    function armDayTimer() {
+      clearTimeout(dayTimer);
+      // 06:00 des Folgetags per Datum, nicht +24 h (Zeitumstellung)
+      const next = new Date(partyDayStartMs());
+      next.setDate(next.getDate() + 1);
+      // eine Sekunde Luft, damit der State sicher schon zum neuen Tag gehört
+      dayTimer = setTimeout(() => { area.broadcast(); armDayTimer(); }, next.getTime() - Date.now() + 1000);
+      dayTimer.unref?.();
+    }
+    armDayTimer();
+
     // Heartbeat (D-046): Handys im Standby oder ohne WLAN verschwinden nicht
     // von selbst aus wss.clients — erst das TCP-Timeout nach Minuten räumt sie
     // weg, bis dahin füllt jeder Broadcast ihre Sendepuffer. Deshalb alle 30 s
@@ -322,7 +346,9 @@ export function setupWs(server, areas) {
     }, HEARTBEAT_MS);
     heartbeat.unref?.();
 
-    wss.on('connection', (ws) => {
+    wss.on('connection', (ws, req) => {
+      // Schlüssel fürs Fehlversuch-Limit wie bei Express' req.ip
+      const ip = req?.socket?.remoteAddress ?? '';
       // Ohne 'error'-Listener wirft Node bei einem kaputten Frame (ungültiges
       // UTF-8, zu große Nachricht) eine unbehandelte Exception und der ganze
       // Server stirbt (D-046). ws schließt die Verbindung danach selbst.
@@ -342,7 +368,8 @@ export function setupWs(server, areas) {
           return;
         }
 
-        const handler = handlers[msg?.type];
+        // Nur eigene Handler: Object.hasOwn hält „constructor" & Co. draußen
+        const handler = Object.hasOwn(handlers, msg?.type ?? '') ? handlers[msg.type] : null;
         if (!handler) {
           ws.send(JSON.stringify({ type: 'error', message: `Unbekannter Nachrichtentyp: ${msg?.type}` }));
           return;
@@ -366,7 +393,7 @@ export function setupWs(server, areas) {
         }
 
         try {
-          handler(auth, msg);
+          handler(auth, msg, ip);
           area.broadcast();
         } catch (err) {
           ws.send(JSON.stringify({ type: 'error', message: err.message }));
@@ -376,7 +403,15 @@ export function setupWs(server, areas) {
   }
 
   server.on('upgrade', (req, socket, head) => {
-    const { pathname } = new URL(req.url, 'http://localhost');
+    // Kaputte Adresse (z. B. „GET http://[") wirft in new URL — ohne
+    // try/catch riss das den ganzen Server mit (D-084)
+    let pathname;
+    try {
+      ({ pathname } = new URL(req.url, 'http://localhost'));
+    } catch {
+      socket.destroy();
+      return;
+    }
     const area =
       areas.find((a) => pathname === `${a.base}/ws`) ??
       (pathname === '/ws' ? areas[0] : null);   // Alt-Pfad => Partykeller

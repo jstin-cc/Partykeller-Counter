@@ -185,7 +185,7 @@ function createApiRouter(area) {
   router.post('/login', (req, res) => {
     if (rateLimited(req, res)) return;
     const { playerId, pin } = req.body ?? {};
-    const player = playerId ? db.getPlayer(playerId) : null;
+    const player = typeof playerId === 'string' && playerId ? db.getPlayer(playerId) : null;
     if (!player) {
       loginLimiter.fail(req.ip);
       return res.status(401).json({ error: 'Name oder PIN falsch' });
@@ -270,11 +270,17 @@ app.use((err, req, res, next) => {
     return res.status(413).json({ error: backup ? 'Sicherung ist zu groß (max. 20 MB)' : 'Anfrage ist zu groß' });
   }
   if (err instanceof SyntaxError && 'body' in err) return res.status(400).json({ error: 'Datei ist kein gültiges JSON' });
-  return next(err);
+  if (res.headersSent) return next(err);
+  // Alles andere: knapp als JSON, ohne Stacktrace (Express' Standardseite
+  // zeigte sonst Dateipfade und Code-Zeilen jedem im WLAN, D-084)
+  const status = Number.isInteger(err?.status) && err.status >= 400 ? err.status : 500;
+  if (status >= 500) console.error(`${req.method} ${req.path}: ${err?.stack ?? err}`);
+  return res.status(status).json({ error: status >= 500 ? 'Interner Fehler' : 'Ungültige Anfrage' });
 });
 
 const server = app.listen(config.port, () => {
   console.log(`Partykeller-Counter läuft auf http://0.0.0.0:${config.port}`);
 });
 
-setupWs(server, areas);
+// Dieselbe Fehlversuch-Sperre gilt auch fürs Lösch-Passwort beim Reset (WS)
+setupWs(server, areas, { loginLimiter });

@@ -250,7 +250,7 @@ function renderHello() {
     title.textContent = 'Servus!';
   }
   $('hello-avatar').hidden = !name;
-  $('hello-avatar').textContent = name ? name.charAt(0).toUpperCase() : '';
+  $('hello-avatar').textContent = name ? ([...name][0]?.toUpperCase() ?? '') : '';
 
   const sub = $('hello-sub');
   sub.textContent = '';
