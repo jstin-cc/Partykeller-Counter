@@ -7,6 +7,12 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09 (D-084): **Gesamtprüfung mit Fixes** — Abende sind in
+der Nacht der Zeitumstellung (nächste: 24./25.10.) richtig getrennt, eine
+kaputte Anfrage kann den Server nicht mehr abschießen, um 06:00 springen
+TV und Handys von selbst auf den neuen Abend, Reset-Passwort mit
+Fehlversuch-Sperre, Downloads in Safari/Firefox robuster, Emoji-Namen
+im Namenskreis.
 Seit 2026-10-09 (D-083): **Fix Firefox: Wechsel zur Nutzerauswahl ohne
 Haken** — kein heller Zwischenrahmen mehr, der Namenskreis fliegt sichtbar
 in seine Zeile. Neue Regel: alles muss auch in Firefox und auf dem iPhone
@@ -454,6 +460,22 @@ Repo liegt (`public/assets/youngstars-logo.png`, Icons dann neu erzeugen).
 - [x] Abend-Archiv: ±1-Korrektur raus, Sprung ins Protokoll (D-076)
 - [x] Abend-Archiv: Name anklickbar statt Knopf „Benennen“ (D-077)
 - [ ] Inspiration landonorris.com: Entwürfe L1, L2, L3, L5 (warten auf Auswahl)
+
+## Verifikation (2026-10-09, D-084)
+
+Server: Anfrage `GET http://[` mit Upgrade-Header — vorher Absturz, jetzt
+läuft `/health` weiter. Zeitumstellung mit `TZ=Europe/Berlin` und
+Test-Log um 26.10.2025 und 29.03.2026: vorher ein Schein-Abend 26.10. mit
+falscher Siegerin und fehlende Einträge im Protokoll des 25.10., jetzt
+stimmen Archiv, Abend-Detail und Protokoll überein (4/1/1/1). Reset per WS:
+richtiges Passwort setzt zurück, nach 5 falschen kommt „Zu viele
+Fehlversuche“. `constructor` als Nachrichtentyp → „Unbekannter
+Nachrichtentyp“. Login mit Objekt als `playerId` → 401 statt HTML-Stacktrace.
+Nächster 06:00-Zeitpunkt auch über beide Umstellungen richtig.
+Browser (Firefox 157 per puppeteer-core/BiDi und Chromium): Konto
+„🍺Tom…“ zeigt 🍺 im Namenskreis auf Dashboard, Startseite und
+Anmeldung; Sicherung im Admin kommt als Datei an; keine Konsolenfehler.
+iPhone/Safari nicht testbar — nur Web-Standards verwendet.
 
 ## Verifikation (2026-09-10, D-049)
 

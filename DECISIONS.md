@@ -1983,3 +1983,46 @@ kam. Der Nutzer sah das als kurzes Haken mit einer Art Anmeldescreen.
 
 **Begründung:** Rückmeldung und Wunsch des Nutzers: „Bitte immer darauf
 achten, dass es auch auf Firefox und auf dem iPhone läuft“.
+
+## D-084 (2026-10-09): Gesamtprüfung — Zeitumstellung, Absturz, Tageswechsel, Kleinkram
+
+**Entscheidung:** Nach einer Durchsicht der ganzen App behoben:
+- **Party-Tag in SQL zeitumstellungsfest.** Die Tagesbildung in SQL zog
+  erst 6 h vom UTC-Zeitstempel ab und rechnete dann in Ortszeit. In der
+  Nacht der Zeitumstellung lag sie damit eine Stunde neben der Rechnung in
+  JS (`partyDayStartMs`): Getränke von 05:00–06:00 (Herbst) bzw.
+  06:00–07:00 (Frühjahr) landeten im falschen Abend, das Archiv zeigte einen
+  Schein-Abend mit falschem Sieger. Jetzt `date(ts/1000, 'unixepoch',
+  'localtime', '-6 hours')` — erst Ortszeit, dann 6 h zurück. Ebenso endet
+  `partyDayRangeMs` am 06:00 des Folgetags statt nach festen 24 h (ein
+  Party-Tag hat dann 23 bzw. 25 Stunden). Betrifft konkret die Nacht vom
+  24. auf den 25.10.2026.
+- **Kein Absturz durch kaputte Adresse.** Eine WebSocket-Anfrage mit
+  ungültiger Adresse (z. B. `GET http://[`) ließ `new URL` im
+  `upgrade`-Handler werfen und riss den ganzen Server mit. Jetzt
+  abgefangen, die Verbindung wird verworfen.
+- **Broadcast um 06:00.** Beim Wechsel des Party-Tags schickt der Server
+  von sich aus den neuen Stand. Vorher sahen TV („Heute“) und Handys die
+  Zahlen der letzten Nacht, bis jemand das nächste Getränk zählte.
+- **Lösch-Passwort beim Reset** wird zeitkonstant verglichen
+  (`checkPassword`) und läuft durch dieselbe Fehlversuch-Sperre wie Login
+  und Sicherungs-Import (5 Fehlversuche → 60 s Sperre je IP).
+- WebSocket-Nachrichten finden nur echte Handler (`Object.hasOwn`), nicht
+  `constructor` & Co.
+- Unerwartete Fehler in der REST-API kommen als knappes JSON statt als
+  Express-Fehlerseite mit Stacktrace und Dateipfaden; `/api/login` prüft,
+  dass `playerId` ein Text ist.
+- Downloads (Sicherung, CSV, Story-Bild) geben die Blob-Adresse erst nach
+  30 s frei statt sofort nach dem Klick — sonst kann Safari/Firefox den
+  Download abbrechen (Regel 8).
+- Namenskreise auf Start, Anmeldung und Dashboard nehmen das erste
+  *Zeichen* (`[...name][0]`) statt der ersten UTF-16-Einheit — bei einem
+  Namen mit Emoji vorn stand sonst ein kaputtes Zeichen (der Admin machte
+  es schon richtig).
+- Anmeldeliste: Nach „Zurück“ aus dem Dashboard trug die zuletzt
+  angetippte Zeile noch die Übergangsnamen; ein Tipp auf eine andere Zeile
+  vergab sie doppelt, und der Browser ließ den Übergang ausfallen.
+
+**Begründung:** Wunsch des Nutzers nach einer vollständigen Prüfung auf
+Bugs und Unsauberkeiten. Zeitumstellung und Absturz waren echte Fehler
+(nachgestellt und nach dem Fix gegengeprüft), der Rest Härtung.
