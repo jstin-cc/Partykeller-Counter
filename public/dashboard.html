@@ -46,10 +46,13 @@
     width: 100%; max-width: 480px; max-height: 86vh;
     padding: 18px 20px 24px 20px;
     display: flex; flex-direction: column; gap: 14px;
-    animation: sheet-up 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
-  @keyframes sheet-up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .board-sheet { animation: none; } }
+  /* Griff oben am Blatt: daran (oder am Kopf) nach unten wischen schließt (D-079) */
+  .sheet-grab {
+    align-self: center; flex-shrink: 0; width: 40px; height: 5px; margin: -8px 0 -4px;
+    border-radius: 999px; background: var(--ink-muted); opacity: 0.5;
+  }
+  .board-grip { cursor: grab; }
   #board-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
   .board-row {
     display: flex; align-items: center; gap: 12px; padding: 10px 14px;
@@ -418,8 +421,9 @@
 <!-- Ganze Rangliste (D-030): dasselbe Blatt für „heute" und „all-time",
      oben umschaltbar, die eigene Zeile ist markiert und wird angesteuert. -->
 <div id="board-modal" class="modal-backdrop" hidden>
-  <div class="board-sheet">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+  <div class="board-sheet" role="dialog" aria-modal="true" aria-labelledby="board-title">
+    <div class="sheet-grab board-grip" aria-hidden="true"></div>
+    <div class="board-grip" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
       <div>
         <div id="board-title" style="font-family:'Bitter',serif;font-weight:800;font-size:20px;color:var(--creme);">Rangliste</div>
         <div id="board-count" style="font-size:13px;color:var(--ink-muted);"></div>
@@ -439,6 +443,7 @@
 import { AREA } from './js/area.js';
 import { getSession, clearSession, rememberName } from './js/api.js';
 import { connectState } from './js/ws-client.js';
+import { rollNumber, revealError, bottomSheet, staggerIn } from './js/motion.js';
 import { onSeason, setSeasonEnabled, newYear, mmss, now as seasonNow } from './js/season.js';
 
 const { token, playerId } = getSession();
@@ -475,27 +480,20 @@ if (!token || !playerId) {
   let errTimer;
   function showError(message) {
     errEl.textContent = message;
+    revealError(errEl);   // gleitet kurz ein (D-079)
     clearTimeout(errTimer);
     errTimer = setTimeout(() => { errEl.textContent = ''; }, 4000);
   }
 
-  function popEl(el) {
-    el.classList.remove('pk-pop');
-    void el.offsetWidth;   // Reflow erzwingen, damit die Animation neu startet
-    el.classList.add('pk-pop');
-    // Klasse nach dem Lauf entfernen: sonst spielt die Animation erneut,
-    // sobald der Tab-Wechsel das Element wieder sichtbar macht.
-    el.addEventListener('animationend', () => el.classList.remove('pk-pop'), { once: true });
-  }
-
-  // Zahl setzen und bei Anstieg kurz „aufploppen" lassen. `key` trennt Werte,
-  // die sich dasselbe Element teilen (Rangliste heute/all-time, D-040).
+  // Zahl setzen und bei Anstieg wie ein Zählwerk hochrollen (D-079). `key`
+  // trennt Werte, die sich dasselbe Element teilen (Rangliste heute/all-time,
+  // D-040).
   const prev = {};
   function bump(id, value, key = id) {
     const el = $(id);
     const had = key in prev;
-    el.textContent = value;
-    if (had && value > prev[key]) popEl(el);
+    if (had && value > prev[key]) rollNumber(el, value);
+    else el.textContent = value;
     prev[key] = value;
   }
 
@@ -675,7 +673,7 @@ if (!token || !playerId) {
     return lastPlayers.map((p) => ({ id: p.id, name: p.name, total: p.total }));
   }
 
-  function renderBoard(scrollToMe = false) {
+  function renderBoard(scrollToMe = false, stagger = false) {
     const entries = boardEntries(boardScope);
     $('board-title').textContent = boardScope === 'today' ? 'Rangliste heute' : 'All-Time Rangliste';
     // Gleiche Wörter wie auf dem TV-Board (D-054)
@@ -718,26 +716,44 @@ if (!token || !playerId) {
       row.append(rank, who, total);
       list.appendChild(row);
     });
-    // Beim Öffnen zur eigenen Zeile springen – bei 40 Leuten sucht sonst jeder
+    // Beim Öffnen zeilenweise einblenden (D-079)
+    if (stagger) staggerIn(list.children);
+    // Zur eigenen Zeile rollen – bei 40 Leuten sucht sonst jeder. Beim Öffnen
+    // weich, sobald das Blatt oben ist; beim Umschalten direkt.
     if (scrollToMe && myRow) {
-      requestAnimationFrame(() => myRow.scrollIntoView({ block: 'center' }));
+      const toMe = (behavior) => list.scrollTo({
+        top: list.scrollTop + myRow.getBoundingClientRect().top - list.getBoundingClientRect().top
+          - (list.clientHeight - myRow.offsetHeight) / 2,
+        behavior,
+      });
+      if (stagger) setTimeout(() => toMe('smooth'), 420);
+      else requestAnimationFrame(() => toMe('auto'));
     }
   }
 
-  function setBoardScope(scope, scrollToMe = false) {
+  function setBoardScope(scope, scrollToMe = false, stagger = false) {
     boardScope = scope;
     $('board-tabs').dataset.pos = scope === 'today' ? '0' : '1';
     $('board-tab-today').classList.toggle('active', scope === 'today');
     $('board-tab-alltime').classList.toggle('active', scope !== 'today');
-    renderBoard(scrollToMe);
+    renderBoard(scrollToMe, stagger);
   }
+
+  // Blatt mit Schwung (D-079): fährt hoch, Zeilen folgen gestaffelt, am Griff
+  // nach unten wischen schließt, beim Schließen gleitet es hinaus.
+  const boardSheet = bottomSheet({
+    backdrop: $('board-modal'),
+    sheet: document.querySelector('.board-sheet'),
+    grips: [...document.querySelectorAll('.board-grip')],
+  });
 
   function openBoard(scope) {
-    $('board-modal').hidden = false;
-    setBoardScope(scope, true);
+    $('board-list').scrollTop = 0;
+    boardSheet.open();
+    setBoardScope(scope, true, true);
   }
 
-  const closeBoard = () => { $('board-modal').hidden = true; };
+  const closeBoard = () => boardSheet.close();
 
   $('show-board').addEventListener('click', () => openBoard(profScope));
   $('board-tab-today').addEventListener('click', () => setBoardScope('today', true));

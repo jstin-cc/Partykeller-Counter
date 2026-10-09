@@ -324,13 +324,25 @@ button:not(:disabled):active { transform: scale(0.95); }
 .card, .user-row { transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease, opacity 0.25s ease; }
 .user-row:active { transform: scale(0.99); }
 
-/* Zahl „ploppt" kurz auf, wenn ein Zähler steigt. */
-@keyframes pk-pop {
-  0%   { transform: scale(1); }
-  35%  { transform: scale(1.35); }
-  100% { transform: scale(1); }
+/* Zahlen rollen (D-079, rollNumber in js/motion.js): die geänderte Ziffer
+   kommt von unten, die alte (data-old) gleitet nach oben weg. Bewusst ohne
+   overflow: hidden — das Leuchten der Zahl bleibt rund statt eckig. */
+.roll-d { display: inline-block; position: relative; }
+.roll-d > span { display: inline-block; animation: roll-in 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) var(--roll-delay, 0ms) backwards; }
+.roll-d::before {
+  content: attr(data-old); position: absolute; left: 0; right: 0; top: 0; text-align: center;
+  animation: roll-out 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) var(--roll-delay, 0ms) both;
 }
-.pk-pop { animation: pk-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); transform-origin: center; }
+@keyframes roll-in { from { transform: translateY(0.6em); opacity: 0; } }
+@keyframes roll-out { from { transform: none; opacity: 1; } to { transform: translateY(-0.6em); opacity: 0; } }
+
+/* Speichern abhaken (D-079, confirmSaved in js/motion.js) */
+.save-check { width: 1.15em; height: 1.15em; vertical-align: -0.22em; margin-right: 6px; }
+.save-check path {
+  fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 24; stroke-dashoffset: 24; animation: save-draw 0.38s 0.06s ease-out forwards;
+}
+@keyframes save-draw { to { stroke-dashoffset: 0; } }
 
 /* Kurzes Aufleuchten (z. B. Podest bei Platzwechsel). */
 @keyframes pk-flash {
@@ -341,7 +353,9 @@ button:not(:disabled):active { transform: scale(0.95); }
 .pk-flash { animation: pk-flash 0.9s ease; }
 
 @media (prefers-reduced-motion: reduce) {
-  .pk-pop, .pk-flash { animation: none; }
+  .pk-flash, .roll-d > span, .roll-d::before { animation: none; }
+  .roll-d::before { content: none; }
+  .save-check path { animation: none; stroke-dashoffset: 0; }
 }
 
 /* Seitenwechsel (D-068): Browser mit View Transitions blenden zwischen zwei

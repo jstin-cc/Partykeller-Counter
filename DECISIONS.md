@@ -1824,3 +1824,44 @@ Entwurf S3 aus `docs/STARTSEITE-ENTWUERFE.md`.
 fast schwarz und hatte nichts vom Look der übrigen Seiten. Der häufigste
 Weg ist ein Gast, der wiederkommt. Er braucht jetzt einen Tipp statt zwei
 Seiten.
+
+## D-079 (2026-10-09): Zahlen rollen, Blatt mit Schwung, Fehler schütteln, Aufstiegspfeil
+
+**Entscheidung:** Aus den Animations-Entwürfen (`docs/ANIMATIONEN-ENTWUERFE.md`)
+werden A1, A6, A7 und von A8 nur der Pfeil umgesetzt. Die gemeinsamen
+Bausteine liegen in `public/js/motion.js`:
+
+- **Zahlen rollen (A1)** ersetzt den Pop. Steigt ein Zähler (Dashboard:
+  Getränke heute, Heute/Gesamt je Getränk, Profil; TV: Podest, Zeilen),
+  dreht sich jede geänderte Ziffer wie ein Zählwerk nach oben, bei 9 → 10
+  rollt die Zehnerstelle 70 ms später mit. Ohne `overflow: hidden`: die
+  alte Ziffer gleitet als `::before` nach oben weg und blendet aus. So
+  bleibt das Leuchten der Zahl rund wie bisher, statt in eckigen Flächen
+  abgeschnitten zu werden (Wunsch des Nutzers). Live-Updates rollen
+  genauso, nach dem Lauf steht wieder reiner Text im Element.
+- **Blatt mit Schwung (A6)** für die ganze Rangliste im Profil: Das Blatt
+  fährt von unten hoch, die Zeilen folgen gestaffelt, die Liste rollt weich
+  zur eigenen Zeile. Am Griff oder Kopf nach unten wischen schließt (ab
+  80 px oder schnell), sonst federt es zurück. Beim Schließen (Knopf,
+  Hintergrund, Esc) gleitet es hinaus. Der Hintergrund blendet nur Farbe
+  und Unschärfe, nicht seine Deckkraft — die hätte das Blatt durchsichtig
+  gemacht.
+- **Fehler schütteln, Speichern abhaken (A7):** Falsche PIN (Meldung jetzt
+  direkt unter dem PIN-Feld statt oben auf der Seite), Fehler beim
+  Konto-Anlegen, falsches Admin-Passwort, Fehler bei Reset und Backup: das
+  Feld schüttelt kurz, die Meldung gleitet ein. Speichern zeichnet einen
+  Haken in den Knopf („Gespeichert“): QR-Adresse im Admin, PIN setzen,
+  Abend benennen. Dialoge schließen erst nach dem Haken (0,5 s).
+  Inline-Editoren (Umbenennen, Fun-Facts, Protokoll) schließen wie bisher
+  sofort, dort ist der neue Wert die Bestätigung.
+- **Aufstiegspfeil (A8, nur der Pfeil):** Klettert jemand in der
+  TV-Rangliste ab Platz 4 nach oben, steht für gut 4 s „▲ n“ in Gold neben
+  dem Namen. Das Gleiten der Zeilen gab es schon (FLIP beim Neuaufbau).
+  Beim Moduswechsel gibt es keinen Pfeil. Wird die Liste währenddessen
+  neu gebaut, läuft der Pfeil an derselben Stelle weiter.
+
+Bei „Bewegung reduzieren“ springen Zahlen, Blatt und Fehler direkt in den
+Endzustand. Der Pfeil blendet dann nur ein und aus. Keine neue
+Abhängigkeit, nur CSS und die Web Animations API.
+
+**Begründung:** Auswahl des Nutzers aus den Entwürfen A1–A9.

@@ -228,6 +228,7 @@ import { AREA } from './js/area.js';
 import { connectState } from './js/ws-client.js';
 import { buildCurve } from './js/curve.js';
 import { getSession } from './js/api.js';
+import { revealError, confirmSaved } from './js/motion.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -248,6 +249,7 @@ let editDay = null;          // im Modal geöffneter Party-Tag
 
 function showEditError(message) {
   $('edit-error').textContent = message;
+  revealError($('edit-error'));
   setTimeout(() => { $('edit-error').textContent = ''; }, 4000);
 }
 
@@ -588,9 +590,14 @@ function openEdit(day) {
 // Abend benennen (D-028); leeres Feld entfernt den Namen wieder
 function saveNightName() {
   if (!editDay) return;
-  send({ type: 'setNightName', day: editDay, name: $('edit-name-input').value.trim() });
-  showToast($('edit-name-input').value.trim() ? 'Name gespeichert.' : 'Name entfernt.', true);
-  closeEdit();
+  const name = $('edit-name-input').value.trim();
+  send({ type: 'setNightName', day: editDay, name });
+  editDay = null;   // kein zweites Senden, während der Haken läuft
+  // erst den Haken im Knopf zeigen, dann schließen (D-079)
+  confirmSaved($('save-name'), { ms: 700, label: name ? 'Gespeichert' : 'Entfernt' }).then(() => {
+    showToast(name ? 'Name gespeichert.' : 'Name entfernt.', true);
+    closeEdit();
+  });
 }
 function closeEdit() { $('edit-modal').hidden = true; editDay = null; }
 

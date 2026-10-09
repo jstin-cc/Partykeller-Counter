@@ -738,6 +738,7 @@ import { post, getSession } from './js/api.js';
 import { connectState } from './js/ws-client.js';
 import { factList, FACT_KIND_LABEL } from './js/facts.js';
 import { seasonAt } from './js/season.js';
+import { shake, revealError, confirmSaved } from './js/motion.js';
 
 const $ = (id) => document.getElementById(id);
 // Getrennte Admin-Sessions pro Bereich (pk_/ys_-Präfix, D-019)
@@ -759,6 +760,9 @@ $('login-form').addEventListener('submit', async (e) => {
     const el = $('login-error');
     el.textContent = err.message === 'Falsches Passwort' ? 'Falsches Passwort.' : err.message;
     el.hidden = false;
+    revealError(el);          // Meldung gleitet ein, Feld schüttelt (D-079)
+    shake($('login-pw'));
+    $('login-pw').select();
   }
 });
 
@@ -785,9 +789,12 @@ function showError(message) {
     const el = $('reset-error');
     el.textContent = message;
     el.hidden = false;
+    revealError(el);
+    shake($('reset-pw'));
     return;
   }
   $('dash-error').textContent = message;
+  revealError($('dash-error'));
   clearTimeout(errTimer);
   errTimer = setTimeout(() => { $('dash-error').textContent = ''; }, 4000);
 }
@@ -1178,7 +1185,7 @@ $('pace-toggle').addEventListener('change', (e) => send({ type: 'setPaceCompare'
 $('join-save').addEventListener('click', () => {
   send({ type: 'setJoinUrl', url: $('join-url').value });
   $('join-url').blur();
-  $('join-hint').textContent = '✓ Gespeichert';
+  confirmSaved($('join-save'));   // Haken im Knopf (D-079)
 });
 
 // Tippt der Admin gerade in ein Feld der Liste (Name, Zählerwert), darf ein
@@ -2096,7 +2103,9 @@ $('close-pin').addEventListener('click', () => { $('pin-modal').hidden = true; }
 $('pin-form').addEventListener('submit', (e) => {
   e.preventDefault();
   send({ type: 'setPin', id: pinPlayerId, pin: $('pin-value').value });
-  $('pin-modal').hidden = true;
+  // erst den Haken zeigen, dann schließen (D-079)
+  confirmSaved($('pin-form').querySelector('.btn-green'), { ms: 700 })
+    .then(() => { $('pin-modal').hidden = true; });
 });
 
 // --- Komplett-Reset: nur mit erneuter Passwort-Eingabe (gleiche .env wie Login) ---
@@ -2163,6 +2172,8 @@ function showImportError(message) {
   const el = $('import-error');
   el.textContent = message;
   el.hidden = false;
+  revealError(el);
+  shake($('import-form'));
 }
 
 $('import-form').addEventListener('submit', async (e) => {
