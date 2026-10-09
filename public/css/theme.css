@@ -436,6 +436,19 @@ html[data-vt-auftritt] .vt-stufe {
   animation: vt-auftritt 0.36s cubic-bezier(0.2, 0.8, 0.2, 1) calc(100ms + var(--vt-i, 0) * 45ms) backwards;
 }
 
+/* Ersatz ohne View Transitions zwischen Seiten (D-081: Firefox, ältere
+   Safari). js/vt.js setzt data-vt-ersatz; die Blöcke kommen aus der
+   Richtung, der Titel blendet ein, und bei der Farbflut wird der <body> als
+   Kreis über der alten Farbe aufgedeckt. Namenskreis, Titel und Logo
+   fliegen per Script (FLIP). */
+@keyframes vt-ersatz-vor { from { opacity: 0; transform: translateX(26px); } }
+@keyframes vt-ersatz-zurueck { from { opacity: 0; transform: translateX(-26px); } }
+@keyframes vt-ersatz-titel { from { opacity: 0; } }
+html[data-vt-ersatz][data-vt-richtung="vor"] .vt-stufe { animation-name: vt-ersatz-vor; }
+html[data-vt-ersatz][data-vt-richtung="zurueck"] .vt-stufe { animation-name: vt-ersatz-zurueck; }
+html[data-vt-ersatz] .kopf-titel { animation: vt-ersatz-titel 0.3s ease both; }
+html[data-vt-ersatz][data-vt-flut] body { animation: vt-flut 0.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
 /* Saison-Akzente (D-071): Deko, die js/season.js je nach Datum in die mit
    data-deco-top / data-deco-foot markierten Flächen setzt. Sie liegt am Rand,
    fängt keine Tipps ab und steht nie über Zahlen oder Namen. */
