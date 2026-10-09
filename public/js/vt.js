@@ -164,27 +164,48 @@
   function ersatzSpielen(von) {
     spiegeln(von);
     stufen();
-    const ziele = [];
+    // Fliegende Elemente (FLIP): ein Abbild in eigener, fester Ebene fliegt
+    // von der alten an die neue Stelle, das Original wartet unsichtbar. So
+    // schneidet kein Rahmen mit overflow: hidden (die Anmeldeliste) den Flug ab.
+    const fluege = [];
     for (const [name, el] of namen()) {
       const alt = von.orte?.[name];
       if (!alt) continue;
+      // Der Block drumherum gleitet nicht herein, sonst landete das Abbild daneben
+      const stufe = el.closest('.vt-stufe');
+      if (stufe) stufe.style.animation = 'none';
+      fluege.push([name, el, alt, stufe]);
+    }
+    const ziele = [];
+    for (const [name, el, alt, stufe] of fluege) {
       const r = el.getBoundingClientRect();
       const dx = alt[0] - r.left;
       const dy = alt[1] - r.top;
-      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;   // steht schon da (Kopf, Zapfen)
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) { ziele.push([null, null, stufe]); continue; }   // steht schon da (Kopf)
       // Gleicher Inhalt wird mitskaliert (Logo, Name), wechselnder Text
       // („‹ Bereich" → „‹ Wechseln") nur verschoben
       const s = name === 'kopf-zurueck' || !r.height ? 1 : alt[3] / r.height;
-      if (getComputedStyle(el).display === 'inline') el.style.display = 'inline-block';
-      el.style.transformOrigin = '0 0';
-      // Der Block drumherum blendet nicht ein, sonst wäre das Ziel unsichtbar
-      const stufe = el.closest('.vt-stufe');
-      if (stufe) stufe.style.animation = 'none';
-      ziele.push([el, stufe]);
-      el.animate([
+      const cs = getComputedStyle(el);
+      const geist = el.cloneNode(true);
+      for (const n of [geist, ...geist.querySelectorAll('[id]')]) n.removeAttribute('id');
+      for (const prop of ['font-family', 'font-size', 'font-weight', 'line-height', 'letter-spacing',
+        'color', 'text-shadow', 'text-transform', 'white-space', 'text-align']) {
+        geist.style.setProperty(prop, cs.getPropertyValue(prop));
+      }
+      Object.assign(geist.style, {
+        position: 'fixed', left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`,
+        margin: '0', zIndex: '1000', pointerEvents: 'none', transformOrigin: '0 0', boxSizing: 'border-box',
+        display: cs.display === 'inline' ? 'inline-block' : cs.display, viewTransitionName: 'none',
+      });
+      geist.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(geist);
+      el.style.visibility = 'hidden';
+      ziele.push([el, geist, stufe]);
+      geist.animate([
         { transform: `translate(${dx}px, ${dy}px) scale(${s})` },
         { transform: 'none' },
-      ], { duration: 420, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+      ], { duration: 420, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', fill: 'forwards' })
+        .finished.catch(() => {}).then(() => { geist.remove(); el.style.visibility = ''; });
     }
     setTimeout(fertig, 480);
     setTimeout(() => {
@@ -193,9 +214,9 @@
       delete html.dataset.vtFlut;
       delete html.dataset.vtAuftritt;
       html.style.backgroundColor = '';
-      for (const [el, stufe] of ziele) {
-        el.style.display = '';
-        el.style.transformOrigin = '';
+      for (const [el, geist, stufe] of ziele) {
+        geist?.remove();
+        if (el) el.style.visibility = '';
         if (stufe) stufe.style.animation = '';
       }
       aufraeumen();
