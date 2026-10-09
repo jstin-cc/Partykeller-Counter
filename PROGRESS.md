@@ -7,6 +7,11 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09: **Entwürfe für Seitenübergänge** in
+`docs/UEBERGAENGE-ENTWUERFE.md`, live in `docs/animationen/uebergaenge.html`
+(P1 feste Kulisse, P2 Richtung, P3 ein Kopf für alle Seiten, P4 Getipptes
+wird Überschrift, P5 Bereichsfarbe flutet, P6 Inhalt setzt sich) — **noch
+nicht umgesetzt**, wartet auf Auswahl.
 Seit 2026-10-09 (D-079): **Animationen A1, A6, A7, A8-Pfeil** — Zahlen
 rollen wie ein Zählwerk (Leuchten bleibt rund), die ganze Rangliste fährt
 als Blatt hoch und lässt sich nach unten wegwischen, Fehler schütteln das
