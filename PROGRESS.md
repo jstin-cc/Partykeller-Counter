@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09 (D-083): **Fix Firefox: Wechsel zur Nutzerauswahl ohne
+Haken** — kein heller Zwischenrahmen mehr, der Namenskreis fliegt sichtbar
+in seine Zeile. Neue Regel: alles muss auch in Firefox und auf dem iPhone
+laufen (CLAUDE.md, Regel 8).
 Seit 2026-10-09 (D-082): **Fix: kein Haken mehr beim Wechsel zur
 Anmeldung** — die Kontenliste steht sofort vollständig da (aus der zuletzt
 geladenen Kopie), statt erst nach dem Übergang nachzurutschen.

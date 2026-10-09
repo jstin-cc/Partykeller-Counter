@@ -36,6 +36,15 @@ mit getrennten Daten und eigenem Theme (D-019): **Partykeller**
    Tokens sind bereichsgestempelt — sie gelten nur im eigenen Bereich (D-019).
 7. Persistenz ist zwingend: Ein Server-Neustart darf keine Daten und keine
    Logins verlieren (D-006).
+8. **Jede Änderung muss in Chrome, Firefox und Safari auf dem iPhone
+   laufen** (Wunsch des Nutzers, 2026-10-09). Was nur in Chrome geht, braucht
+   einen Ersatz — Beispiel: Seitenübergänge (View Transitions zwischen
+   Seiten) kann Firefox nicht, dort spielt `js/vt.js` sie nach (D-081).
+   Vor jedem Merge auch in Firefox testen: In der Cloud-Umgebung geht das
+   mit dem Firefox-Tarball von download.mozilla.org und `puppeteer-core`
+   (WebDriver BiDi), beides außerhalb des Repos. WebKit/iPhone ist dort
+   nicht testbar — dann nur Web-Standards nutzen, die Safari kann, und den
+   Nutzer bitten, auf dem iPhone nachzusehen.
 
 ## Design (verbindlich)
 

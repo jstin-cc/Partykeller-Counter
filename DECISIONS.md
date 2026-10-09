@@ -1963,3 +1963,23 @@ Zeile.
 die eigene Zeile da, bis der Übergang vorbei war. Das Formular
 „Registrieren“ rutschte hoch, und die Seite sprang, sobald die echte Liste
 kam. Der Nutzer sah das als kurzes Haken mit einer Art Anmeldescreen.
+
+## D-083 (2026-10-09): Firefox-Übergänge ohne Blitz und abgeschnittene Flüge; Browser-Regel
+
+**Entscheidung:**
+- Der Wechsel vom Profil zur Nutzerauswahl hakte in Firefox. In einem
+  echten Firefox 157 (ferngesteuert) zeigten sich zwei Ursachen:
+  1. Firefox malt die neue Seite, bevor ihr `<body>` da ist. Ohne eigene
+     Farbe am `<html>` war das ein heller, leerer Rahmen. Jetzt gilt
+     `html { background: var(--bg); color-scheme: dark; }` in `theme.css`,
+     dazu `<meta name="color-scheme" content="dark">` in jeder Seite.
+  2. Der Ersatz-Flug (D-081) bewegte das Element selbst. In der
+     Anmeldeliste schnitt deren `overflow: hidden` den Namenskreis ab, die
+     eigene Zeile wirkte kurz leer. Jetzt fliegt ein Abbild in fester Ebene
+     über der Seite, das Original wartet unsichtbar.
+- Neue harte Regel in CLAUDE.md (Nr. 8): Jede Änderung muss in Chrome,
+  Firefox und Safari auf dem iPhone laufen. Firefox wird vor jedem Merge
+  mitgetestet.
+
+**Begründung:** Rückmeldung und Wunsch des Nutzers: „Bitte immer darauf
+achten, dass es auch auf Firefox und auf dem iPhone läuft“.
