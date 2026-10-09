@@ -100,6 +100,11 @@ html[data-area="youngstars"] .ys-logo {
 /* hidden-Attribut muss auch gegen display:flex-Regeln gewinnen */
 [hidden] { display: none !important; }
 
+/* Schon vor dem <body> dunkel (D-083): Firefox malt die neue Seite beim
+   Wechsel, bevor ihr Inhalt da ist — ohne eigene Farbe am <html> blitzte
+   dabei ein heller, leerer Rahmen auf */
+html { background: var(--bg); color-scheme: dark; }
+
 body {
   margin: 0;
   background: var(--bg);
