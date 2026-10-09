@@ -7,10 +7,12 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
-Seit 2026-10-09: **Entwürfe für die Startseite** in
-`docs/STARTSEITE-ENTWUERFE.md` (S1 Zwei Welten, S2 Glas-Karten mit
-Live-Stand, S3 „Weiter als …“ für schon Angemeldete, S4 Live-Podest;
-Vorschlag S2 + S3) — **noch nicht umgesetzt**, wartet auf Auswahl.
+Seit 2026-10-09 (D-078): **Neue Startseite nach Entwurf S3** — wer am
+Handy schon angemeldet ist, wird mit Namenskreis begrüßt und kommt mit
+„Weiter zählen ›“ direkt ins Dashboard; beide Bereiche stehen als
+Glas-Tafel mit dem Stand von heute darunter, dazu Links zum TV.
+Entwürfe S1, S2 und S4 in `docs/STARTSEITE-ENTWUERFE.md` bleiben
+ungenutzt.
 Seit 2026-09-29 (D-077): **Archiv: Name anklickbar** — Tipp auf den Namen
 (oder „Namen geben“) benennt den Abend, eigener Knopf entfällt.
 Seit 2026-09-29 (D-076): **Archiv ohne ±1-Korrektur** — Korrekturen nur
