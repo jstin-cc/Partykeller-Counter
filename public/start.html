@@ -18,6 +18,7 @@
 </script>
 <link rel="icon" href="assets/cones-flat.png">
 <link rel="stylesheet" href="css/theme.css">
+<script src="js/vt.js" data-seite="start"></script>
 <style>
   /* Bereichsfarben lokal auf eine Zeile legen — beide Bereiche stehen auf
      derselben Seite, html[data-area] gilt aber nur für einen */
@@ -32,11 +33,6 @@
 
   body {
     background: linear-gradient(160deg, var(--bg) 0%, oklch(0.13 0.025 200) 62%, oklch(0.13 0.03 232) 100%) fixed;
-  }
-  .login-watermark {
-    position: fixed; left: -140px; top: -100px; width: 520px; height: 520px;
-    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
-    opacity: 0.22; pointer-events: none; z-index: 0;
   }
   .start-logos { display: flex; flex-direction: column; align-items: center; gap: 8px; }
   .start-logos img { width: auto; object-fit: contain; }
@@ -109,27 +105,27 @@
 </head>
 <body>
 <div class="screen">
-  <div class="login-watermark"></div>
+  <div class="watermark"></div>
 
-  <div class="screen-inner" style="padding:32px 24px;gap:22px;">
+  <div class="screen-inner vt-inhalt" style="padding:32px 24px;gap:22px;">
     <div class="start-logos">
       <img src="assets/logo.png" alt="SV Partykeller" style="height:64px;">
       <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:40px;">
     </div>
 
-    <section id="hello" class="hello" hidden>
+    <section id="hello" class="hello vt-stufe" hidden>
       <div id="hello-avatar" class="avatar big-avatar"></div>
       <h1 id="hello-title"></h1>
       <div id="hello-sub" class="hello-sub"></div>
       <div id="continue" class="continue"></div>
     </section>
 
-    <h1 id="choose-title" class="choose-title">Wo wird heute gezählt?</h1>
-    <div id="divider" class="divider" hidden>oder Bereich wählen</div>
+    <h1 id="choose-title" class="choose-title vt-stufe">Wo wird heute gezählt?</h1>
+    <div id="divider" class="divider vt-stufe" hidden>oder Bereich wählen</div>
 
-    <nav class="tafel" aria-label="Bereich wählen">
+    <nav class="tafel vt-stufe" aria-label="Bereich wählen">
       <a class="area-row area-pk" href="/partykeller/" data-area="partykeller">
-        <div class="thumb"><img src="assets/logo.png" alt=""></div>
+        <div class="thumb"><img src="assets/logo.png" alt="" data-vt-spiegel="anmeldung@partykeller:area-logo"></div>
         <div class="area-text">
           <div class="area-name">Partykeller</div>
           <div class="area-state"></div>
@@ -137,7 +133,7 @@
         <div class="chevron">›</div>
       </a>
       <a class="area-row area-ys" href="/youngstars/" data-area="youngstars">
-        <div class="thumb"><img class="ys-glow" src="assets/youngstars-logo.png" alt=""></div>
+        <div class="thumb"><img class="ys-glow" src="assets/youngstars-logo.png" alt="" data-vt-spiegel="anmeldung@youngstars:ys-logo"></div>
         <div class="area-text">
           <div class="area-name">Youngstars</div>
           <div class="area-state"></div>
@@ -146,7 +142,7 @@
       </a>
     </nav>
 
-    <div class="start-links">
+    <div class="start-links vt-stufe">
       <span>Für den TV:</span>
       <a href="/partykeller/tv">Partykeller-TV</a>
       <a href="/youngstars/tv">Youngstars-TV</a>

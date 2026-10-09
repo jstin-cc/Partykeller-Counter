@@ -70,7 +70,6 @@ html[data-area="youngstars"] {
 
 /* Zapfen-Wasserzeichen in Navy (gleiche Form, hellere Navy-Füllung) */
 html[data-area="youngstars"] .watermark,
-html[data-area="youngstars"] .login-watermark,
 html[data-area="youngstars"] .admin-watermark,
 html[data-area="youngstars"] .archive-watermark,
 html[data-area="youngstars"] .tv-mark {
@@ -369,6 +368,72 @@ button:not(:disabled):active { transform: scale(0.95); }
 ::view-transition-group(me-avatar), ::view-transition-group(me-name) {
   animation-duration: 0.45s;
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Seiten als ein Paket (D-080, Entwürfe P1–P6). js/vt.js setzt dazu beim
+   Seitenwechsel data-vt-richtung, data-vt-flut und data-vt-auftritt auf
+   <html> und benennt, was von der alten Seite herübergleiten soll. */
+
+/* P3 Ein Kopf für alle Seiten: Zurück links, Logos mittig, Titel darunter.
+   Logo, Zurück und Titel tragen feste Namen und bleiben beim Wechsel stehen
+   bzw. gleiten an ihren Platz. */
+.kopf { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.kopf-zurueck {
+  justify-self: start; width: fit-content; text-decoration: none;
+  font-size: 14px; font-weight: 600; view-transition-name: kopf-zurueck;
+}
+.kopf-logos { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.kopf-logo { height: 72px; width: auto; object-fit: contain; view-transition-name: area-logo; }
+.kopf-logos .ys-logo { height: 38px; width: auto; object-fit: contain; view-transition-name: ys-logo; }
+.kopf-titel {
+  font-family: 'Bitter', serif; font-weight: 800; font-size: 28px; line-height: 1.1;
+  color: var(--creme); margin: 0 auto; width: fit-content; text-align: center;
+  view-transition-name: seiten-titel;
+}
+::view-transition-group(area-logo), ::view-transition-group(ys-logo),
+::view-transition-group(kopf-zurueck), ::view-transition-group(seiten-titel),
+::view-transition-group(kulisse-zapfen), ::view-transition-group(kulisse-wald),
+::view-transition-group(inhalt) {
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* „‹ Bereich" → „‹ Wechseln": verschieden breite Texte nicht verzerren */
+::view-transition-old(kopf-zurueck), ::view-transition-new(kopf-zurueck) { inline-size: auto; }
+
+/* P1 Feste Kulisse: Zapfen (.watermark u. a.) und Wald bleiben stehen.
+   Den Wald benennt js/vt.js nur, wenn er im Bild ist. */
+.watermark, .archive-watermark, .admin-watermark { view-transition-name: kulisse-zapfen; }
+
+/* P2 Richtung: tiefer hinein kommt der Inhalt von rechts, zurück von links
+   (wie Zählen/Profil, D-069). Ohne Richtung blendet er nur über. */
+.vt-inhalt { view-transition-name: inhalt; }
+::view-transition-old(inhalt), ::view-transition-new(inhalt) { animation-duration: 0.22s; }
+@keyframes vt-raus-links { to { opacity: 0; transform: translateX(-28px); } }
+@keyframes vt-rein-rechts { from { opacity: 0; transform: translateX(28px); } }
+@keyframes vt-raus-rechts { to { opacity: 0; transform: translateX(28px); } }
+@keyframes vt-rein-links { from { opacity: 0; transform: translateX(-28px); } }
+html[data-vt-richtung="vor"]::view-transition-old(inhalt) { animation: vt-raus-links 0.18s cubic-bezier(0.4, 0, 1, 1) both; }
+html[data-vt-richtung="vor"]::view-transition-new(inhalt) { animation: vt-rein-rechts 0.32s cubic-bezier(0, 0, 0.2, 1) 0.12s both; }
+html[data-vt-richtung="zurueck"]::view-transition-old(inhalt) { animation: vt-raus-rechts 0.18s cubic-bezier(0.4, 0, 1, 1) both; }
+html[data-vt-richtung="zurueck"]::view-transition-new(inhalt) { animation: vt-rein-links 0.32s cubic-bezier(0, 0, 0.2, 1) 0.12s both; }
+
+/* P5 Bereichsfarbe flutet: wechselt der Bereich (Startseite ↔ Youngstars),
+   läuft die neue Farbe als Kreis vom letzten Tipp aus über den Bildschirm. */
+@keyframes vt-flut {
+  from { clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 50%)); }
+  to { clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%)); }
+}
+html[data-vt-flut]::view-transition-old(root) { animation: none; }
+html[data-vt-flut]::view-transition-new(root) {
+  animation: vt-flut 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  mix-blend-mode: normal;
+}
+
+/* P6 Inhalt setzt sich: nach dem Wechsel folgen die Blöcke (.vt-stufe) mit
+   45 ms Versatz; --vt-i setzt js/vt.js. Nur beim Seitenwechsel. */
+@keyframes vt-auftritt { from { opacity: 0; transform: translateY(12px); } }
+html[data-vt-auftritt] .vt-stufe {
+  animation: vt-auftritt 0.36s cubic-bezier(0.2, 0.8, 0.2, 1) calc(100ms + var(--vt-i, 0) * 45ms) backwards;
 }
 
 /* Saison-Akzente (D-071): Deko, die js/season.js je nach Datum in die mit

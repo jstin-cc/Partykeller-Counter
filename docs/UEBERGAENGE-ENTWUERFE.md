@@ -1,6 +1,7 @@
 # Übergänge zwischen den Seiten: Entwürfe P1–P6 (Stand 2026-10-09)
 
-**Status:** Entwürfe, noch nichts umgesetzt — wartet auf Auswahl.
+**Status:** Alle sechs umgesetzt (D-080). Die Demo zeigt weiter den
+Vergleich zum Stand vorher.
 
 Ziel: Startseite, Anmeldung, Dashboard und Archiv sollen wie **eine App**
 wirken statt wie vier Seiten. Die Demo `docs/animationen/uebergaenge.html`

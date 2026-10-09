@@ -10,12 +10,23 @@
 <meta name="theme-color" content="#010f05">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
+<script src="js/vt.js" data-seite="admin"></script>
 <style>
   .admin-watermark {
     position: fixed;
     background: url('assets/zapfen-bg.svg') no-repeat center / contain;
     pointer-events: none;
     z-index: 0;
+  }
+  .admin-watermark.wm-login { left: 50%; top: -260px; width: 600px; height: 600px; margin-left: -300px; opacity: 0.18; }
+  .admin-watermark.wm-dash { right: -200px; top: -160px; width: 700px; height: 700px; opacity: 0.16; transform: rotate(20deg); }
+  /* Handy: Zapfen an derselben Stelle wie auf den übrigen Seiten — er bleibt
+     beim Seitenwechsel stehen (D-080, P1) */
+  @media (max-width: 760px) {
+    .admin-watermark.wm-login, .admin-watermark.wm-dash {
+      left: auto; right: -150px; top: auto; bottom: 60px; margin-left: 0;
+      width: 480px; height: 480px; opacity: 0.22; transform: rotate(-12deg);
+    }
   }
   .input-flat {
     background: var(--surface-2);
@@ -441,9 +452,9 @@
 
 <!-- Ansicht 1: Admin-Login (Admin Login v3) -->
 <div id="login-view" class="screen">
-  <div class="admin-watermark" style="left:50%;top:-260px;width:600px;height:600px;margin-left:-300px;opacity:0.18;"></div>
+  <div class="admin-watermark wm-login"></div>
 
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;">
+  <div class="vt-inhalt" style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;">
     <form id="login-form" class="glass" style="width:100%;max-width:400px;background:var(--surface);border-radius:var(--radius-lg);padding:36px 28px;display:flex;flex-direction:column;gap:18px;">
       <div style="text-align:center;">
         <img src="assets/logo.png" alt="SV Partykeller" style="height:64px;width:auto;object-fit:contain;margin-bottom:14px;">
@@ -461,9 +472,9 @@
 
 <!-- Ansicht 2: Admin-Dashboard (Aufbau nach Entwurf E7, D-061) -->
 <div id="dash-view" hidden style="min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;">
-  <div class="admin-watermark" style="right:-200px;top:-160px;width:700px;height:700px;opacity:0.16;transform:rotate(20deg);"></div>
+  <div class="admin-watermark wm-dash"></div>
 
-  <div id="adm" class="adm" data-m="konten" data-v="konten">
+  <div id="adm" class="adm vt-inhalt" data-m="konten" data-v="konten">
     <header class="adm-head">
       <img src="assets/logo.png" alt="SV Partykeller" class="logo">
       <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="height:36px;width:auto;object-fit:contain;">
