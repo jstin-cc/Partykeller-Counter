@@ -10,13 +10,22 @@
 <meta name="theme-color" content="#010f05">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
+<script src="js/vt.js" data-seite="abende"></script>
 <style>
   .archive-watermark {
-    position: fixed;
+    position: fixed; right: -200px; top: -160px; width: 700px; height: 700px;
+    opacity: 0.16; transform: rotate(20deg);
     background: url('assets/zapfen-bg.svg') no-repeat center / contain;
     pointer-events: none;
     z-index: 0;
   }
+  /* Handy: Zapfen an derselben Stelle wie auf Anmeldung und Dashboard —
+     er bleibt beim Seitenwechsel stehen (D-080, P1) */
+  @media (max-width: 760px) {
+    .archive-watermark { right: -150px; top: auto; bottom: 60px; width: 480px; height: 480px; opacity: 0.22; transform: rotate(-12deg); }
+  }
+  .arch-actions { display: flex; justify-content: flex-end; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .arch-actions:not(:has(> :not([hidden]))) { display: none; }
   .cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -156,28 +165,25 @@
   }
   .toast.ok { border-left-color: var(--green); }
   .link-btn { background: none; border: none; color: var(--ink-muted); font-size: 14px; text-decoration: underline; cursor: pointer; font-family: 'Work Sans', sans-serif; }
-  /* Handy: nur ein Logo neben dem Titel, sonst bricht „Abend-Archiv“ bei den
-     Youngstars um — wie im Admin-Kopf (D-070) */
-  @media (max-width: 760px) {
-    .arch-head .ys-logo { display: none !important; }
-  }
 </style>
 </head>
 <body>
 <div style="min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;">
-  <div class="archive-watermark" style="right:-200px;top:-160px;width:700px;height:700px;opacity:0.16;transform:rotate(20deg);"></div>
+  <div class="archive-watermark"></div>
 
-  <div style="max-width:1100px;margin:0 auto;width:100%;padding:28px 20px 0 20px;position:relative;z-index:1;flex:1;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px;">
-      <div class="arch-head" style="display:flex;align-items:center;gap:16px;">
-        <img src="assets/logo.png" alt="SV Partykeller" style="view-transition-name:area-logo;height:56px;width:auto;object-fit:contain;">
-        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="view-transition-name:ys-logo;height:34px;width:auto;object-fit:contain;">
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:28px;color:var(--creme);margin:0;line-height:1.1;">Abend-Archiv</h1>
-          <a id="back" href="./" style="text-decoration:none;font-size:14px;font-weight:600;">‹ Zur Anmeldung</a>
+  <div class="vt-inhalt" style="max-width:1100px;margin:0 auto;width:100%;padding:20px 24px 0 24px;position:relative;z-index:1;flex:1;">
+    <!-- Kopf wie auf allen Seiten (D-080): Zurück links, Logos mittig, Titel darunter -->
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+      <header class="kopf">
+        <a id="back" class="kopf-zurueck" href="./">‹ Zurück</a>
+        <div class="kopf-logos">
+          <img src="assets/logo.png" alt="SV Partykeller" class="kopf-logo">
+          <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo">
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span></span>
+      </header>
+      <h1 class="kopf-titel">Abend-Archiv</h1>
+      <div class="arch-actions">
         <button id="tv-live" class="night-btn" hidden style="flex:none;">TV zurück zur Live-Ansicht</button>
         <button id="export-all" class="night-btn" hidden style="flex:none;">⬇ Alle Abende als CSV</button>
       </div>
@@ -186,7 +192,7 @@
     <div id="empty" hidden style="text-align:center;margin-top:60px;color:var(--ink-muted);font-size:16px;">
       Noch keine Abende aufgezeichnet – der erste Schluck legt los.
     </div>
-    <div id="cards" class="cards"></div>
+    <div id="cards" class="cards vt-stufe"></div>
 
     <!-- Ältere Abende stehen schon im Speicher, werden aber erst auf Wunsch
          gezeichnet (D-042): jede Karte bringt ein eigenes SVG mit. -->
@@ -234,10 +240,17 @@ const $ = (id) => document.getElementById(id);
 
 // Wer angemeldet ist, kommt aus dem Dashboard und will dorthin zurück —
 // nicht zur Anmeldung (D-054)
-if (getSession().token) {
-  $('back').href = 'dashboard';
-  $('back').textContent = '‹ Zurück';
-}
+if (getSession().token) $('back').href = 'dashboard';
+// „‹ Zurück" führt dorthin, wo man herkam (D-080): kam man von einer Seite
+// dieses Bereichs, geht es im Verlauf zurück (samt Übergang nach links)
+$('back').addEventListener('click', (e) => {
+  let ref = null;
+  try { ref = new URL(document.referrer); } catch { /* kein Verweis */ }
+  if (ref && ref.origin === location.origin && ref.pathname.startsWith(AREA.base + '/') && history.length > 1) {
+    e.preventDefault();
+    history.back();
+  }
+});
 
 // Admin-Werkzeuge (Name, Protokoll, TV-Anzeige) erscheinen nur mit Admin-Login aus
 // derselben Browser-Session (Token wie in admin.html, bereichsgetrennt D-019)

@@ -10,17 +10,8 @@
 <meta name="theme-color" content="#010f05">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
+<script src="js/vt.js" data-seite="willkommen"></script>
 <style>
-  /* Wasserzeichen wie auf der Anmeldeseite (links oben) */
-  .login-watermark {
-    position: fixed;
-    left: -140px; top: -100px;
-    width: 520px; height: 520px;
-    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
-    opacity: 0.22;
-    pointer-events: none;
-    z-index: 0;
-  }
 
   .skip {
     position: absolute; top: 20px; right: 20px; z-index: 2;
@@ -97,15 +88,20 @@
 </head>
 <body>
 <div class="screen">
-  <div class="login-watermark"></div>
+  <div class="watermark"></div>
   <button id="skip" class="skip" type="button">Überspringen</button>
 
-  <div class="screen-inner" style="padding:26px 24px 24px;">
+  <div class="screen-inner vt-inhalt" style="padding:20px 24px 24px;">
 
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-      <img src="assets/logo.png" alt="SV Partykeller" style="view-transition-name:area-logo;height:72px;width:auto;object-fit:contain;">
-      <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="view-transition-name:ys-logo;height:40px;width:auto;object-fit:contain;">
-    </div>
+    <!-- Kopf wie auf allen Seiten (D-080), hier ohne Zurück -->
+    <header class="kopf">
+      <span></span>
+      <div class="kopf-logos">
+        <img src="assets/logo.png" alt="SV Partykeller" class="kopf-logo">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo">
+      </div>
+      <span></span>
+    </header>
 
     <!-- Schritt 1: zählen -->
     <section id="step-1" class="step" style="margin-top:14px;">

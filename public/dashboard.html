@@ -10,6 +10,8 @@
 <meta name="theme-color" content="#010f05">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
+<script src="js/vt.js" data-seite="dashboard"></script>
+<link rel="expect" href="#vt-bereit" blocking="render">
 <!-- Erstes Bild erst, wenn der Kopf mit Namen steht — sonst hat der Übergang
      von der Anmeldung kein Ziel (D-068) -->
 <link rel="expect" href="#main-tabs" blocking="render">
@@ -196,15 +198,16 @@
 <div class="screen" data-deco-top="phone">
   <div class="watermark"></div>
 
-  <div class="screen-inner">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <a href="./" style="flex:1;text-decoration:none;font-size:14px;font-weight:600;">‹ Wechseln</a>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <img src="assets/logo.png" alt="SV Partykeller" style="view-transition-name:area-logo;height:80px;width:auto;object-fit:contain;">
-        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="view-transition-name:ys-logo;height:38px;width:auto;object-fit:contain;">
+  <div class="screen-inner vt-inhalt">
+    <!-- Kopf wie auf allen Seiten (D-080) -->
+    <header class="kopf">
+      <a class="kopf-zurueck" href="./">‹ Wechseln</a>
+      <div class="kopf-logos">
+        <img src="assets/logo.png" alt="SV Partykeller" class="kopf-logo">
+        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo">
       </div>
-      <div style="flex:1;"></div>
-    </div>
+      <span></span>
+    </header>
 
     <div id="user-view" hidden style="display:flex;flex-direction:column;gap:18px;">
       <div class="ident">
@@ -235,7 +238,7 @@
       </script>
 
       <!-- Umschalter: Zählen (Eingabe) / Profil (Statistik & Abzeichen) -->
-      <div id="main-tabs" class="tabs" role="tablist" data-pos="0">
+      <div id="main-tabs" class="tabs vt-stufe" role="tablist" data-pos="0">
         <div class="tab-indicator"></div>
         <button id="tab-btn-count" class="tab-btn active" type="button">Zählen</button>
         <button id="tab-btn-profile" class="tab-btn" type="button">Profil</button>
@@ -243,7 +246,7 @@
 
       <div id="tab-count" style="display:flex;flex-direction:column;gap:18px;">
 
-      <div class="card" style="text-align:center;padding:18px;">
+      <div class="card vt-stufe" style="text-align:center;padding:18px;">
         <div class="eyebrow">Getränke heute</div>
         <!-- Rechts neben der Zahl: Vergleich mit dem eigenen Schnitt bis zur
              gleichen Uhrzeit (D-072) -->
@@ -259,7 +262,7 @@
         </div>
       </div>
 
-      <button id="add-beer" class="drink" type="button" aria-label="Bier hinzufügen" style="--fill:var(--amber);--on:var(--bg);">
+      <button id="add-beer" class="drink vt-stufe" type="button" aria-label="Bier hinzufügen" style="--fill:var(--amber);--on:var(--bg);">
         <div class="drink-head">
           <span class="drink-name">Bier</span>
           <span class="drink-plus" aria-hidden="true">+</span>
@@ -277,7 +280,7 @@
         </div>
       </button>
 
-      <button id="add-shot" class="drink" type="button" aria-label="Shot hinzufügen" style="--fill:var(--brick);--on:var(--ink);">
+      <button id="add-shot" class="drink vt-stufe" type="button" aria-label="Shot hinzufügen" style="--fill:var(--brick);--on:var(--ink);">
         <div class="drink-head">
           <span class="drink-name">Shots</span>
           <span class="drink-plus" aria-hidden="true">+</span>
@@ -295,7 +298,7 @@
         </div>
       </button>
 
-      <button id="add-mix" class="drink" type="button" aria-label="Mische hinzufügen" style="--fill:var(--mix);--on:var(--bg);">
+      <button id="add-mix" class="drink vt-stufe" type="button" aria-label="Mische hinzufügen" style="--fill:var(--mix);--on:var(--bg);">
         <div class="drink-head">
           <span class="drink-name">Mischen</span>
           <span class="drink-plus" aria-hidden="true">+</span>
@@ -410,7 +413,7 @@
     </div>
 
     <div style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
-      <a href="abende" style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abend-Archiv</a>
+      <a href="abende" data-vt-titel style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abend-Archiv</a>
       <a href="#" id="logout" style="color:var(--ink-muted);font-size:13px;text-decoration:none;">Abmelden</a>
     </div>
   </div>
@@ -439,6 +442,7 @@
   </div>
 </div>
 
+<span id="vt-bereit" hidden></span>
 <script type="module">
 import { AREA } from './js/area.js';
 import { getSession, clearSession, rememberName } from './js/api.js';

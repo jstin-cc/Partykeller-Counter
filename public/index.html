@@ -10,18 +10,9 @@
 <meta name="theme-color" content="#010f05">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <link rel="stylesheet" href="css/theme.css">
+<script src="js/vt.js" data-seite="anmeldung"></script>
+<link rel="expect" href="#vt-bereit" blocking="render">
 <style>
-  .login-watermark {
-    position: fixed;
-    left: -140px;
-    top: -100px;
-    width: 520px;
-    height: 520px;
-    background: url('assets/zapfen-bg.svg') no-repeat center / contain;
-    opacity: 0.22;
-    pointer-events: none;
-    z-index: 0;
-  }
   /* Anmeldeliste (D-044): eine Glas-Tafel, die Konten als Zeilen mit
      Haarlinie dazwischen — statt einer Kachel je Konto */
   .user-list {
@@ -79,47 +70,73 @@
 </head>
 <body>
 <div class="screen">
-  <div class="login-watermark"></div>
+  <div class="watermark"></div>
 
-  <div class="screen-inner" style="padding:32px 24px;gap:22px;">
+  <div class="screen-inner vt-inhalt" style="gap:22px;">
 
-    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-        <img src="assets/logo.png" alt="SV Partykeller" style="view-transition-name:area-logo;height:76px;width:auto;object-fit:contain;">
-        <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo" style="view-transition-name:ys-logo;height:46px;width:auto;object-fit:contain;">
-      </div>
-      <h1 style="font-family:'Bitter',serif;font-weight:800;font-size:30px;color:var(--creme);margin:0;">Anmeldung</h1>
+    <!-- Kopf wie auf allen Seiten (D-080): Zurück links, Logos mittig, Titel darunter -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <header class="kopf">
+        <a class="kopf-zurueck" href="/">‹ Bereich</a>
+        <div class="kopf-logos">
+          <img src="assets/logo.png" alt="SV Partykeller" class="kopf-logo">
+          <img src="assets/youngstars-logo.png" alt="Youngstars" class="ys-logo">
+        </div>
+        <span></span>
+      </header>
+      <h1 class="kopf-titel">Anmeldung</h1>
     </div>
 
     <div id="error-banner" class="error-banner" hidden></div>
 
-    <div>
+    <div class="vt-stufe">
       <div class="sec" style="margin-bottom:12px;"><span class="sec-title">Dein Konto</span></div>
       <div id="user-list" class="user-list"></div>
+      <script>
+        // Rückweg aus dem Dashboard (D-080, P4): Die eigene Zeile steht schon
+        // im ersten Bild, damit der Namenskreis in sie zurückgleiten kann.
+        // Die echte Liste ersetzt sie, sobald sie geladen ist.
+        (() => {
+          try {
+            const von = JSON.parse(sessionStorage.getItem('vt-von'));
+            if (!von || von.seite !== 'dashboard' || Date.now() - von.t > 8000) return;
+            const k = document.documentElement.dataset.area === 'youngstars' ? 'ys' : 'pk';
+            const name = localStorage.getItem(`${k}_player_name`);
+            if (!name) return;
+            const list = document.getElementById('user-list');
+            list.innerHTML = '<div style="display:flex;flex-direction:column;"><button type="button" class="user-row">'
+              + '<div class="avatar" data-vt-spiegel="dashboard:me-avatar"></div>'
+              + '<div style="flex:1;font-size:16px;font-weight:600;color:var(--ink);"><span data-vt-spiegel="dashboard:me-name"></span></div>'
+              + '<div style="color:var(--green);font-size:20px;">›</div></button></div>';
+            list.querySelector('.avatar').textContent = name.charAt(0).toUpperCase();
+            list.querySelector('span').textContent = name;
+          } catch { /* dann eben ohne Rückflug */ }
+        })();
+      </script>
       <div id="list-empty" hidden style="color:var(--ink-muted);font-size:14px;">Noch niemand da – leg unten los.</div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;color:var(--ink-muted);font-size:13px;">
+    <div class="vt-stufe" style="display:flex;align-items:center;gap:12px;color:var(--ink-muted);font-size:13px;">
       <div style="flex:1;height:1px;background:oklch(0.95 0.01 95 / 0.15);"></div>
       Registrieren
       <div style="flex:1;height:1px;background:oklch(0.95 0.01 95 / 0.15);"></div>
     </div>
 
-    <form id="create-form" style="display:flex;flex-direction:column;gap:10px;">
+    <form id="create-form" class="vt-stufe" style="display:flex;flex-direction:column;gap:10px;">
       <input id="create-name" class="input-flat" type="text" maxlength="24" placeholder="Dein Name" autocomplete="off" required>
       <input id="create-pin" class="input-flat" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="PIN (optional, 4 Ziffern)" autocomplete="off">
       <button class="btn-green" style="padding:15px;font-size:16px;margin-top:4px;">Konto erstellen &amp; los</button>
     </form>
 
-    <div style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
-      <a href="/" style="font-size:13px;text-decoration:none;color:var(--ink-muted);">‹ Bereich</a>
-      <a href="abende" style="font-size:13px;text-decoration:none;">Abend-Archiv</a>
+    <div class="vt-stufe" style="display:flex;justify-content:center;gap:22px;margin-top:auto;padding-top:12px;">
+      <a href="abende" data-vt-titel style="font-size:13px;text-decoration:none;">Abend-Archiv</a>
       <a href="admin" style="font-size:13px;text-decoration:none;">Admin-Zugang</a>
     </div>
   </div>
 
   <img src="assets/footer-woods.png" alt="" class="footer-woods">
 </div>
+<span id="vt-bereit" hidden></span>
 
 <script type="module">
 import { post, fetchPlayers, setSession, getLastPlayerId } from './js/api.js';
@@ -264,8 +281,10 @@ $('create-form').addEventListener('submit', async (e) => {
   }
 });
 
+// Erst nach dem Seitenübergang neu zeichnen (D-080): Die Liste ersetzt sonst
+// die Zeile, in die der Namenskreis gerade zurückgleitet
 fetchPlayers()
-  .then(({ players }) => renderUsers(players))
+  .then(async ({ players }) => { await window.vtFertig; renderUsers(players); })
   .catch(() => showError('Server nicht erreichbar.'));
 </script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
