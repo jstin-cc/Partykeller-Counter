@@ -89,6 +89,38 @@ maschine die übliche Einstellung. In der **Eingabeaufforderung (cmd)** oder im
 **Git Bash** tritt das Problem gar nicht auf, dort läuft `npm.cmd` statt
 `npm.ps1`.
 
+### Fehler „was compiled against a different Node.js version“
+
+Nach einem Node-Update (z. B. von Node 22 auf 24) bricht `npm start` so ab:
+
+```
+Error: The module '...\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 127. This version of Node.js requires
+NODE_MODULE_VERSION 137.
+```
+
+`better-sqlite3` enthält ein fertiges Binary, das genau zu einer
+Node-Version passt. Es liegt noch das alte im `node_modules`-Ordner, und ein
+erneutes `npm install` tauscht es nicht aus, weil sich am Paket selbst
+nichts geändert hat. Abhilfe — **die Daten in `data/` bleiben erhalten**:
+
+```powershell
+npm rebuild better-sqlite3
+npm start
+```
+
+Hilft das nicht, `node_modules` ganz löschen und neu installieren (siehe
+[Auf neue Version aktualisieren](#auf-neue-version-aktualisieren--neustart)).
+Für den Download des passenden Binarys braucht dieser eine Schritt
+Internet; danach läuft die App wieder offline.
+
+Die Zeile `npm warn allow-scripts … better-sqlite3` bei `npm install`
+(ab npm 11.16) ist nur ein Hinweis: npm will wissen, ob das Paket beim
+Installieren ein Skript ausführen darf. Die Freigabe steht in der
+`package.json` (`allowScripts`, D-085), mit aktuellem Stand verschwindet
+die Warnung.
+
 ## Auf neue Version aktualisieren / Neustart
 
 Laufenden Server im Terminal stoppen (**Strg + C**), dann ins Projektverzeichnis
