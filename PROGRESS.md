@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09 (D-081): **Seitenübergänge auch in Firefox** — wo der
+Browser keine Übergänge zwischen Seiten kann (Firefox, ältere Safari),
+spielt die neue Seite sie selbst nach: Inhalt aus der Richtung, fliegender
+Namenskreis/Titel/Logo, Farbflut als Kreis.
 Seit 2026-10-09 (D-080): **Seitenübergänge als ein Paket** — fester Zapfen
 und Wald, ein gemeinsamer Kopf (Zurück links, Logo mittig, Titel darunter)
 auf Anmeldung, Dashboard, Archiv und Willkommen, Inhalt kommt vorwärts von

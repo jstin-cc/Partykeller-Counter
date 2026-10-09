@@ -10,9 +10,13 @@
 //  P6 Auftritt    .vt-stufe-Blöcke folgen gestaffelt (data-vt-auftritt)
 //  P1 Kulisse     der Wald gleitet nur mit, wenn er im Bild ist
 //
-// Woher man kommt, merkt sich die alte Seite in der sessionStorage. Browser
-// ohne View Transitions (oder mit „Bewegung reduzieren") lösen kein
-// pagereveal mit viewTransition aus — dort passiert hier nichts.
+// Woher man kommt, merkt sich die alte Seite in der sessionStorage.
+//
+// Ersatz (D-081): Firefox und ältere Safari kennen keine View Transitions
+// zwischen zwei Seiten. Dort spielt die neue Seite den Übergang selbst nach:
+// Blöcke gleiten aus der Richtung herein, Namenskreis, Titel und Logo fliegen
+// von ihrer alten Stelle her (FLIP), die Farbe flutet als Kreis. Bei
+// „Bewegung reduzieren" passiert in beiden Fällen nichts.
 (() => {
   const SEITE = document.currentScript?.dataset.seite ?? '';
   const TIEFE = { start: 0, anmeldung: 1, willkommen: 1.5, dashboard: 2, abende: 3, admin: 3 };
@@ -22,6 +26,8 @@
   const bereich = () => html.dataset.area || 'partykeller';
   let tipp = null;          // letzter Tipp in Bildschirm-Koordinaten
   const benannt = new Set();
+  const ruhig = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ERSATZ = !('CSSViewTransitionRule' in window) && !ruhig;
 
   // Erfüllt, sobald der Übergang auf diese Seite fertig ist (oder keiner
   // läuft). Seiten, die benannte Elemente gleich ersetzen würden (die
@@ -29,7 +35,7 @@
   // Übergang, bricht der Browser ihn ab.
   let fertig;
   window.vtFertig = new Promise((r) => { fertig = r; });
-  if (!('onpagereveal' in window)) fertig();
+  if (!('onpagereveal' in window) && !ERSATZ) fertig();
   setTimeout(() => fertig(), 1500);   // Sicherheitsnetz
 
   const nenne = (el, name) => { el.style.viewTransitionName = name; benannt.add(el); };
@@ -51,10 +57,65 @@
     for (const el of document.querySelectorAll(FEST)) if (!imBild(el)) nenne(el, 'none');
   }
 
+  // Ersatz: welche Elemente tragen gerade welchen Namen? Feste Namen stehen
+  // im CSS — Browser ohne View Transitions kennen die Eigenschaft womöglich
+  // gar nicht, deshalb hier noch einmal als Liste. Gesetzte Namen (style)
+  // gehen vor, „none" schließt aus.
+  const STATISCH = [
+    ['.kopf-logo', 'area-logo'], ['.kopf-logos .ys-logo', 'ys-logo'],
+    ['.kopf-zurueck', 'kopf-zurueck'], ['.kopf-titel', 'seiten-titel'],
+    ['.ident .avatar', 'me-avatar'], ['.ident-name', 'me-name'],
+  ];
+  function namen() {
+    const n = new Map();
+    for (const [sel, name] of STATISCH) for (const el of document.querySelectorAll(sel)) n.set(el, name);
+    for (const el of document.querySelectorAll('body *')) if (el.style.viewTransitionName) n.set(el, el.style.viewTransitionName);
+    const proName = new Map();
+    for (const [el, name] of n) if (name !== 'none' && imBild(el)) proName.set(name, el);
+    return proName;
+  }
+
   function merken() {
+    const von = { seite: SEITE, bereich: bereich(), t: Date.now(), x: tipp?.x, y: tipp?.y };
+    if (ERSATZ) {
+      von.farbe = getComputedStyle(html).getPropertyValue('--bg').trim();   // Grundfarbe des Bereichs
+      von.orte = {};
+      for (const [name, el] of namen()) {
+        const r = el.getBoundingClientRect();
+        von.orte[name] = [r.left, r.top, r.width, r.height];
+      }
+    }
+    try { sessionStorage.setItem(KEY, JSON.stringify(von)); } catch { /* ohne Speicher: nur Überblenden */ }
+  }
+
+  function lesen() {
     try {
-      sessionStorage.setItem(KEY, JSON.stringify({ seite: SEITE, bereich: bereich(), t: Date.now(), x: tipp?.x, y: tipp?.y }));
-    } catch { /* ohne Speicher: nur Überblenden */ }
+      const von = JSON.parse(sessionStorage.getItem(KEY));
+      return von && Date.now() - von.t <= MAX_ALTER && von.seite !== SEITE ? von : null;
+    } catch { return null; }
+  }
+
+  function richtung(von) {
+    const a = TIEFE[von.seite];
+    const b = TIEFE[SEITE];
+    if (a != null && b != null && a !== b) html.dataset.vtRichtung = b > a ? 'vor' : 'zurueck';
+  }
+  function flut(von) {
+    if (von.bereich === bereich()) return false;
+    html.dataset.vtFlut = '';
+    if (von.x != null) {
+      html.style.setProperty('--vt-x', `${von.x}px`);
+      html.style.setProperty('--vt-y', `${von.y}px`);
+    }
+    return true;
+  }
+  function stufen() {
+    let i = 0;
+    for (const el of document.querySelectorAll('.vt-stufe')) {
+      if (!el.getClientRects().length) continue;
+      el.style.setProperty('--vt-i', String(Math.min(i++, 8)));
+    }
+    html.dataset.vtAuftritt = '';
   }
 
   // Ein Titel pro Seite: wer „seiten-titel" bekommt, nimmt ihn dem Kopf weg
@@ -74,36 +135,10 @@
   addEventListener('pageswap', () => { kulisse(); merken(); });
   addEventListener('pagehide', merken);
 
-  // Aus dem Zwischenspeicher zurück (Zurück-Taste): Namen vom letzten Weg weg
-  addEventListener('pageshow', (e) => { if (e.persisted) aufraeumen(); });
-
-  addEventListener('pagereveal', (e) => {
-    aufraeumen();
-    if (!e.viewTransition) { fertig(); return; }
-    e.viewTransition.finished.finally(fertig);
-    let von = null;
-    try { von = JSON.parse(sessionStorage.getItem(KEY)); } catch { /* egal */ }
-    if (!von || Date.now() - von.t > MAX_ALTER || von.seite === SEITE) return;
-
-    kulisse();
-
-    // P2 Richtung
-    const a = TIEFE[von.seite];
-    const b = TIEFE[SEITE];
-    if (a != null && b != null && a !== b) html.dataset.vtRichtung = b > a ? 'vor' : 'zurueck';
-
-    // P5 Farbflut beim Bereichswechsel
-    if (von.bereich !== bereich()) {
-      html.dataset.vtFlut = '';
-      if (von.x != null) {
-        html.style.setProperty('--vt-x', `${von.x}px`);
-        html.style.setProperty('--vt-y', `${von.y}px`);
-      }
-    }
-
-    // P4 Rückweg spiegelt den Hinweg: aus dem Archiv gleitet der Titel zurück
-    // in seinen Link; data-vt-spiegel="seite[@bereich]:name" nennt weitere
-    // Ziele (Namenskreis in der Anmeldeliste, Logo in der Bereichs-Kachel)
+  // P4 Rückweg spiegelt den Hinweg: aus dem Archiv gleitet der Titel zurück
+  // in seinen Link; data-vt-spiegel="seite[@bereich]:name" nennt weitere
+  // Ziele (Namenskreis in der Anmeldeliste, Logo in der Bereichs-Kachel)
+  function spiegeln(von) {
     if (von.seite === 'abende') {
       const link = document.querySelector('a[data-vt-titel]');
       if (link && imBild(link)) titelAuf(link);
@@ -113,14 +148,88 @@
       const [seite, ber] = wo.split('@');
       if (seite === von.seite && (!ber || ber === von.bereich) && imBild(el)) nenne(el, name);
     }
+  }
 
-    // P6 Auftritt: sichtbare Blöcke der Reihe nach
-    let i = 0;
-    for (const el of document.querySelectorAll('.vt-stufe')) {
-      if (!el.getClientRects().length) continue;
-      el.style.setProperty('--vt-i', String(Math.min(i++, 8)));
-    }
+  // --- Ersatz ohne View Transitions ---
+  // Teil 1 läuft sofort im <head>, damit die Blöcke schon im ersten Bild
+  // unsichtbar starten; Teil 2, sobald die Seite steht.
+  function ersatzVorbereiten(von) {
+    html.dataset.vtErsatz = '';
+    richtung(von);
+    // Farbflut: Die alte Farbe liegt hinter der Seite, die neue (der <body>)
+    // wird als Kreis aufgedeckt
+    if (flut(von) && von.farbe) html.style.backgroundColor = von.farbe;
     html.dataset.vtAuftritt = '';
+  }
+  function ersatzSpielen(von) {
+    spiegeln(von);
+    stufen();
+    const ziele = [];
+    for (const [name, el] of namen()) {
+      const alt = von.orte?.[name];
+      if (!alt) continue;
+      const r = el.getBoundingClientRect();
+      const dx = alt[0] - r.left;
+      const dy = alt[1] - r.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;   // steht schon da (Kopf, Zapfen)
+      // Gleicher Inhalt wird mitskaliert (Logo, Name), wechselnder Text
+      // („‹ Bereich" → „‹ Wechseln") nur verschoben
+      const s = name === 'kopf-zurueck' || !r.height ? 1 : alt[3] / r.height;
+      if (getComputedStyle(el).display === 'inline') el.style.display = 'inline-block';
+      el.style.transformOrigin = '0 0';
+      // Der Block drumherum blendet nicht ein, sonst wäre das Ziel unsichtbar
+      const stufe = el.closest('.vt-stufe');
+      if (stufe) stufe.style.animation = 'none';
+      ziele.push([el, stufe]);
+      el.animate([
+        { transform: `translate(${dx}px, ${dy}px) scale(${s})` },
+        { transform: 'none' },
+      ], { duration: 420, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+    }
+    setTimeout(fertig, 480);
+    setTimeout(() => {
+      delete html.dataset.vtErsatz;
+      delete html.dataset.vtRichtung;
+      delete html.dataset.vtFlut;
+      delete html.dataset.vtAuftritt;
+      html.style.backgroundColor = '';
+      for (const [el, stufe] of ziele) {
+        el.style.display = '';
+        el.style.transformOrigin = '';
+        if (stufe) stufe.style.animation = '';
+      }
+      aufraeumen();
+    }, 900);
+  }
+  function ersatz(von, sofort) {
+    if (!von) { fertig(); return; }
+    ersatzVorbereiten(von);
+    if (sofort || document.readyState !== 'loading') ersatzSpielen(von);
+    else document.addEventListener('DOMContentLoaded', () => ersatzSpielen(von), { once: true });
+  }
+  if (ERSATZ) ersatz(lesen(), false);
+
+  // Aus dem Zwischenspeicher zurück (Zurück-Taste): Namen vom letzten Weg
+  // weg; ohne View Transitions den Übergang nachspielen
+  addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    aufraeumen();
+    if (ERSATZ) ersatz(lesen(), true);
+  });
+
+  addEventListener('pagereveal', (e) => {
+    if (ERSATZ) return;
+    aufraeumen();
+    if (!e.viewTransition) { fertig(); return; }
+    e.viewTransition.finished.finally(fertig);
+    const von = lesen();
+    if (!von) return;
+
+    kulisse();
+    richtung(von);   // P2
+    flut(von);       // P5
+    spiegeln(von);   // P4
+    stufen();        // P6
 
     e.viewTransition.finished.finally(() => {
       delete html.dataset.vtRichtung;
