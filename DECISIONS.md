@@ -1948,3 +1948,18 @@ reduzieren“ passiert nichts.
 
 **Begründung:** Rückmeldung des Nutzers: „Funktioniert überhaupt nicht in
 Firefox“.
+
+## D-082 (2026-10-09): Anmeldeliste schon im ersten Bild
+
+**Entscheidung:** Die Anmeldeseite merkt sich die zuletzt geladene
+Kontenliste in der localStorage (`pk_spieler` / `ys_spieler`, nur ID, Name
+und „ausgeblendet“). Ein Inline-Skript zeichnet die Liste daraus schon ins
+erste Bild, in derselben Reihenfolge wie `renderUsers` (eigenes Konto
+oben). Das eigene Konto trägt die Spiegel-Namen für den Rückflug des
+Namenskreises (D-080). Ohne Kopie bleibt es bei der einzelnen eigenen
+Zeile.
+
+**Begründung:** Beim Wechsel aus dem Profil zur Anmeldung stand bisher nur
+die eigene Zeile da, bis der Übergang vorbei war. Das Formular
+„Registrieren“ rutschte hoch, und die Seite sprang, sobald die echte Liste
+kam. Der Nutzer sah das als kurzes Haken mit einer Art Anmeldescreen.
