@@ -234,7 +234,7 @@
           if (!localStorage.getItem(`${k}_token`) || !name) return;
           document.getElementById('user-view').hidden = false;
           document.getElementById('player-name').textContent = name;
-          document.getElementById('player-initial').textContent = name.charAt(0).toUpperCase();
+          document.getElementById('player-initial').textContent = [...name][0]?.toUpperCase() ?? '';
         })();
       </script>
 
@@ -868,7 +868,7 @@ if (!token || !playerId) {
         return;
       }
       $('player-name').textContent = me.name;
-      $('player-initial').textContent = me.name.charAt(0).toUpperCase();
+      $('player-initial').textContent = [...me.name][0]?.toUpperCase() ?? '';
       rememberName(me.name);   // Umbenennung im Admin fürs nächste erste Bild
       // created_at steht als 'YYYY-MM-DD HH:MM:SS' im Zustand (D-006)
       const joined = /^\d{4}-\d{2}-\d{2}/.exec(me.createdAt ?? '');

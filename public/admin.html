@@ -2161,7 +2161,9 @@ $('backup-save').addEventListener('click', async () => {
     a.download = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1]
       ?? `${AREA.id}-backup.json`;
     a.click();
-    URL.revokeObjectURL(url);
+    // Erst später freigeben: Safari und Firefox lesen die Datei erst nach
+    // dem Klick — sofort freigegeben, bricht der Download dort ab (D-084)
+    setTimeout(() => URL.revokeObjectURL(url), 30_000);
     showHint('Sicherung heruntergeladen.');
   } catch {
     showHint('Download fehlgeschlagen.');

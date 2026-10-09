@@ -418,5 +418,7 @@ export async function downloadStory(night) {
   a.href = url;
   a.download = `${AREA.id}-abend-${night.day}.png`;
   a.click();
-  URL.revokeObjectURL(url);
+  // Erst später freigeben: Safari und Firefox lesen die Datei erst nach
+  // dem Klick — sofort freigegeben, bricht der Download dort ab (D-084)
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
