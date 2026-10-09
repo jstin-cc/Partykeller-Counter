@@ -7,6 +7,13 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09: **Entwürfe für Animationen und Übergänge** in
+`docs/ANIMATIONEN-ENTWUERFE.md`, live zum Ausprobieren in
+`docs/animationen/entwuerfe.html` (A1 Zahlen rollen, A2 Einschenken,
+A3 Getränke-Charakter, A4 Abzeichen-Moment, A5 gestaffelter Auftritt,
+A6 Blatt mit Schwung, A7 Fehler schütteln/Speichern abhaken, A8 Überholen
+am TV, A9 neuer Spitzenreiter) — **noch nicht umgesetzt**, wartet auf
+Auswahl.
 Seit 2026-10-09: **Fix Startseite: Name fehlte nach „Zurück“** — nach dem
 Anmelden zeigte die Startseite beim Zurückblättern den alten Stand aus dem
 Browser-Cache ohne Begrüßung; sie liest Anmeldung und Stand jetzt neu.
