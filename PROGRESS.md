@@ -7,6 +7,9 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09 (D-082): **Fix: kein Haken mehr beim Wechsel zur
+Anmeldung** — die Kontenliste steht sofort vollständig da (aus der zuletzt
+geladenen Kopie), statt erst nach dem Übergang nachzurutschen.
 Seit 2026-10-09 (D-081): **Seitenübergänge auch in Firefox** — wo der
 Browser keine Übergänge zwischen Seiten kann (Firefox, ältere Safari),
 spielt die neue Seite sie selbst nach: Inhalt aus der Richtung, fliegender

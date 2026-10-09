@@ -93,24 +93,43 @@
       <div class="sec" style="margin-bottom:12px;"><span class="sec-title">Dein Konto</span></div>
       <div id="user-list" class="user-list"></div>
       <script>
-        // Rückweg aus dem Dashboard (D-080, P4): Die eigene Zeile steht schon
-        // im ersten Bild, damit der Namenskreis in sie zurückgleiten kann.
-        // Die echte Liste ersetzt sie, sobald sie geladen ist.
+        // Liste schon im ersten Bild (D-080, D-082): aus der zuletzt geladenen
+        // Kopie, in derselben Reihenfolge wie renderUsers. So springt nichts,
+        // wenn die echte Liste nachkommt, und beim Rückweg aus dem Dashboard
+        // gleitet der Namenskreis in die eigene Zeile (data-vt-spiegel).
         (() => {
           try {
-            const von = JSON.parse(sessionStorage.getItem('vt-von'));
-            if (!von || von.seite !== 'dashboard' || Date.now() - von.t > 8000) return;
             const k = document.documentElement.dataset.area === 'youngstars' ? 'ys' : 'pk';
-            const name = localStorage.getItem(`${k}_player_name`);
-            if (!name) return;
+            const ich = localStorage.getItem(`${k}_last_player_id`);
+            let liste = JSON.parse(localStorage.getItem(`${k}_spieler`) || 'null');
+            if (!Array.isArray(liste)) {
+              // Noch keine Kopie: wenigstens die eigene Zeile, wenn man aus dem Dashboard kommt
+              const von = JSON.parse(sessionStorage.getItem('vt-von'));
+              const name = localStorage.getItem(`${k}_player_name`);
+              if (!von || von.seite !== 'dashboard' || Date.now() - von.t > 8000 || !name) return;
+              liste = [{ id: ich, name }];
+            }
+            liste = liste.filter((p) => !p.hidden);
+            const i = liste.findIndex((p) => p.id === ich);
+            if (i > 0) liste.unshift(liste.splice(i, 1)[0]);
             const list = document.getElementById('user-list');
-            list.innerHTML = '<div style="display:flex;flex-direction:column;"><button type="button" class="user-row">'
-              + '<div class="avatar" data-vt-spiegel="dashboard:me-avatar"></div>'
-              + '<div style="flex:1;font-size:16px;font-weight:600;color:var(--ink);"><span data-vt-spiegel="dashboard:me-name"></span></div>'
-              + '<div style="color:var(--green);font-size:20px;">›</div></button></div>';
-            list.querySelector('.avatar').textContent = name.charAt(0).toUpperCase();
-            list.querySelector('span').textContent = name;
-          } catch { /* dann eben ohne Rückflug */ }
+            for (const p of liste) {
+              const wrap = document.createElement('div');
+              wrap.style.cssText = 'display:flex;flex-direction:column;';
+              wrap.innerHTML = '<button type="button" class="user-row"><div class="avatar"></div>'
+                + '<div style="flex:1;font-size:16px;font-weight:600;color:var(--ink);"><span></span></div>'
+                + '<div style="color:var(--green);font-size:20px;">›</div></button>';
+              const av = wrap.querySelector('.avatar');
+              const nm = wrap.querySelector('span');
+              av.textContent = p.name.charAt(0).toUpperCase();
+              nm.textContent = p.name;
+              if (p.id === ich) {
+                av.dataset.vtSpiegel = 'dashboard:me-avatar';
+                nm.dataset.vtSpiegel = 'dashboard:me-name';
+              }
+              list.appendChild(wrap);
+            }
+          } catch { /* dann eben erst nach dem Laden */ }
         })();
       </script>
       <div id="list-empty" hidden style="color:var(--ink-muted);font-size:14px;">Noch niemand da – leg unten los.</div>
@@ -139,6 +158,7 @@
 <span id="vt-bereit" hidden></span>
 
 <script type="module">
+import { AREA } from './js/area.js';
 import { post, fetchPlayers, setSession, getLastPlayerId } from './js/api.js';
 import { shake, revealError } from './js/motion.js';
 
@@ -284,7 +304,15 @@ $('create-form').addEventListener('submit', async (e) => {
 // Erst nach dem Seitenübergang neu zeichnen (D-080): Die Liste ersetzt sonst
 // die Zeile, in die der Namenskreis gerade zurückgleitet
 fetchPlayers()
-  .then(async ({ players }) => { await window.vtFertig; renderUsers(players); })
+  .then(async ({ players }) => {
+    // Kopie für das erste Bild beim nächsten Besuch (siehe Inline-Skript an der Liste)
+    try {
+      localStorage.setItem(`${AREA.keyPrefix}_spieler`,
+        JSON.stringify(players.map(({ id, name, hidden }) => ({ id, name, hidden }))));
+    } catch { /* ohne Speicher kein Vorab-Bild */ }
+    await window.vtFertig;
+    renderUsers(players);
+  })
   .catch(() => showError('Server nicht erreichbar.'));
 </script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
