@@ -207,6 +207,7 @@ Partykeller-Counter/
 │   ├── css/theme.css     # Design-Tokens (siehe Abschnitt 8)
 │   ├── js/               # shared: ws-client.js, api.js, facts.js, curve.js,
 │   │                     #   story.js (Story-Bild, D-049), motion.js (Animationen, D-079),
+│   │                     #   vt.js (Seitenübergänge, D-080),
 │   │                     #   qrcode (vendored)
 │   └── assets/           # logo-gold.png, footer-woods.png, zapfen-raw.svg, fonts/
 ├── deploy/

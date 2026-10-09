@@ -7,11 +7,18 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09 (D-080): **Seitenübergänge als ein Paket** — fester Zapfen
+und Wald, ein gemeinsamer Kopf (Zurück links, Logo mittig, Titel darunter)
+auf Anmeldung, Dashboard, Archiv und Willkommen, Inhalt kommt vorwärts von
+rechts und zurück von links, „Abend-Archiv“ gleitet zum Titel und zurück,
+der Namenskreis fliegt bei „‹ Wechseln“ zurück in seine Zeile, die
+Bereichsfarbe flutet vom Tipp aus, und die Blöcke setzen sich nacheinander.
+Gesteuert von `public/js/vt.js`.
 Seit 2026-10-09: **Entwürfe für Seitenübergänge** in
 `docs/UEBERGAENGE-ENTWUERFE.md`, live in `docs/animationen/uebergaenge.html`
 (P1 feste Kulisse, P2 Richtung, P3 ein Kopf für alle Seiten, P4 Getipptes
-wird Überschrift, P5 Bereichsfarbe flutet, P6 Inhalt setzt sich) — **noch
-nicht umgesetzt**, wartet auf Auswahl.
+wird Überschrift, P5 Bereichsfarbe flutet, P6 Inhalt setzt sich) — alle
+umgesetzt (D-080).
 Seit 2026-10-09 (D-079): **Animationen A1, A6, A7, A8-Pfeil** — Zahlen
 rollen wie ein Zählwerk (Leuchten bleibt rund), die ganze Rangliste fährt
 als Blatt hoch und lässt sich nach unten wegwischen, Fehler schütteln das

@@ -1865,3 +1865,57 @@ Endzustand. Der Pfeil blendet dann nur ein und aus. Keine neue
 Abhängigkeit, nur CSS und die Web Animations API.
 
 **Begründung:** Auswahl des Nutzers aus den Entwürfen A1–A9.
+
+## D-080 (2026-10-09): Seitenübergänge als ein Paket (P1–P6)
+
+**Entscheidung:** Die Entwürfe aus `docs/UEBERGAENGE-ENTWUERFE.md` werden
+alle umgesetzt. Grundlage bleibt D-068 (Cross-Document View Transitions,
+keine Bibliothek). Neu ist `public/js/vt.js`, ein klassisches Skript im
+`<head>` jeder Handy-Seite (`data-seite`: start, anmeldung, willkommen,
+dashboard, abende, admin). Es muss vor dem ersten Bild laufen, weil
+`pagereveal` dann auslöst. Die Bewegungen selbst stehen in `theme.css`.
+
+- **P1 Feste Kulisse:** Der Zapfen liegt auf allen Handy-Seiten an derselben
+  Stelle (rechts unten, wie im Dashboard). Er heißt `kulisse-zapfen` und
+  bleibt beim Wechsel stehen. Start, Anmeldung und Willkommen nutzen jetzt
+  `.watermark` statt des eigenen Zapfens links oben. Archiv und Admin
+  behalten am Laptop ihren großen Zapfen rechts oben. Der Wald bekommt
+  `kulisse-wald` nur, wenn er im Bild ist.
+- **P2 Richtung:** Jede Seite hat eine Tiefe: Start 0, Anmeldung 1,
+  Willkommen 1,5, Dashboard 2, Archiv und Admin 3. Die alte Seite merkt
+  sich in der sessionStorage (`vt-von`), woher man kommt. Tiefer hinein
+  kommt der Inhalt (`.vt-inhalt`) von rechts, zurück von links. Ohne
+  Angabe wird wie bisher übergeblendet.
+- **P3 Ein Kopf für alle Seiten:** `.kopf` mit Zurück links, Logos mittig
+  und `.kopf-titel` darunter. Das gilt auf Anmeldung, Dashboard, Archiv und
+  Willkommen (dort ohne Zurück). Logo, Zurück und Titel tragen feste Namen
+  und bleiben beim Wechsel stehen.
+  - „‹ Bereich“ wandert auf der Anmeldung von unten in den Kopf.
+  - Das Archiv sagt immer „‹ Zurück“ und geht im Verlauf zurück, wenn man
+    aus diesem Bereich kam.
+  - Den Admin-Kopf am Laptop lässt P3 aus.
+- **P4 Getipptes wird Überschrift:** Der angetippte Link „Abend-Archiv“
+  (`data-vt-titel`) gleitet zum Archiv-Titel. Der Rückweg spiegelt den
+  Hinweg (`data-vt-spiegel`):
+  - Der Archiv-Titel gleitet zurück in den Link.
+  - Bei „‹ Wechseln“ fliegt der Namenskreis zurück in seine Zeile der
+    Anmeldeliste. Ein Inline-Skript stellt die eigene Zeile schon ins erste
+    Bild (`rel="expect"` hält das Bild so lange an). Die echte Liste
+    zeichnet erst nach dem Übergang (`window.vtFertig`), sonst bricht der
+    Browser ihn ab.
+  - Bei „‹ Bereich“ gleitet das Logo zurück in seine Kachel auf der
+    Startseite.
+- **P5 Bereichsfarbe flutet:** Wechselt der Bereich zwischen Startseite und
+  Youngstars, deckt die neue Seite die alte als Kreis vom letzten Tipp aus
+  auf.
+- **P6 Inhalt setzt sich:** Nach einem Übergang folgen die `.vt-stufe`-Blöcke
+  mit 45 ms Versatz. Das passiert nur beim Seitenwechsel, nie bei
+  Live-Updates.
+
+Kopf, Namenskreis und Wald gleiten nur mit, wenn sie auf der alten Seite im
+Bild sind. Sonst flögen sie bei gescrollter Seite von außerhalb herein.
+Ohne View Transitions oder mit „Bewegung reduzieren“ wechseln die Seiten
+wie bisher hart. Es gibt keine neue Abhängigkeit.
+
+**Begründung:** Wunsch des Nutzers („gefällt mir, umsetzen“). Die Seiten
+sollen wie eine App wirken statt wie einzelne Seiten.
