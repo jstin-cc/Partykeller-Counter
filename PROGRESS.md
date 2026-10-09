@@ -7,13 +7,19 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09 (D-079): **Animationen A1, A6, A7, A8-Pfeil** — Zahlen
+rollen wie ein Zählwerk (Leuchten bleibt rund), die ganze Rangliste fährt
+als Blatt hoch und lässt sich nach unten wegwischen, Fehler schütteln das
+Feld (falsche PIN jetzt direkt unter dem Feld), Speichern zeichnet einen
+Haken in den Knopf, und am TV steht beim Überholen kurz „▲ n“ neben dem
+Namen. Gemeinsame Bausteine in `public/js/motion.js`.
 Seit 2026-10-09: **Entwürfe für Animationen und Übergänge** in
 `docs/ANIMATIONEN-ENTWUERFE.md`, live zum Ausprobieren in
 `docs/animationen/entwuerfe.html` (A1 Zahlen rollen, A2 Einschenken,
 A3 Getränke-Charakter, A4 Abzeichen-Moment, A5 gestaffelter Auftritt,
 A6 Blatt mit Schwung, A7 Fehler schütteln/Speichern abhaken, A8 Überholen
-am TV, A9 neuer Spitzenreiter) — **noch nicht umgesetzt**, wartet auf
-Auswahl.
+am TV, A9 neuer Spitzenreiter) — A1, A6, A7 und der Pfeil aus A8 sind
+umgesetzt (D-079), der Rest bleibt Entwurf.
 Seit 2026-10-09: **Fix Startseite: Name fehlte nach „Zurück“** — nach dem
 Anmelden zeigte die Startseite beim Zurückblättern den alten Stand aus dem
 Browser-Cache ohne Begrüßung; sie liest Anmeldung und Stand jetzt neu.

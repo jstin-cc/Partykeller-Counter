@@ -1,6 +1,8 @@
 # Animationen und Übergänge: Entwürfe A1–A9 (Stand 2026-10-09)
 
-**Status:** Entwürfe, noch nichts umgesetzt — wartet auf Auswahl.
+**Status:** A1 (ohne eckige Leuchtflächen — das Leuchten bleibt wie
+bisher), A6, A7 und von A8 nur der Pfeil „▲ n“ sind umgesetzt (D-079).
+A2–A5, das Gleiten aus A8 (gab es schon) und A9 bleiben Entwürfe.
 
 Bewegung lässt sich in Standbildern schlecht zeigen, deshalb sind die
 Entwürfe eine **lauffähige Demo-Seite**: `docs/animationen/entwuerfe.html`
