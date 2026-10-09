@@ -7,6 +7,10 @@ die Wahrheit über den Projektstand (Kontextverlust-sicher).
 funktional komplett (Login, Dashboard mit Profil-Tab, TV-Scoreboard mit QR,
 Admin, Abend-Archiv mit Bearbeitung und CSV-Export) und end-to-end im Browser
 getestet.
+Seit 2026-10-09: **Entwürfe für die Startseite** in
+`docs/STARTSEITE-ENTWUERFE.md` (S1 Zwei Welten, S2 Glas-Karten mit
+Live-Stand, S3 „Weiter als …“ für schon Angemeldete, S4 Live-Podest;
+Vorschlag S2 + S3) — **noch nicht umgesetzt**, wartet auf Auswahl.
 Seit 2026-09-29 (D-077): **Archiv: Name anklickbar** — Tipp auf den Namen
 (oder „Namen geben“) benennt den Abend, eigener Knopf entfällt.
 Seit 2026-09-29 (D-076): **Archiv ohne ±1-Korrektur** — Korrekturen nur
